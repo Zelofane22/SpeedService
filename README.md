@@ -14,10 +14,21 @@ Ce dépôt contient la base du projet Speed Service.
 Branches recommandées :
 
 - `main` : version stable / production-ready
-- `develop` : version d'intégration continue
+- `develop` : version d'intégration et préparation des versions
 - `feature/*` : nouvelles fonctionnalités
-- `release/*` : préparation des versions
-- `hotfix/*` : corrections urgentes
+- `release/*` : préparation des releases
+- `hotfix/*` : corrections urgentes en production
+
+## Workflow Git
+
+1. Créer une branche depuis `develop` : `feature/<description>`.
+2. Faire des commits atomiques et lisibles.
+3. Ouvrir une Pull Request vers `develop`.
+4. Revue + validation CI.
+5. Fusionner dans `develop`.
+6. Créer une branche `release/<version>` depuis `develop` si nécessaire.
+7. Fusionner `release/*` dans `main` puis `develop`.
+8. Pour une correction urgente, créer `hotfix/<description>` depuis `main`.
 
 Conventions de commits :
 
