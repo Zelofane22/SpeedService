@@ -1,0 +1,8 @@
+/vendor
+/.env
+/storage/*.key
+/storage/*.sqlite
+/storage/app/public
+/storage/debugbar
+/bootstrap/cache/*.php
+/public/storage
