@@ -1,6 +1,32 @@
 # Speed Service
 
-Ce dépôt contient la base du projet Speed Service.
+Plateforme de livraison de colis au Bénin — application web full-stack (Next.js 15 + Laravel 12).
+
+---
+
+## Avancement du projet
+
+**Sprint en cours : Sprint 0 — Infrastructure & Setup**
+Dernière mise à jour : 2026-06-22
+
+| Tâche | Statut |
+|---|---|
+| Structure du dépôt (frontend / backend) | ✅ Terminé |
+| Configuration Docker Compose (PostgreSQL, Redis) | ✅ Terminé |
+| Pipeline CI/CD (GitHub Actions) | ✅ Terminé |
+| Conventions Git et workflow documentés | ✅ Terminé |
+| Setup Tailwind CSS + Shadcn UI (frontend) | ⏳ À faire |
+| Modélisation base de données + migrations Laravel | ⏳ À faire |
+| Configuration Laravel Sanctum | ⏳ À faire |
+| Wireframes / Maquettes UI | ⏳ À faire |
+
+**Prochain sprint : Sprint 1 — Authentification**
+- US-001 Inscription (email, téléphone, mot de passe)
+- US-002 Connexion utilisateur
+- US-003 Réinitialisation du mot de passe
+- US-004 Modification du profil
+
+---
 
 ## Structure du dépôt
 
@@ -54,11 +80,16 @@ La pipeline CI automatise :
 - validation composer / tests backend
 - validation Docker Compose
 
-## Premier commit
+## Roadmap des sprints
 
-Le premier commit contient :
-
-- structure de base `frontend/`
-- structure de base `backend/`
-- configuration CI/CD
-- configuration Docker Compose
+| Sprint | Thème | Statut |
+|---|---|---|
+| Sprint 0 | Infrastructure & Setup | 🔄 En cours |
+| Sprint 1 | Authentification | ⏳ À venir |
+| Sprint 2 | Création de livraison | ⏳ À venir |
+| Sprint 3 | Géolocalisation | ⏳ À venir |
+| Sprint 4 | Paiement | ⏳ À venir |
+| Sprint 5 | Gestion livreurs & statuts | ⏳ À venir |
+| Sprint 6 | Suivi client & notifications | ⏳ À venir |
+| Sprint 7 | Administration (back-office) | ⏳ À venir |
+| Sprint 8 | Stabilisation & déploiement | ⏳ À venir |
