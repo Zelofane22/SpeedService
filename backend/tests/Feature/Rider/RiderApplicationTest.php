@@ -84,7 +84,7 @@ class RiderApplicationTest extends TestCase
         $this->actingAs($admin, 'sanctum')
             ->getJson('/api/admin/riders/applications')
             ->assertOk()
-            ->assertJsonStructure(['data', 'meta']);
+            ->assertJsonStructure(['data', 'current_page', 'total']);
     }
 
     public function test_non_admin_cannot_list_applications(): void
