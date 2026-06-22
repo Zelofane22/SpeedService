@@ -14,9 +14,9 @@ Dernière mise à jour : 2026-06-22
 | US-001 Inscription (email, téléphone, mot de passe) | ✅ Terminé |
 | US-002 Connexion utilisateur | ✅ Terminé |
 | US-003 Réinitialisation du mot de passe | ✅ Terminé |
-| US-004 Modification du profil | ⏳ À faire |
+| US-004 Modification du profil | ✅ Terminé |
 
-**Prochain sprint : Sprint 2 — Création de livraison**
+**Sprint 1 terminé. Prochain sprint : Sprint 2 — Création de livraison**
 
 ---
 
@@ -55,7 +55,7 @@ La pipeline CI automatise :
 | Sprint | Thème | Statut |
 |---|---|---|
 | Sprint 0 | Infrastructure & Setup | ✅ Terminé (2026-06-22) |
-| Sprint 1 | Authentification | 🔄 En cours |
+| Sprint 1 | Authentification | ✅ Terminé (2026-06-22) |
 | Sprint 2 | Création de livraison | ⏳ À venir |
 | Sprint 3 | Géolocalisation | ⏳ À venir |
 | Sprint 4 | Paiement | ⏳ À venir |
