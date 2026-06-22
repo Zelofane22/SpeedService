@@ -1,4 +1,4 @@
-FROM cgr.dev/chainguard/node:latest
+FROM node:26-slim
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
