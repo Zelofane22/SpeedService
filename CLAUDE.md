@@ -85,7 +85,7 @@ User --< Address
 | Sprint 4 | Paiement ✅ |
 | Sprint 5 | Gestion livreurs & statuts ✅ |
 | Sprint 6 | Suivi client & notifications ✅ |
-| Sprint 7 | Administration (back-office) — en cours |
+| Sprint 7 | Administration (back-office) — 🔄 en cours (démarré 2026-06-22) |
 | Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj |
 | Sprint 9 | Stabilisation & déploiement |
 

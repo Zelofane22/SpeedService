@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -46,7 +46,7 @@ interface Props {
 }
 
 export default function MapPickerInner({ value, onChange, label }: Props) {
-  const [search, setSearch]       = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [searching, setSearching] = useState(false)
   const [searchErr, setSearchErr] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null)
@@ -68,11 +68,11 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
   async function handleMapClick(lat: number, lon: number) {
     const address = await reverseGeocode(lat, lon)
     onChange({ lat, lon, address })
-    setSearch(address)
+    if (searchInputRef.current) searchInputRef.current.value = address
   }
 
   async function handleSearch() {
-    const q = search.trim()
+    const q = searchInputRef.current?.value.trim() ?? ''
     if (!q) return
     setSearching(true)
     setSearchErr(null)
@@ -87,7 +87,7 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
       }
       const { lat, lon, display_name } = results[0] as { lat: number; lon: number; display_name: string }
       onChange({ lat, lon, address: display_name })
-      setSearch(display_name)
+      if (searchInputRef.current) searchInputRef.current.value = display_name
       setFlyTarget([lat, lon])
     } catch {
       setSearchErr('Erreur de connexion.')
@@ -98,8 +98,7 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
 
   // Keep input in sync when parent resets value
   useEffect(() => {
-    if (value && value.address !== search) setSearch(value.address)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (searchInputRef.current) searchInputRef.current.value = value?.address ?? ''
   }, [value?.address])
 
   return (
@@ -108,9 +107,10 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
 
       <div className="flex gap-2">
         <input
+          ref={searchInputRef}
           type="text"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setSearchErr(null) }}
+          defaultValue={value?.address ?? ''}
+          onChange={() => setSearchErr(null)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           placeholder="Quartier, rue… puis appuyez sur Localiser"
           className="flex-1 bg-brand-input border border-brand-border rounded-xl px-3 py-2 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"

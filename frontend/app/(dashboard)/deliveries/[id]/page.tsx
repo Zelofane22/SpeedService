@@ -116,10 +116,7 @@ export default function DeliveryTrackingPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true)
-    else setRefreshing(true)
-
+  const load = useCallback(async () => {
     try {
       const result = await apiGet<Delivery>(`/deliveries/${params.id}`)
       setDelivery(result)
@@ -128,15 +125,23 @@ export default function DeliveryTrackingPage() {
       setError((caught as Error).message || 'Impossible de charger cette livraison.')
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }, [params.id])
 
   useEffect(() => {
     void load()
-    const interval = window.setInterval(() => void load(true), 30_000)
+    const interval = window.setInterval(() => void load(), 30_000)
     return () => window.clearInterval(interval)
   }, [load])
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    try {
+      await load()
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   if (loading) {
     return <div className="flex justify-center py-28"><div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
@@ -169,7 +174,7 @@ export default function DeliveryTrackingPage() {
           <StatusBadge status={delivery.status} />
           <button
             type="button"
-            onClick={() => void load(true)}
+            onClick={() => void handleRefresh()}
             disabled={refreshing}
             className="flex items-center gap-2 rounded-xl border border-brand-border bg-white px-3 py-2 text-xs font-semibold text-gray-600 hover:border-primary/40 disabled:opacity-60"
           >

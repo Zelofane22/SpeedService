@@ -92,7 +92,7 @@ Dernière mise à jour : 2026-06-22
 | Frontend : centre de notifications accessible depuis la cloche | ✅ Terminé |
 | Tests : 67 tests PHPUnit, 241 assertions, lint et build Next.js au vert | ✅ Terminé |
 
-**Sprint 6 terminé. Prochain sprint : Sprint 7 — Administration (back-office)**
+**Sprint 6 terminé. Sprint 7 — Administration (back-office) en cours depuis le 2026-06-22.**
 
 ---
 
@@ -137,6 +137,6 @@ La pipeline CI automatise :
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
-| Sprint 7 | Administration (back-office) | ⏳ À venir |
+| Sprint 7 | Administration (back-office) | 🔄 En cours (démarré le 2026-06-22) |
 | Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ⏳ À venir |
 | Sprint 9 | Stabilisation & déploiement | ⏳ À venir |
