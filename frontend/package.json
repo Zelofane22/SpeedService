@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint --dir ."
   },
   "dependencies": {
     "next": "16.2.9",
