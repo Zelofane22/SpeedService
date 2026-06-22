@@ -38,6 +38,7 @@ class StoreDeliveryRequest extends FormRequest
 
             'delivery_type'  => ['required', new Enum(DeliveryType::class)],
             'payment_method' => ['required', new Enum(PaymentMethod::class)],
+            'distance'       => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

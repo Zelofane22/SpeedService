@@ -49,13 +49,14 @@ class DeliveryController extends Controller
             'sender_name'         => $request->sender_name,
             'sender_phone'        => $request->sender_phone,
             'pickup_address'      => $request->pickup_address,
-            'pickup_latitude'     => $request->pickup_latitude ?? 0.0,
-            'pickup_longitude'    => $request->pickup_longitude ?? 0.0,
+            'pickup_latitude'     => $request->pickup_latitude,
+            'pickup_longitude'    => $request->pickup_longitude,
             'recipient_name'      => $request->recipient_name,
             'recipient_phone'     => $request->recipient_phone,
             'delivery_address'    => $request->delivery_address,
-            'delivery_latitude'   => $request->delivery_latitude ?? 0.0,
-            'delivery_longitude'  => $request->delivery_longitude ?? 0.0,
+            'delivery_latitude'   => $request->delivery_latitude,
+            'delivery_longitude'  => $request->delivery_longitude,
+            'distance'            => $request->distance,
         ]);
 
         $delivery->statusHistories()->create(['status' => DeliveryStatus::AwaitingPayment]);

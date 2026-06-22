@@ -2,12 +2,19 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/status', function () {
     return response()->json(['status' => 'ok']);
+});
+
+// Geo (public — no sensitive data)
+Route::prefix('geo')->group(function () {
+    Route::get('/geocode', [GeocodingController::class, 'geocode']);
+    Route::post('/distance', [GeocodingController::class, 'distance']);
 });
 
 // Auth (public)

@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { apiPost } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import MapPicker, { type GeoPoint } from '@/components/map-picker'
+import RouteMap from '@/components/route-map'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -15,15 +17,31 @@ type Form = {
   sender_name: string
   sender_phone: string
   pickup_address: string
+  pickup_point: GeoPoint | null
+
   recipient_name: string
   recipient_phone: string
   delivery_address: string
+  delivery_point: GeoPoint | null
+
   package_type: string
   content_category: string
   package_description: string
   package_weight: string
   delivery_type: 'standard' | 'express'
   payment_method: string
+}
+
+// ─── Haversine distance (km) ──────────────────────────────────────────────────
+
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
 // ─── Price table ──────────────────────────────────────────────────────────────
@@ -114,7 +132,7 @@ function FieldSelect({
   )
 }
 
-// ─── Steps ───────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const STEPS = ['Expéditeur', 'Destinataire', 'Colis', 'Récapitulatif', 'Paiement']
 
@@ -134,11 +152,11 @@ const CATEGORIES = [
 ]
 
 const PAYMENT_METHODS = [
-  { value: 'mtn_momo',       label: 'MTN MoMo',             desc: 'Paiement mobile rapide' },
-  { value: 'moov_money',     label: 'Moov Money',           desc: 'Paiement mobile sécurisé' },
-  { value: 'card',           label: 'Carte bancaire',       desc: 'Visa, Mastercard' },
+  { value: 'mtn_momo',         label: 'MTN MoMo',               desc: 'Paiement mobile rapide' },
+  { value: 'moov_money',       label: 'Moov Money',             desc: 'Paiement mobile sécurisé' },
+  { value: 'card',             label: 'Carte bancaire',         desc: 'Visa, Mastercard' },
   { value: 'cash_on_delivery', label: 'Paiement à la livraison', desc: 'En espèces à la réception' },
-  { value: 'agency',         label: 'Paiement en agence',   desc: 'Espèces dans une agence partenaire' },
+  { value: 'agency',           label: 'Paiement en agence',     desc: 'Espèces dans une agence partenaire' },
 ]
 
 const PACKAGE_LABELS: Record<string, string> = {
@@ -160,27 +178,45 @@ export default function NewDeliveryPage() {
   const [created, setCreated] = useState<CreatedDelivery | null>(null)
 
   const [form, setForm] = useState<Form>({
-    sender_name: '', sender_phone: '', pickup_address: '',
-    recipient_name: '', recipient_phone: '', delivery_address: '',
+    sender_name: '', sender_phone: '', pickup_address: '', pickup_point: null,
+    recipient_name: '', recipient_phone: '', delivery_address: '', delivery_point: null,
     package_type: 'small', content_category: 'other',
     package_description: '', package_weight: '',
     delivery_type: 'standard', payment_method: 'mtn_momo',
   })
 
-  function set(field: keyof Form, value: string) {
+  function set<K extends keyof Form>(field: K, value: Form[K]) {
     setForm((f) => ({ ...f, [field]: value }))
   }
 
+  function handlePickupPoint(pt: GeoPoint) {
+    set('pickup_point', pt)
+    set('pickup_address', pt.address)
+  }
+
+  function handleDeliveryPoint(pt: GeoPoint) {
+    set('delivery_point', pt)
+    set('delivery_address', pt.address)
+  }
+
+  const distance: number | null =
+    form.pickup_point && form.delivery_point
+      ? haversine(
+          form.pickup_point.lat, form.pickup_point.lon,
+          form.delivery_point.lat, form.delivery_point.lon,
+        ) * 1.3
+      : null
+
   function validateStep(): string | null {
     if (step === 0) {
-      if (!form.sender_name.trim()) return 'Le nom de l\'expéditeur est requis.'
-      if (!form.sender_phone.trim()) return 'Le téléphone de l\'expéditeur est requis.'
-      if (!form.pickup_address.trim()) return 'L\'adresse de collecte est requise.'
+      if (!form.sender_name.trim())    return "Le nom de l'expéditeur est requis."
+      if (!form.sender_phone.trim())   return "Le téléphone de l'expéditeur est requis."
+      if (!form.pickup_point)          return 'Veuillez sélectionner le point de collecte sur la carte.'
     }
     if (step === 1) {
       if (!form.recipient_name.trim()) return 'Le nom du destinataire est requis.'
       if (!form.recipient_phone.trim()) return 'Le téléphone du destinataire est requis.'
-      if (!form.delivery_address.trim()) return 'L\'adresse de livraison est requise.'
+      if (!form.delivery_point)        return 'Veuillez sélectionner le point de livraison sur la carte.'
     }
     return null
   }
@@ -205,9 +241,14 @@ export default function NewDeliveryPage() {
         sender_name:          form.sender_name,
         sender_phone:         form.sender_phone,
         pickup_address:       form.pickup_address,
+        pickup_latitude:      form.pickup_point?.lat ?? null,
+        pickup_longitude:     form.pickup_point?.lon ?? null,
         recipient_name:       form.recipient_name,
         recipient_phone:      form.recipient_phone,
         delivery_address:     form.delivery_address,
+        delivery_latitude:    form.delivery_point?.lat ?? null,
+        delivery_longitude:   form.delivery_point?.lon ?? null,
+        distance:             distance ? parseFloat(distance.toFixed(2)) : null,
         package_type:         form.package_type,
         content_category:     form.content_category,
         package_description:  form.package_description || null,
@@ -226,7 +267,7 @@ export default function NewDeliveryPage() {
 
   const price = calcPrice(form.package_type, form.delivery_type)
 
-  // ── Success screen ──────────────────────────────────────────────────────
+  // ── Success screen ─────────────────────────────────────────────────────────
   if (created) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
@@ -259,7 +300,7 @@ export default function NewDeliveryPage() {
     )
   }
 
-  // ── Wizard ──────────────────────────────────────────────────────────────
+  // ── Wizard ─────────────────────────────────────────────────────────────────
   return (
     <div className="p-6 max-w-2xl mx-auto">
       {/* Stepper */}
@@ -271,7 +312,7 @@ export default function NewDeliveryPage() {
                 <div
                   className={cn(
                     'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all',
-                    i < step  ? 'bg-primary text-white' :
+                    i < step   ? 'bg-primary text-white' :
                     i === step ? 'bg-primary text-white ring-4 ring-primary/20' :
                                  'bg-brand-muted text-primary-400',
                   )}
@@ -292,34 +333,41 @@ export default function NewDeliveryPage() {
 
       {/* Card */}
       <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-8">
-        {/* Step 0: Sender */}
+
+        {/* Step 0: Sender + Pickup map */}
         {step === 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-brand-foreground mb-6">Informations expéditeur</h2>
             <FieldInput label="Nom complet" name="sender_name" value={form.sender_name} onChange={(v) => set('sender_name', v)} placeholder="Koffi Mensah" icon={User} required />
             <FieldInput label="Téléphone" name="sender_phone" value={form.sender_phone} onChange={(v) => set('sender_phone', v)} placeholder="+229 97 00 00 00" type="tel" icon={Phone} required />
-            <FieldInput label="Adresse de collecte" name="pickup_address" value={form.pickup_address} onChange={(v) => set('pickup_address', v)} placeholder="Cadjèhoun, Rue des Cocotiers" icon={MapPin} required />
-            <div className="rounded-2xl h-36 bg-brand-muted/50 flex items-center justify-center border border-brand-border">
-              <div className="text-center text-primary-400">
-                <MapPin size={28} className="mx-auto mb-2 text-primary/40" />
-                <p className="text-sm font-medium">Carte disponible en Sprint 3</p>
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-brand-foreground">
+                Point de collecte <span className="text-red-500">*</span>
+              </label>
+              <MapPicker
+                value={form.pickup_point}
+                onChange={handlePickupPoint}
+                label="Recherchez ou cliquez sur la carte pour placer le point d'enlèvement"
+              />
             </div>
           </div>
         )}
 
-        {/* Step 1: Recipient */}
+        {/* Step 1: Recipient + Delivery map */}
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-brand-foreground mb-6">Informations destinataire</h2>
             <FieldInput label="Nom du destinataire" name="recipient_name" value={form.recipient_name} onChange={(v) => set('recipient_name', v)} placeholder="Aïcha Bah" icon={User} required />
             <FieldInput label="Téléphone" name="recipient_phone" value={form.recipient_phone} onChange={(v) => set('recipient_phone', v)} placeholder="+229 97 11 11 11" type="tel" icon={Phone} required />
-            <FieldInput label="Adresse de livraison" name="delivery_address" value={form.delivery_address} onChange={(v) => set('delivery_address', v)} placeholder="Akpakpa, Carrefour Total" icon={MapPin} required />
-            <div className="rounded-2xl h-36 bg-brand-muted/50 flex items-center justify-center border border-brand-border">
-              <div className="text-center text-primary-400">
-                <MapPin size={28} className="mx-auto mb-2 text-primary/40" />
-                <p className="text-sm font-medium">Carte disponible en Sprint 3</p>
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-brand-foreground">
+                Point de livraison <span className="text-red-500">*</span>
+              </label>
+              <MapPicker
+                value={form.delivery_point}
+                onChange={handleDeliveryPoint}
+                label="Recherchez ou cliquez sur la carte pour placer le point de livraison"
+              />
             </div>
           </div>
         )}
@@ -349,20 +397,30 @@ export default function NewDeliveryPage() {
           </div>
         )}
 
-        {/* Step 3: Recap */}
+        {/* Step 3: Recap + Route map */}
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold text-brand-foreground mb-6">Récapitulatif</h2>
+
+            {/* Route map */}
+            {form.pickup_point && form.delivery_point && distance !== null && (
+              <RouteMap
+                pickup={form.pickup_point}
+                delivery={form.delivery_point}
+                distanceKm={distance}
+              />
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               {[
-                { l: 'Expéditeur', v: form.sender_name },
-                { l: 'Tél. expéditeur', v: form.sender_phone },
+                { l: 'Expéditeur',          v: form.sender_name },
+                { l: 'Tél. expéditeur',     v: form.sender_phone },
                 { l: 'Adresse de collecte', v: form.pickup_address },
-                { l: 'Destinataire', v: form.recipient_name },
-                { l: 'Tél. destinataire', v: form.recipient_phone },
+                { l: 'Destinataire',         v: form.recipient_name },
+                { l: 'Tél. destinataire',   v: form.recipient_phone },
                 { l: 'Adresse de livraison', v: form.delivery_address },
-                { l: 'Type de colis', v: PACKAGE_LABELS[form.package_type] ?? form.package_type },
-                { l: 'Poids', v: form.package_weight ? `${form.package_weight} kg` : 'Non renseigné' },
+                { l: 'Type de colis',        v: PACKAGE_LABELS[form.package_type] ?? form.package_type },
+                { l: 'Poids',               v: form.package_weight ? `${form.package_weight} kg` : 'Non renseigné' },
               ].map(({ l, v }) => (
                 <div key={l} className="bg-brand-muted/30 rounded-2xl p-4">
                   <p className="text-xs text-primary-400 mb-1">{l}</p>
@@ -438,6 +496,12 @@ export default function NewDeliveryPage() {
                 <span className="text-primary-400">Service</span>
                 <span className="font-medium">{form.delivery_type === 'express' ? 'Express' : 'Standard'}</span>
               </div>
+              {distance !== null && (
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <span className="text-primary-400">Distance estimée</span>
+                  <span className="font-medium">{distance.toFixed(1)} km</span>
+                </div>
+              )}
               <div className="border-t border-primary/15 pt-3 flex justify-between items-center">
                 <span className="font-bold text-brand-foreground">Total</span>
                 <span className="text-xl font-extrabold text-primary">{fmtPrice(price)}</span>
@@ -454,7 +518,7 @@ export default function NewDeliveryPage() {
         </div>
       )}
 
-      {/* Navigation buttons */}
+      {/* Navigation */}
       <div className="flex gap-3 mt-6">
         {step > 0 && (
           <button
@@ -477,7 +541,7 @@ export default function NewDeliveryPage() {
             disabled={loading}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white text-sm font-semibold rounded-2xl hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-primary/25"
           >
-            {loading ? 'Envoi en cours...' : <><Check size={16} /> Confirmer la commande</>}
+            {loading ? 'Envoi en cours…' : <><Check size={16} /> Confirmer la commande</>}
           </button>
         )}
       </div>

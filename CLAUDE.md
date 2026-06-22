@@ -79,9 +79,9 @@ User --< Address
 | Sprint | Thème |
 |--------|-------|
 | Sprint 0 | Infrastructure & Setup ✅ |
-| Sprint 1 | Authentification (US-001 → US-004) |
-| Sprint 2 | Création de livraison |
-| Sprint 3 | Géolocalisation |
+| Sprint 1 | Authentification (US-001 → US-004) ✅ |
+| Sprint 2 | Création de livraison ✅ |
+| Sprint 3 | Géolocalisation ✅ |
 | Sprint 4 | Paiement |
 | Sprint 5 | Gestion livreurs & statuts |
 | Sprint 6 | Suivi client & notifications |

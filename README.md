@@ -6,8 +6,10 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 1 — Authentification**
+**Sprint en cours : Sprint 4 — Paiement**
 Dernière mise à jour : 2026-06-22
+
+### Sprint 1 — Authentification ✅
 
 | Tâche | Statut |
 |---|---|
@@ -16,7 +18,31 @@ Dernière mise à jour : 2026-06-22
 | US-003 Réinitialisation du mot de passe | ✅ Terminé |
 | US-004 Modification du profil | ✅ Terminé |
 
-**Sprint 1 terminé. Prochain sprint : Sprint 2 — Création de livraison**
+### Sprint 2 — Création de livraison ✅
+
+| Tâche | Statut |
+|---|---|
+| Backend : `DeliveryController` (index, store, show, cancel) | ✅ Terminé |
+| Backend : `PriceCalculator` (Document 1500 / Small 2500 / Medium 4000 / Large 6500 FCFA, ×2 Express) | ✅ Terminé |
+| Backend : validation `StoreDeliveryRequest` + création Payment + StatusHistory | ✅ Terminé |
+| Backend : routes `/deliveries` protégées par Sanctum | ✅ Terminé |
+| Backend : factory `DeliveryFactory` + 17 tests PHPUnit (50 assertions au vert) | ✅ Terminé |
+| Frontend : dashboard utilisateur avec KPI cards et données réelles | ✅ Terminé |
+| Frontend : wizard création livraison en 5 étapes (expéditeur → destinataire → colis → récap → paiement) | ✅ Terminé |
+| Frontend : page Historique avec recherche et `StatusBadge` | ✅ Terminé |
+| Frontend : sidebar navigation (layout dashboard refactorisé) | ✅ Terminé |
+
+### Sprint 3 — Géolocalisation ✅
+
+| Tâche | Statut |
+|---|---|
+| Backend : `GeocodingController` — proxy Nominatim (`GET /geo/geocode`) + Haversine (`POST /geo/distance`) | ✅ Terminé |
+| Backend : migration coordonnées nullable + champ `distance` dans `StoreDeliveryRequest` & `DeliveryController` | ✅ Terminé |
+| Frontend : `MapPicker` (Leaflet + OSM, clic sur carte + recherche géocodée, centré sur Cotonou) | ✅ Terminé |
+| Frontend : `RouteMap` (polyline entre les deux points + distance estimée dans le récap) | ✅ Terminé |
+| Frontend : wizard nouvelle livraison — étapes 0 & 1 avec carte interactive, distance dans étapes 3 & 4 | ✅ Terminé |
+
+**Sprint 3 terminé. Prochain sprint : Sprint 4 — Paiement**
 
 ---
 
@@ -56,8 +82,8 @@ La pipeline CI automatise :
 |---|---|---|
 | Sprint 0 | Infrastructure & Setup | ✅ Terminé (2026-06-22) |
 | Sprint 1 | Authentification | ✅ Terminé (2026-06-22) |
-| Sprint 2 | Création de livraison | ⏳ À venir |
-| Sprint 3 | Géolocalisation | ⏳ À venir |
+| Sprint 2 | Création de livraison | ✅ Terminé (2026-06-22) |
+| Sprint 3 | Géolocalisation | ✅ Terminé (2026-06-22) |
 | Sprint 4 | Paiement | ⏳ À venir |
 | Sprint 5 | Gestion livreurs & statuts | ⏳ À venir |
 | Sprint 6 | Suivi client & notifications | ⏳ À venir |
