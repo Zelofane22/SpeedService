@@ -129,9 +129,12 @@ export default function DeliveryTrackingPage() {
   }, [params.id])
 
   useEffect(() => {
-    void load()
+    const initialLoad = window.setTimeout(() => void load(), 0)
     const interval = window.setInterval(() => void load(), 30_000)
-    return () => window.clearInterval(interval)
+    return () => {
+      window.clearTimeout(initialLoad)
+      window.clearInterval(interval)
+    }
   }, [load])
 
   async function handleRefresh() {

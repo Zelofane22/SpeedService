@@ -103,3 +103,6 @@ backend/    → Laravel 12 — API partagée (api.speedservice.bj)
 met à jours l'état d'avencement dans readme.md et claud.md
 
 Dernier état : Sprint 6 terminé le 2026-06-22 (suivi client par statut, historique, notifications in-app/email/SMS). Prochain chantier : Sprint 7 — Administration.
+
+### orchestration (synchronisation CLAUDE - GPT CODEX)
+Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.

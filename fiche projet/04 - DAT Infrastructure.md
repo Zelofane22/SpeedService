@@ -1,7 +1,7 @@
 # DAT — INFRASTRUCTURE & DÉPLOIEMENT
 # Speed Service
 
-**Version :** 1.0 — MVP (10 sprints)
+**Version :** 1.1 — cible d'infrastructure et état du dépôt
 **Date :** Juin 2026
 **Complément :** [03 - DAT Architecture.md](03%20-%20DAT%20Architecture.md)
 
@@ -15,9 +15,9 @@ Pour l'architecture logicielle (code, BDD, modules métier), voir [03 - DAT Arch
 
 ---
 
-# 2. Architecture multi-application
+# 2. Architecture multi-application cible
 
-Speed Service est déployé sur **trois sous-domaines** desservis par un seul VPS :
+La cible de production prévoit **trois sous-domaines** desservis par un VPS. Aucun élément du dépôt ne permet d'affirmer que ce déploiement ou ces DNS existent déjà.
 
 | Sous-domaine | Application | Port interne | Notes |
 |---|---|---|---|
@@ -28,6 +28,8 @@ Speed Service est déployé sur **trois sous-domaines** desservis par un seul VP
 Nginx joue le rôle de **reverse proxy** : il reçoit toutes les requêtes HTTPS entrantes et les distribue au bon processus selon le `server_name`.
 
 ```
+
+**État courant vérifié :** le développement local repose sur `frontend/`, `backend/`, PostgreSQL et Redis via Docker Compose. Le dossier `rider/` n'existe pas encore. Le back-office du Sprint 7 reste un chantier **en cours piloté par Claude** dans le frontend principal.
 Internet
     │ :443 HTTPS
     ▼
@@ -41,7 +43,7 @@ Internet
 
 # 3. Configuration DNS
 
-À configurer chez le registrar (OVH, Namecheap, Contabo DNS…).
+À configurer chez le registrar (OVH, Namecheap, Contabo DNS…) lors des Sprints 8 et 9.
 
 ## 3.1 Enregistrements à créer
 
@@ -77,7 +79,9 @@ dig api.speedservice.bj A
 
 ---
 
-# 4. Configuration Nginx
+# 4. Configuration Nginx cible
+
+Les blocs ci-dessous sont des modèles de déploiement à adapter et tester ; ils ne sont pas versionnés comme configuration active dans le dépôt.
 
 ## 4.1 Installation
 
@@ -197,7 +201,7 @@ sudo systemctl reload nginx
 
 ---
 
-# 5. Certificats SSL (Let's Encrypt)
+# 5. Certificats SSL (Let's Encrypt) — cible
 
 ## 5.1 Installation de Certbot
 
@@ -233,7 +237,7 @@ sudo systemctl status certbot.timer
 
 # 6. CORS — Configuration Laravel
 
-Le backend doit autoriser les deux origines frontend.
+Le backend devra autoriser les deux origines frontend en production. À la date de l'audit, aucun fichier `backend/config/cors.php` n'est présent : la politique doit donc être publiée/configurée et testée avant mise en ligne.
 
 `backend/config/cors.php`
 
@@ -254,7 +258,7 @@ return [
 ];
 ```
 
-En développement local, ajouter `http://localhost:3000` et `http://localhost:3001`.
+En développement local, autoriser `http://localhost:3000` et, seulement après création de l'app rider, `http://localhost:3001`. Le backend utilise actuellement des Bearer tokens Sanctum, pas l'authentification SPA par cookie ; `supports_credentials` doit être choisi en cohérence avec le mode final.
 
 ---
 
@@ -267,36 +271,38 @@ En développement local, ajouter `http://localhost:3000` et `http://localhost:30
 ```yaml
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
     ports: ["3000:3000"]
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+      NODE_ENV: development
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     ports: ["8000:8000"]
-    depends_on: [postgres, redis]
+    depends_on: [db, redis]
     environment:
       DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      REDIS_HOST: redis
+      DB_HOST: db
 
-  postgres:
-    image: postgres:16-alpine
-    ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+  db:
+    image: postgres:16
+    volumes: [db_data:/var/lib/postgresql/data]
 
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     ports: ["6379:6379"]
 
 volumes:
-  pgdata:
+  db_data:
 ```
 
-## 7.2 Production
+Ce résumé reflète les noms de services actuels. Deux points restent à corriger/valider pour un démarrage intégré : exposer `NEXT_PUBLIC_API_URL` au frontend si la valeur par défaut ne convient pas, et définir `REDIS_HOST=redis` côté backend pour les queues (la valeur par défaut actuelle est `127.0.0.1`). Aucun worker de queue dédié n'est déclaré dans Compose.
 
-En production, les apps Next.js tournent en tant que processus Node.js managés par **PM2** (ou systemd) plutôt que dans des containers, pour simplifier le déploiement sur un VPS unique.
+## 7.2 Production cible
+
+Le scénario proposé fait tourner les apps Next.js comme processus Node.js managés par **PM2** (ou systemd). Ce choix n'est pas encore matérialisé par des fichiers de déploiement ou un `ecosystem.config.*` dans le dépôt.
 
 ```bash
 # Installer PM2
@@ -317,7 +323,7 @@ pm2 startup
 
 ---
 
-# 8. Chaîne CI/CD
+# 8. Chaîne CI actuelle et CD cible
 
 ## 8.1 Outil
 
@@ -327,39 +333,36 @@ pm2 startup
 
 | Branche | Rôle |
 |---|---|
-| `main` | Production — déploiement manuel ou automatique après validation |
-| `develop` | Préproduction — déploiement automatique |
+| `main` | Version stable ; cible de production après validation |
+| `develop` | Développement courant ; cible de préproduction |
 | `feature/*` | Développement de fonctionnalités |
 | `hotfix/*` | Correctifs urgents |
 
-## 8.3 Pipeline Frontend (`.github/workflows/frontend.yml`)
+## 8.3 Job Frontend (`.github/workflows/ci.yml`)
 
 Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 
 ```
 1. Checkout du code
 2. npm install
-3. TypeScript (tsc --noEmit)
-4. Lint (eslint)
-5. Build Next.js
-6. Tests unitaires (si présents)
-7. Deploy sur VPS via SSH (rsync + pm2 restart)
+3. Lint (ESLint)
+4. Build Next.js
 ```
 
-## 8.4 Pipeline Backend (`.github/workflows/backend.yml`)
+## 8.4 Job Backend et validation Docker (`.github/workflows/ci.yml`)
 
 ```
 1. Checkout du code
-2. composer install
-3. php artisan test (PHPUnit)
-4. PHP lint (Laravel Pint)
-5. Deploy sur VPS via SSH
-6. php artisan migrate --force
-7. php artisan queue:restart
-8. php artisan config:cache && php artisan route:cache
+2. composer validate --strict
+3. composer install
+4. Copie de .env.example et génération APP_KEY
+5. composer test (PHPUnit)
+6. Job séparé : docker compose config
 ```
 
-## 8.5 Secrets GitHub Actions
+La CI se déclenche sur push et pull request vers `main` ou `develop`. Elle ne contient actuellement **aucune étape de déploiement** ; la partie CD (SSH, migrations, redémarrage PM2/queues) reste à concevoir au Sprint 9.
+
+## 8.5 Secrets GitHub Actions cibles pour le déploiement
 
 | Secret | Usage |
 |---|---|
@@ -374,7 +377,7 @@ Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 | `MOOV_MONEY_API_KEY` | Clé API Moov Money |
 | `SMTP_PASSWORD` | Mot de passe serveur email |
 
-> Aucun secret ne doit apparaître dans le dépôt Git (`.env` est dans `.gitignore`).
+> Ces noms décrivent une cible et ne prouvent pas que les secrets sont configurés. Aucun secret ne doit apparaître dans le dépôt Git (`.env` est dans `.gitignore`). Les clés FedaPay/MTN/Moov ne seront utiles qu'après choix et intégration effective des passerelles.
 
 ---
 
@@ -383,12 +386,12 @@ Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 | Environnement | URL | Source | Déploiement |
 |---|---|---|---|
 | Développement | `localhost:3000` / `localhost:8000` | Branche courante | Manuel (`docker compose up`) |
-| Préproduction | `staging.speedservice.bj` | `develop` | Automatique (GitHub Actions) |
-| Production | `speedservice.bj` | `main` | Manuel après validation |
+| Préproduction cible | `staging.speedservice.bj` | `develop` | À mettre en place |
+| Production cible | `speedservice.bj` | `main` | À mettre en place après validation |
 
 ---
 
-# 10. Serveur de production
+# 10. Serveur de production recommandé
 
 | Composant | Valeur |
 |---|---|
@@ -401,7 +404,7 @@ Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 
 ---
 
-# 11. Sauvegardes
+# 11. Sauvegardes cibles
 
 ## 11.1 Base de données PostgreSQL
 
@@ -413,15 +416,15 @@ Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 0 4 * * * find /backups/db -name "*.sql.gz" -mtime +30 -delete
 ```
 
-Conservation : **30 jours minimum**.
+Conservation cible : **30 jours minimum**. Aucun script ou job de sauvegarde n'est versionné dans le dépôt actuel.
 
 ## 11.2 Fichiers uploadés (documents rider — Sprint 8)
 
-Les fichiers d'identité et documents livreur sont stockés sur **S3 (ou compatible S3 : Scaleway Object Storage, OVH Object Storage)** avec réplication activée. Conservation : 12 mois après rejet définitif du dossier (RGPD).
+Au Sprint 8, les fichiers d'identité et documents livreur devront être stockés sur **S3 (ou compatible S3)** avec accès privé et sauvegarde adaptée. La durée de conservation devra être validée selon le droit applicable ; les tables et uploads rider n'existent pas encore.
 
 ---
 
-# 12. Monitoring
+# 12. Monitoring cible
 
 ## 12.1 Application
 
@@ -441,9 +444,11 @@ Les fichiers d'identité et documents livreur sont stockés sur **S3 (ou compati
 
 Uptime Kuma notifie par email et SMS en cas d'indisponibilité supérieure à 2 minutes.
 
+Ces outils et alertes sont des recommandations : aucune configuration Pulse, Telescope, Uptime Kuma, Prometheus ou Grafana n'est présente dans le dépôt.
+
 ---
 
-# 13. Journalisation
+# 13. Journalisation cible
 
 | Type | Canal | Rétention |
 |---|---|---|
@@ -453,14 +458,16 @@ Uptime Kuma notifie par email et SMS en cas d'indisponibilité supérieure à 2 
 
 Rotation des logs via **logrotate** (installé par défaut sur Ubuntu).
 
+Les durées de rétention ci-dessus constituent une politique à mettre en œuvre sur le serveur ; elles ne sont pas garanties par le code du dépôt.
+
 ---
 
-# 14. Plan de déploiement initial (Mise en production)
+# 14. Plan cible de déploiement initial (Sprint 9)
 
 ```
 1. Provisionner le VPS (Ubuntu 24.04)
 2. Configurer le DNS (enregistrements A pour les 3 sous-domaines)
-3. Installer : Nginx, PHP 8.4, PHP-FPM, Node.js 20, PM2, PostgreSQL 16, Redis, Certbot
+3. Installer : Nginx, PHP 8.4, PHP-FPM, une version Node validée avec Next.js (CI actuelle : Node 24), PM2, PostgreSQL 16, Redis, Certbot
 4. Cloner le dépôt Git sur le serveur
 5. Configurer les fichiers .env (backend + frontend)
 6. php artisan migrate --seed
@@ -491,3 +498,18 @@ Checklist spécifique à la mise en production de `rider.speedservice.bj` :
 □ Tester l'accès HTTPS depuis un mobile
 □ Tester l'installation PWA (Android Chrome → "Ajouter à l'écran d'accueil")
 ```
+
+---
+
+## 16. État d'exécution vérifié
+
+| Élément | État au 22 juin 2026 |
+|---|---|
+| Dockerfiles frontend/backend | Présents, orientés développement |
+| Docker Compose local | Présent ; ajustements Redis/API/worker à valider |
+| GitHub Actions | CI unique : lint/build frontend, validation/tests backend, validation Compose |
+| Déploiement automatique | Absent |
+| DNS, Nginx, TLS | Cibles documentées, non vérifiées comme déployées |
+| Sauvegardes et monitoring | Recommandations, non versionnés |
+| Rider `rider.speedservice.bj` | Sprint 8, application absente |
+| Sprint 7 Administration | **En cours — chantier Claude**, ne constitue pas encore une version livrable validée |

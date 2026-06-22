@@ -126,6 +126,9 @@ La pipeline CI automatise :
 - validation composer / tests backend
 - validation Docker Compose
 
+## orchestration (synchronisation CLAUDE - GPT CODEX)
+Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
+
 ## Roadmap des sprints
 
 | Sprint | Thème | Statut |

@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
@@ -27,11 +28,11 @@ const config: Config = {
           foreground: '#ffffff',
         },
         brand: {
-          background: '#FAF7FB',
-          foreground: '#1D1D1F',
-          muted: '#F0E4EE',
-          border: '#E8D5E5',
-          input: '#F5EDF4',
+          background: 'rgb(var(--brand-background) / <alpha-value>)',
+          foreground: 'rgb(var(--brand-foreground) / <alpha-value>)',
+          muted: 'rgb(var(--brand-muted) / <alpha-value>)',
+          border: 'rgb(var(--brand-border) / <alpha-value>)',
+          input: 'rgb(var(--brand-input) / <alpha-value>)',
         },
       },
       fontFamily: {

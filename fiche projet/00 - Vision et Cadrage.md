@@ -4,7 +4,7 @@
 
 ### Nom du projet
 
-**Speed Service** *(nom provisoire)*
+**Speed Service**
 
 ### Secteur d'activité
 
@@ -54,7 +54,7 @@ Développer une plateforme centralisée permettant la gestion complète des livr
 
 * Digitaliser le processus de commande de livraison.
 * Réduire les délais de livraison.
-* Offrir un système de suivi en temps réel.
+* Offrir un suivi fiable par statut et historique ; la position GPS en temps réel est reportée après le MVP.
 * Faciliter les paiements électroniques et physiques.
 * Accompagner les commerçants dans leur développement logistique.
 * Créer des opportunités d'emploi pour les livreurs.
@@ -131,8 +131,9 @@ Développer une plateforme centralisée permettant la gestion complète des livr
 * Connexion sécurisée
 * Réception des missions
 * Validation des étapes de livraison
-* Historique des gains
-* Gestion du profil
+* Historique des missions
+
+> **État au 22 juin 2026 :** ces fonctions sont disponibles dans un espace provisoire intégré au frontend client (`/driver/*`). L'application PWA autonome `rider.speedservice.bj`, l'inscription documentaire, le profil enrichi et les revenus sont des travaux futurs (Sprint 8 ou version ultérieure).
 
 ---
 
@@ -141,9 +142,10 @@ Développer une plateforme centralisée permettant la gestion complète des livr
 * Gestion des utilisateurs
 * Gestion des commandes
 * Gestion des livreurs
-* Gestion des partenaires
 * Gestion des paiements
 * Tableau de bord statistique
+
+> **État au 22 juin 2026 :** le Sprint 7 est en cours. Le dépôt contient le socle `/admin` et des API protégées pour les statistiques, utilisateurs, livraisons, validations de paiement, livreurs et rapports. L'affectation manuelle d'un livreur, la suspension persistante et le traitement des candidatures rider ne sont pas encore opérationnels.
 
 ---
 
@@ -200,12 +202,17 @@ Les revenus de la plateforme proviendront de :
 
 ## Frontend
 
-* Next.js
-* React
+* Next.js 16 (App Router)
+* React 19
+* TypeScript
+* Tailwind CSS 3
+* Sélecteur global de thème clair/sombre avec préférence persistée
 
 ## Backend
 
-* Laravel ou Node.js
+* Laravel 12
+* PHP 8.4
+* API REST protégée par Laravel Sanctum
 
 ## Base de données
 
@@ -214,37 +221,45 @@ Les revenus de la plateforme proviendront de :
 ## Cartographie
 
 * OpenStreetMap
-* Google Maps (optionnel)
+* Leaflet
+* Nominatim et calcul Haversine
 
 ## Hébergement
 
-* Serveur Cloud
-* VPS dédié
+* Développement local : Docker Compose
+* Cible de production : VPS, Nginx et HTTPS (déploiement non constaté dans le dépôt)
 
 ---
 
 # 12. Planning Prévisionnel
 
-## Étape 1 : MVP
+## Étape 1 : Socle fonctionnel — Sprints 0 à 6 terminés
 
-Durée estimée : 2 à 3 mois
+* Infrastructure locale et CI
+* Authentification client
+* Création, cartographie et tarification des livraisons
+* Paiements simulés et workflow de validation physique
+* Opérations livreur provisoires
+* Suivi client par statut et notifications
 
-Fonctionnalités :
+## Étape 2 : Administration — Sprint 7 en cours
 
-* Création de compte
-* Commande de livraison
-* Paiement
-* Tableau de bord administrateur
+* Back-office, statistiques et rapports
+* Gestion des utilisateurs, livraisons et paiements
+* Stabilisation des écrans et validation complète par lint, build et tests
 
-## Étape 2 : Déploiement
+## Étape 3 : Rider — Sprint 8 planifié
 
-Durée estimée : 1 mois
+* Application PWA indépendante `rider.speedservice.bj`
+* Tunnel de candidature et validation documentaire
+* Migration de l'espace `/driver/*` provisoire
 
-* Tests
-* Formation des livreurs
-* Acquisition des premiers clients
+## Étape 4 : Stabilisation et déploiement — Sprint 9 planifié
 
-## Étape 3 : Évolution
+* Tests d'intégration, sécurité et performances
+* Préproduction, production et formation administrateur
+
+## Étape 5 : Évolutions après MVP
 
 * Application mobile Android
 * Application mobile iOS
@@ -277,4 +292,18 @@ Durée estimée : 1 mois
 # Conclusion
 
 Speed Service ambitionne de devenir une plateforme de référence dans le domaine de la livraison au Bénin en proposant des services rapides, fiables et accessibles, adaptés aux besoins des particuliers, commerçants et entreprises.
+
+---
+
+## État de référence du dépôt — 22 juin 2026
+
+| Périmètre | État constaté |
+|---|---|
+| Sprints 0 à 6 | Terminés selon le jalon projet et représentés dans le code |
+| Sprint 7 — Administration | En cours : backend et écrans intégrés, stabilisation/validation restantes |
+| Sprint 8 — Rider autonome | Planifié ; aucun dossier `rider/` ni modèle de candidature dans le dépôt |
+| Sprint 9 — Déploiement | Planifié ; la documentation d'exploitation décrit une cible, pas une production existante |
+| Thèmes clair/sombre | Implémentés globalement dans le frontend courant |
+
+Les paiements électroniques sont simulés dans le code actuel. Les intégrations réelles FedaPay, MTN MoMo et Moov Money restent à brancher avant la production.
  

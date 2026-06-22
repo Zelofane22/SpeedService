@@ -4,13 +4,13 @@ import { Card } from '@/components/card'
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-8 text-slate-900">
+    <main className="min-h-screen bg-brand-background px-6 py-8 text-brand-foreground">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-        <section className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-10 shadow-sm">
+        <section className="space-y-4 rounded-[2rem] border border-brand-border bg-white p-10 shadow-sm">
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-[0.24em] text-sky-600">SpeedService</p>
             <h1 className="text-4xl font-semibold sm:text-5xl">Plateforme de livraison rapide</h1>
-            <p className="max-w-2xl text-slate-600">
+            <p className="max-w-2xl text-gray-700">
               Une interface moderne pour gérer les livraisons, la logistique et le suivi client.
             </p>
           </div>
@@ -44,10 +44,10 @@ export default function HomePage() {
           </Card>
         </div>
 
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-[2rem] border border-brand-border bg-white p-8 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">Next Steps</p>
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-gray-700">Next Steps</p>
               <h2 className="text-2xl font-semibold">Configurer l’authentification</h2>
             </div>
             <Button variant="secondary" className="inline-flex items-center gap-2">

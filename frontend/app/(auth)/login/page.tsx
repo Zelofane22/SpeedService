@@ -41,7 +41,14 @@ export default function LoginPage() {
     try {
       const data = await apiPost<LoginResponse>('/auth/login', form)
       localStorage.setItem('auth_token', data.token)
-      router.push(data.user.role === 'driver' ? '/driver/missions' : '/dashboard')
+      localStorage.setItem('user', JSON.stringify(data.user))
+
+      const destination = data.user.role === 'admin'
+        ? '/admin'
+        : data.user.role === 'driver'
+          ? '/driver/missions'
+          : '/dashboard'
+      router.push(destination)
     } catch (err: unknown) {
       if (err instanceof Error && 'errors' in err) {
         const apiErrors = (err as Error & { errors?: Record<string, string[]> }).errors

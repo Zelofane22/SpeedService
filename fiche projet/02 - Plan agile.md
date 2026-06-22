@@ -2,10 +2,12 @@
 
 ## Plateforme de Livraison de Colis au Bénin
 
-Version : 1.0
+Version : 1.1 — état vérifié du dépôt
 Produit : Speed Service
 Méthodologie : Scrum Agile
 Durée MVP estimée : 4 à 5 mois
+
+**Référence au 22 juin 2026 :** Sprints 0 à 6 terminés ; Sprint 7 en cours ; Sprint 8 Rider et Sprint 9 Stabilisation à venir.
 
 ---
 
@@ -204,7 +206,8 @@ SP : 8
 
 Critères d'acceptation :
 
-* Le prix est calculé à partir du type de colis (US-006), du poids, de la distance et du service de livraison choisi (US-013bis).
+* Dans le MVP actuel, le prix est calculé à partir du type de colis (US-006) et du service choisi (US-013bis) ; Express = 2 × Standard.
+* Le poids et la distance sont conservés comme données de livraison mais n'entrent pas encore dans la formule.
 * Le choix du service de livraison intervient à l'étape paiement (cf. US-013bis), donc le prix définitif n'est affiché qu'à cette étape.
 
 ---
@@ -270,7 +273,7 @@ SP : 3
 Critères d'acceptation :
 
 * Affiché en premier sur l'étape "Paiement", avant le choix du mode de paiement.
-* Les deux options (Standard, Express) affichent chacune leur tarif calculé à partir du type de colis et du poids (US-006, US-007).
+* Les deux options (Standard, Express) affichent chacune leur tarif calculé à partir du type de colis (US-006, US-007).
 * Le total de la commande se met à jour automatiquement selon le service sélectionné.
 
 ### Feature : Paiement Mobile Money
@@ -378,9 +381,9 @@ SP : 1
 
 ## EPIC 6 — Gestion des Livreurs
 
-> **Note architecturale** : L'espace livreur est une application web distincte déployée sur le sous-domaine `rider.speedservice.bj`. Elle utilise le même backend Laravel (endpoints `/driver/*`). Le tunnel d'inscription fait l'objet du Sprint 8 (MVP). Voir [Espace Rider.md](Espace%20Rider.md) pour la spécification complète.
+> **Note architecturale** : l'espace livreur opérationnel est provisoirement intégré à `frontend/` sous `/driver/*`. Son extraction vers une application distincte `rider.speedservice.bj`, avec tunnel d'inscription, est planifiée au Sprint 8. Voir [05 - Espace Rider.md](05%20-%20Espace%20Rider.md).
 
-### Feature : Opérations livreur (MVP — `rider.speedservice.bj`)
+### Feature : Opérations livreur (réalisées provisoirement sous `/driver/*`)
 
 #### US-023
 
@@ -576,7 +579,7 @@ SP : 3 — Priorité : Should Have (Sprint 8)
 
 #### US-029
 
-Suivi en temps réel.
+Suivi par statut et historique, actualisé automatiquement toutes les 30 secondes côté client.
 
 SP : 8
 
@@ -689,6 +692,8 @@ SP : 13
 
 ## Sprint 0 (2 semaines)
 
+**Statut : ✅ Terminé**
+
 ### Objectifs
 
 * Architecture technique
@@ -707,6 +712,8 @@ Livrables :
 
 ## Sprint 1
 
+**Statut : ✅ Terminé**
+
 ### Authentification
 
 US :
@@ -724,12 +731,15 @@ Utilisateur opérationnel.
 
 ## Sprint 2
 
+**Statut : ✅ Terminé**
+
 ### Commandes
 
 US :
 
 * 005
 * 006
+* 006bis
 * 007
 * 008
 
@@ -740,6 +750,8 @@ Créer une livraison.
 ---
 
 ## Sprint 3
+
+**Statut : ✅ Terminé**
 
 ### Géolocalisation
 
@@ -758,10 +770,13 @@ Calcul automatique du trajet.
 
 ## Sprint 4
 
+**Statut : ✅ Terminé (passerelles de paiement simulées)**
+
 ### Paiement
 
 US :
 
+* 013bis
 * 013
 * 014
 * 015
@@ -774,6 +789,8 @@ Commande payable.
 ---
 
 ## Sprint 5
+
+**Statut : ✅ Terminé dans l'espace rider provisoire `/driver/*`**
 
 ### Gestion livreurs + Cycle de vie des statuts
 
@@ -800,6 +817,8 @@ Flux opérationnel de livraison complet.
 
 ## Sprint 6
 
+**Statut : ✅ Terminé**
+
 ### Suivi client + Notifications
 
 US :
@@ -823,32 +842,43 @@ Note : US-030 (affichage position GPS du livreur en temps réel) reportée en Ve
 
 ### Administration
 
+**Statut : 🔄 En cours depuis le 22 juin 2026**
+
 US :
 
 * 036 — Gestion utilisateurs
-* 037 — Gestion livreurs (liste, suspension, **validation des dossiers de candidature rider**)
+* 037 — Gestion livreurs (liste et suspension)
 * 038 — Gestion commandes
 * 039 — Gestion paiements
 * 040 — Dashboard d'activité
 
 Objectif :
 
-Back-office fonctionnel, y compris la validation manuelle des dossiers livreur.
+Back-office fonctionnel pour l'activité existante.
 
-Critères d'acceptation spécifiques US-037 (dossiers rider) :
+État d'implémentation constaté :
 
-* L'admin peut consulter les dossiers en attente (`pending`, `under_review`).
-* L'admin peut visualiser tous les documents uploadés (pièce d'identité, véhicule, permis, assurance) via URL signée.
-* L'admin peut **valider** un dossier → statut `approved`, email d'activation envoyé au livreur.
-* L'admin peut **rejeter** un dossier avec motif → statut `rejected`, email avec motif envoyé.
-* L'admin peut **demander un complément** → statut `complement_requested`, email avec instructions.
-* L'admin peut **suspendre** un livreur actif.
+* API admin protégée par Sanctum + middleware de rôle.
+* Statistiques, listes paginées d'utilisateurs/livraisons/livreurs et rapports.
+* Changement de rôle, modification administrative du statut d'une livraison et validation des paiements physiques.
+* Écrans `/admin`, `/admin/users`, `/admin/deliveries`, `/admin/drivers` et `/admin/reports` présents.
+
+Restes avant clôture :
+
+* Stabiliser les contrats de données et le routage après connexion admin.
+* Ajouter une persistance `is_active` avant d'activer réellement la suspension des livreurs.
+* Ajouter l'affectation manuelle d'une livraison à un livreur si elle reste dans le périmètre US-038.
+* Obtenir lint, build et tests au vert sur l'ensemble intégré.
+
+La validation des **dossiers de candidature rider** est déplacée au Sprint 8 : les tables et endpoints correspondants n'existent pas encore.
 
 ---
 
 ## Sprint 8
 
 ### Rider App — Tunnel d'inscription + Application `rider.speedservice.bj`
+
+**Statut : ⏳ Planifié — dossier `rider/` absent du dépôt**
 
 Objectif :
 
@@ -868,6 +898,7 @@ Livreur autonome : candidature en ligne, validation par l'admin, accès à l'esp
 * `GET  /api/rider/apply/status` — consulter l'état de son dossier
 * `POST /api/rider/apply/complement` — soumettre des documents complémentaires
 * Email automatique à chaque changement de statut (confirmation, décision, complément)
+* Interface admin de consultation, validation, rejet et demande de complément
 
 #### 8.3 Frontend — Application `rider.speedservice.bj`
 
@@ -900,6 +931,8 @@ US opérationnel (migration depuis MVP provisoire) :
 
 ### Stabilisation
 
+**Statut : ⏳ Planifié**
+
 * Correctifs et tests d'intégration end-to-end
 * Audit de sécurité
 * Optimisation des performances
@@ -912,11 +945,12 @@ US opérationnel (migration depuis MVP provisoire) :
 
 ## Frontend
 
-* Next.js
-* TypeScript
-* Tailwind CSS
-* Shadcn UI
+* Next.js 16 / React 19
+* TypeScript 6
+* Tailwind CSS 3
+* Composants internes inspirés de shadcn (pas de dépendance shadcn/ui installée)
 * Leaflet / OpenStreetMap
+* Thème clair/sombre global avec préférence persistée
 
 ---
 
@@ -947,7 +981,11 @@ US opérationnel (migration depuis MVP provisoire) :
 
 ## Hébergement
 
-MVP :
+Développement actuel :
+
+* Docker Compose local (frontend, backend, PostgreSQL, Redis)
+
+Cible MVP :
 
 * VPS Contabo / OVH
 
@@ -1000,4 +1038,21 @@ Après validation du MVP :
 * Optimisation des tournées
 * Portefeuille électronique
 * Notifications WhatsApp
+
+---
+
+## 9. Synthèse d'avancement
+
+| Sprint | Périmètre | État |
+|---|---|---|
+| 0 | Infrastructure & setup | ✅ Terminé |
+| 1 | Authentification | ✅ Terminé |
+| 2 | Création de livraison | ✅ Terminé |
+| 3 | Géolocalisation | ✅ Terminé |
+| 4 | Paiement simulé | ✅ Terminé |
+| 5 | Livreurs & statuts | ✅ Terminé, frontend rider provisoire |
+| 6 | Suivi client & notifications | ✅ Terminé |
+| 7 | Administration | 🔄 En cours |
+| 8 | Rider autonome et candidatures | ⏳ À venir |
+| 9 | Stabilisation & déploiement | ⏳ À venir |
  

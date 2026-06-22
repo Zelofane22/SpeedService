@@ -1,7 +1,7 @@
 # DAT — ARCHITECTURE APPLICATIVE
 # Speed Service
 
-**Version :** 1.0 — MVP (10 sprints)
+**Version :** 1.1 — MVP (état du dépôt au 22 juin 2026)
 **Date :** Juin 2026
 **Complément :** [04 - DAT Infrastructure.md](04%20-%20DAT%20Infrastructure.md)
 
@@ -17,39 +17,29 @@ Pour la configuration des serveurs, du réseau, du déploiement et de la CI/CD, 
 
 # 2. Vue d'ensemble applicative
 
-Speed Service est composé de **trois applications** partageant un seul backend :
+Le dépôt courant contient **deux applications exécutables** : un frontend Next.js et une API Laravel. Le frontend regroupe encore les espaces client, administrateur et rider provisoire.
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                        Internet                              │
-└───────────┬──────────────────┬───────────────────────────────┘
-            │                  │
-            ▼                  ▼
-┌───────────────────┐ ┌───────────────────┐
-│  speedservice.bj  │ │rider.speedservice.bj│
-│  App Client       │ │  App Rider (PWA)   │
-│  Next.js          │ │  Next.js           │
-│  Desktop-first    │ │  Mobile-first      │
-└─────────┬─────────┘ └────────┬───────────┘
-          │                    │
-          └──────────┬─────────┘
-                     │ HTTPS / JSON
-                     ▼
-        ┌────────────────────────┐
-        │  api.speedservice.bj   │
-        │  Laravel 12 — API REST │
-        └───────────┬────────────┘
-                    │
-       ┌────────────┼────────────┐
-       ▼            ▼            ▼
-  PostgreSQL      Redis     Services externes
+frontend/ (Next.js 16)
+├── site public et authentification
+├── espace client
+├── back-office /admin (Sprint 7 en cours)
+└── espace rider /driver (provisoire)
+              │ HTTP / JSON + Bearer token
+              ▼
+backend/ (Laravel 12 API)
+├── PostgreSQL
+├── Redis pour les files de notifications
+└── SMTP / passerelle SMS selon configuration
 ```
 
-| Application | URL | Cible | Design |
-|---|---|---|---|
-| Plateforme client | `speedservice.bj` | Clients expéditeurs | Desktop-first, responsive |
-| Espace rider | `rider.speedservice.bj` | Livreurs | Mobile-first, PWA |
-| API | `api.speedservice.bj` | — | Laravel REST (partagé) |
+| Élément | État courant | Cible |
+|---|---|---|
+| `frontend/` | Client + admin + rider provisoire | Client + admin sur `speedservice.bj` |
+| `rider/` | Absent | PWA mobile-first sur `rider.speedservice.bj` au Sprint 8 |
+| `backend/` | API Laravel REST partagée | `api.speedservice.bj` au déploiement |
+
+L'architecture finale à trois applications (client, rider, API) reste la cible, pas l'état déployé constaté.
 
 ---
 
@@ -104,9 +94,11 @@ Responsabilités :
 
 Responsabilités :
 - Paiement Mobile Money (MTN MoMo, Moov Money)
-- Paiement carte bancaire (FedaPay)
+- Paiement carte bancaire
 - Paiement physique avec workflow de validation manuelle
 - Génération de reçus
+
+Les paiements en ligne sont simulés dans le code actuel ; les passerelles opérateur/FedaPay ne sont pas intégrées.
 
 ## 4.6 Notifications
 
@@ -115,6 +107,8 @@ Responsabilités :
 - SMS (validation commande, livreur assigné, livraison terminée)
 - File de traitement via Redis Queues
 
+Le Sprint 6 implémente quatre événements de livraison : commande confirmée, livreur affecté, colis récupéré et colis livré. Les emails et SMS utilisent respectivement le mailer et le driver SMS configurés (journalisation possible en local).
+
 ## 4.7 Administration
 
 Responsabilités :
@@ -122,6 +116,8 @@ Responsabilités :
 - Validation des dossiers de candidature livreur (Sprint 8)
 - Validation manuelle des paiements physiques
 - Dashboard d'activité (commandes, livreurs, revenus)
+
+Le socle Sprint 7 inclut aussi des rapports sur six mois et le changement de rôle. La suspension persistante des livreurs et les dossiers de candidature rider ne sont pas encore disponibles.
 
 ---
 
@@ -135,7 +131,7 @@ Responsabilités :
 |---|---|---|
 | Next.js | 16 (App Router) | Framework React SSR/SSG |
 | React | 19 | UI |
-| TypeScript | 5 | Typage statique |
+| TypeScript | 6 | Typage statique |
 | Tailwind CSS | 3 | Styles utilitaires |
 | Leaflet + OpenStreetMap | — | Cartes interactives |
 
@@ -148,6 +144,8 @@ Background  : #FAF7FB
 Foreground  : #1D1D1F
 Font        : Inter
 ```
+
+Le thème clair/sombre est géré globalement par une classe `dark`, des variables CSS, la préférence système et `localStorage`. Le bouton fixe « Thème » est rendu par le layout racine, donc disponible sur toutes les routes du frontend actuel.
 
 ### Structure des routes (App Router)
 
@@ -166,10 +164,16 @@ app/
 │   │   └── payment/        → /deliveries/:id/payment
 │   ├── history/            → /history
 │   └── profile/            → /profile
-└── driver/                 (espace rider provisoire — sera migré vers rider.speedservice.bj en Sprint 8)
-    ├── missions/           → /driver/missions
-    ├── active/             → /driver/active
-    └── history/            → /driver/history
+├── driver/                 (espace rider provisoire — sera migré vers rider.speedservice.bj en Sprint 8)
+│   ├── missions/           → /driver/missions
+│   ├── active/             → /driver/active
+│   └── history/            → /driver/history
+└── (admin)/admin/          (back-office — Sprint 7 en cours)
+    ├── page.tsx            → /admin
+    ├── users/              → /admin/users
+    ├── deliveries/         → /admin/deliveries
+    ├── drivers/            → /admin/drivers
+    └── reports/            → /admin/reports
 ```
 
 > **Note Sprint 5-7 :** L'espace rider est actuellement intégré au projet client à `/driver/*`. En Sprint 8, il sera extrait dans un projet Next.js distinct déployé sur `rider.speedservice.bj`.
@@ -184,17 +188,23 @@ components/
 ├── logo.tsx
 ├── status-badge.tsx    (badge par statut de livraison)
 ├── map-picker.tsx      (sélection d'adresse sur carte Leaflet)
-└── route-map.tsx       (visualisation trajet entre deux points)
+├── route-map.tsx       (visualisation trajet entre deux points)
+├── notification-bell.tsx
+├── theme-toggle.tsx    (sélecteur clair/sombre global)
+└── admin/              (en-têtes, cartes statistiques, badges)
 
 lib/
 ├── api.ts              (apiGet, apiPost, apiPut, apiPatch, apiDelete)
+├── api/admin.ts        (client des endpoints d'administration)
 ├── auth-context.tsx    (AuthContext, useAuthUser)
 └── utils.ts            (cn — clsx + tailwind-merge)
 ```
 
 ---
 
-## 5.2 Application rider — `rider.speedservice.bj` (Sprint 8)
+## 5.2 Application rider cible — `rider.speedservice.bj` (Sprint 8)
+
+Cette application n'existe pas encore dans le dépôt. Le tableau suivant décrit la cible après extraction de `/driver/*`.
 
 ### Différences avec l'app client
 
@@ -233,8 +243,8 @@ Résumé des étapes :
 | Laravel Sanctum | — | Authentification SPA par tokens |
 | Eloquent ORM | — | Accès base de données |
 | Laravel Queues | — | Jobs asynchrones (notifications) |
-| Laravel Events/Listeners | — | Découplage événementiel |
-| Laravel Storage | — | Upload fichiers (documents rider) |
+| Laravel Notifications/Jobs | — | Emails et SMS asynchrones |
+| Laravel Storage | — | Cible Sprint 8 pour les documents rider |
 
 ## 6.2 Structure
 
@@ -247,8 +257,11 @@ app/
 │   │   ├── DriverController.php
 │   │   ├── GeocodingController.php
 │   │   ├── PaymentController.php
+│   │   ├── NotificationController.php
+│   │   ├── AdminController.php
 │   │   └── ProfileController.php
 │   ├── Middleware/
+│   │   └── EnsureAdmin.php
 │   └── Requests/
 │       └── StoreDeliveryRequest.php
 ├── Models/
@@ -267,9 +280,14 @@ app/
 │   ├── PaymentMethod.php
 │   └── PaymentStatus.php
 ├── Services/
-│   └── PriceCalculator.php
+│   ├── PriceCalculator.php
+│   ├── DeliveryNotificationService.php
+│   └── SmsService.php
+├── Jobs/
+│   └── SendDeliverySms.php
 └── Notifications/
-    └── ResetPasswordNotification.php
+    ├── ResetPasswordNotification.php
+    └── DeliveryUpdateNotification.php
 
 routes/
 ├── api.php    (toutes les routes REST)
@@ -303,12 +321,29 @@ GET    /api/deliveries/{id}
 POST   /api/deliveries/{id}/cancel
 POST   /api/deliveries/{id}/pay
 
+GET    /api/notifications
+PATCH  /api/notifications/read-all
+PATCH  /api/notifications/{id}/read
+
 # Protégées driver (auth:sanctum + rôle driver)
 GET    /api/driver/missions/available
 GET    /api/driver/missions
 POST   /api/driver/missions/{id}/accept
 POST   /api/driver/missions/{id}/decline
 PATCH  /api/driver/missions/{id}/status
+
+# Protégées admin (auth:sanctum + middleware admin)
+GET    /api/admin/stats
+GET    /api/admin/users
+GET    /api/admin/users/{id}
+PATCH  /api/admin/users/{id}/role
+GET    /api/admin/deliveries
+GET    /api/admin/deliveries/{id}
+PATCH  /api/admin/deliveries/{id}/status
+POST   /api/admin/deliveries/{id}/validate-payment
+GET    /api/admin/drivers
+PATCH  /api/admin/drivers/{id}/toggle-active
+GET    /api/admin/reports
 ```
 
 ---
@@ -335,16 +370,21 @@ Retourne { user: { role, ... }, token }
 Frontend lit le rôle :
   - client → /dashboard
   - driver → /driver/missions (provisoire) ou rider.speedservice.bj (Sprint 8)
-  - admin  → /admin (Sprint 7)
+  - admin  → /admin (cible Sprint 7)
 ```
+
+> Écart courant : la page de connexion redirige automatiquement les livreurs, mais dirige encore les administrateurs vers `/dashboard`. Le layout `/admin` protège bien l'accès par rôle ; la redirection post-connexion admin reste à corriger.
 
 ## 7.3 Validation du rôle à l'entrée des espaces protégés
 
 Chaque layout protégé appelle `GET /api/profile` au chargement et vérifie le rôle :
 
-- Layout `(dashboard)` → redirige vers `/login` si non authentifié, vers `/driver-login` si rôle driver
+- Layout `(dashboard)` → redirige vers `/login` si non authentifié
 - Layout `driver/` → redirige vers `/driver-login` si non authentifié, vers `/dashboard` si rôle client
+- Layout `(admin)` → redirige vers `/login` sans token et vers `/dashboard` si le rôle mémorisé n'est pas `admin`
 - Page `/driver-login` → retourne une erreur si l'utilisateur connecté est un client
+
+Le layout client ne vérifie pas encore explicitement le rôle après `GET /api/profile`. Cette protection frontend doit être harmonisée ; les endpoints admin restent protégés côté serveur par `EnsureAdmin`.
 
 ## 7.4 Rôles et permissions
 
@@ -352,7 +392,7 @@ Chaque layout protégé appelle `GET /api/profile` au chargement et vérifie le 
 |---|---|
 | `client` | Créer commande, payer, suivre, historique |
 | `driver` | Voir missions disponibles, accepter/refuser, avancer les statuts |
-| `admin` | Gestion complète de la plateforme |
+| `admin` | Endpoints de back-office du Sprint 7 en cours (statistiques, utilisateurs, livraisons, paiements, livreurs, rapports) |
 
 ---
 
@@ -385,7 +425,7 @@ updated_at
 id            UUID PK
 user_id       UUID FK → users
 label         string
-address       string
+full_address  text
 latitude      decimal(10,7)
 longitude     decimal(10,7)
 created_at
@@ -408,7 +448,7 @@ package_description text NULL
 package_weight      decimal(8,2) NULL
 delivery_type       enum                 standard | express
 price               decimal(10,2)
-distance            decimal(8,2) NULL    (km)
+distance            decimal(10,2) NULL   (km)
 sender_name         string
 sender_phone        string
 pickup_address      string
@@ -425,7 +465,7 @@ updated_at
 ```
 
 > `package_type` détermine le tarif. `content_category` est descriptif (assurance, restrictions).
-> `delivery_type` est renseigné à l'étape paiement une fois les deux options tarifées.
+> `delivery_type` et `payment_method` sont choisis dans la dernière étape du wizard avant la création ; la page `/deliveries/{id}/payment` exécute ensuite le parcours adapté. Le prix actuel dépend uniquement du type de colis et du service, pas du poids ni de la distance.
 
 ### delivery_status_histories
 
@@ -433,6 +473,7 @@ updated_at
 id            UUID PK
 delivery_id   UUID FK → deliveries
 status        enum (même valeurs que deliveries.status)
+note          text NULL
 created_at
 ```
 
@@ -456,15 +497,22 @@ updated_at
 ### notification_logs
 
 ```
-id          UUID PK
-user_id     UUID FK → users
-channel     string (email | sms)
-event       string
-status      enum (sent | failed)
+id            UUID PK
+user_id       UUID FK → users
+delivery_id   UUID FK → deliveries NULL
+event         string NULL
+channel       enum (email | sms | in_app)
+title         string
+message       text
+data          json NULL
+read_at       timestamp NULL
 created_at
+updated_at
 ```
 
-### driver_applications *(Sprint 8)*
+Une contrainte unique `(user_id, delivery_id, event, channel)` garantit l'idempotence. Le schéma ne suit pas encore un état d'envoi `sent/failed` pour les canaux externes.
+
+### driver_applications *(cible Sprint 8 — table absente)*
 
 ```
 id                UUID PK
@@ -488,7 +536,7 @@ created_at
 updated_at
 ```
 
-### driver_documents *(Sprint 8)*
+### driver_documents *(cible Sprint 8 — table absente)*
 
 ```
 id                UUID PK
@@ -503,7 +551,7 @@ created_at
 updated_at
 ```
 
-> Les fichiers d'identité sont stockés dans un bucket privé. L'accès se fait via URL signée (TTL 15 min). Suppression automatique 12 mois après rejet définitif (RGPD).
+> Cible Sprint 8 : les fichiers d'identité seront stockés dans un bucket privé, accessibles via URL signée (TTL 15 min), avec une politique de conservation à valider juridiquement. Rien de ce mécanisme n'est encore présent dans le dépôt.
 
 ## 8.3 Tarification
 
@@ -522,10 +570,12 @@ updated_at
 
 | Usage | Détail |
 |---|---|
-| Cache applicatif | Résultats de requêtes fréquentes |
-| Sessions | Stockage de sessions Laravel |
+| Cache applicatif | Stockage fichier par défaut dans la configuration actuelle |
+| Sessions | Stockage fichier dans la configuration actuelle |
 | Queues | Jobs notifications (SMS, email) |
-| Rate limiting | Protection des endpoints API |
+| Rate limiting | À configurer explicitement avant production |
+
+Redis est configuré comme backend de queue. Il n'est pas le backend par défaut du cache ou des sessions dans `.env.example`.
 
 ---
 
@@ -535,9 +585,8 @@ updated_at
 
 | Service | Usage |
 |---|---|
-| FedaPay | Cartes bancaires + agrégateur Mobile Money |
-| MTN MoMo | API Mobile Money directe |
-| Moov Money | API Mobile Money directe |
+| Simulation interne | Parcours carte, MTN MoMo et Moov Money du MVP courant |
+| FedaPay / API opérateurs | Cible de production à choisir et intégrer |
 
 ## Cartographie
 
@@ -560,26 +609,26 @@ updated_at
 
 | Menace | Contre-mesure |
 |---|---|
-| Authentification | Laravel Sanctum — tokens courts durée de vie |
+| Authentification | Laravel Sanctum — Bearer tokens ; politique d'expiration à définir |
 | Mots de passe | Hashage bcrypt (Laravel `hashed` cast) |
 | Injections SQL | Eloquent ORM — requêtes préparées |
 | XSS | Échappement automatique React/Next.js |
-| CSRF | Tokens CSRF Laravel (routes web) |
-| Rate limiting | Middleware `throttle` sur tous les endpoints auth |
+| CSRF | API authentifiée par Bearer token ; CORS à finaliser pour la production |
+| Rate limiting | À appliquer explicitement aux endpoints sensibles avant production |
 | Accès non autorisé | Vérification du rôle dans chaque controller driver/admin |
-| Fichiers sensibles | Bucket privé S3, URL signées TTL 15 min |
+| Fichiers sensibles | Cible Sprint 8 : bucket privé S3 et URL signées TTL 15 min |
 | Secrets | Variables d'environnement uniquement (jamais en dur) |
 
 ---
 
 # 12. Évolutions futures
 
-## Version 1.1 — Rider App
+## Sprint 8 — Rider App
 
 - Application rider mobile-first PWA sur `rider.speedservice.bj`
 - Tunnel d'inscription livreur complet (7 étapes)
 - Module d'administration des dossiers de candidature
-- Tableau de bord des revenus livreur
+- Migration des fonctions de missions depuis `/driver/*`
 
 ## Version 2
 
@@ -587,6 +636,7 @@ updated_at
 - Application Android et iOS (React Native)
 - Notifications WhatsApp
 - Système de notation livreurs
+- Tableau de bord des revenus livreur
 
 ## Version 3
 
