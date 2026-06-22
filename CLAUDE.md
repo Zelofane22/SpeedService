@@ -87,3 +87,6 @@ User --< Address
 | Sprint 6 | Suivi client & notifications |
 | Sprint 7 | Administration (back-office) |
 | Sprint 8 | Stabilisation & déploiement |
+
+### avncement
+met à jours l'état d'avencement dans readme
