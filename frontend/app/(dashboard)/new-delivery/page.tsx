@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Check, ChevronLeft, ChevronRight, MapPin, Phone, User,
-  Clock, Zap, CreditCard, Package, CheckCircle,
+  Clock, Zap, CreditCard, Package,
 } from 'lucide-react'
 import { apiPost } from '@/lib/api'
 import { cn } from '@/lib/utils'
@@ -166,7 +166,7 @@ const PACKAGE_LABELS: Record<string, string> = {
   large:    'Grand colis',
 }
 
-type CreatedDelivery = { reference: string; id: string }
+type CreatedDelivery = { id: string }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -175,7 +175,6 @@ export default function NewDeliveryPage() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [created, setCreated] = useState<CreatedDelivery | null>(null)
 
   const [form, setForm] = useState<Form>({
     sender_name: '', sender_phone: '', pickup_address: '', pickup_point: null,
@@ -256,7 +255,7 @@ export default function NewDeliveryPage() {
         delivery_type:        form.delivery_type,
         payment_method:       form.payment_method,
       }, true)
-      setCreated(data)
+      router.push(`/deliveries/${data.id}/payment`)
     } catch (e: unknown) {
       const err = e as Error & { errors?: Record<string, string[]> }
       setError(err.message ?? 'Une erreur est survenue.')
@@ -266,39 +265,6 @@ export default function NewDeliveryPage() {
   }
 
   const price = calcPrice(form.package_type, form.delivery_type)
-
-  // ── Success screen ─────────────────────────────────────────────────────────
-  if (created) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={40} className="text-green-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-brand-foreground mb-2">Commande créée !</h2>
-          <p className="text-sm text-primary-400 mb-1">Référence</p>
-          <p className="text-xl font-mono font-bold text-primary mb-6">{created.reference}</p>
-          <p className="text-sm text-primary-400 mb-8">
-            Votre livraison est en attente de paiement. Vous recevrez une confirmation dès validation.
-          </p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="px-6 py-3 bg-primary text-white text-sm font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/25"
-            >
-              Retour au tableau de bord
-            </button>
-            <button
-              onClick={() => router.push('/history')}
-              className="px-6 py-3 border-2 border-primary text-primary text-sm font-semibold rounded-2xl hover:bg-primary/5 transition-all"
-            >
-              Voir mes livraisons
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // ── Wizard ─────────────────────────────────────────────────────────────────
   return (

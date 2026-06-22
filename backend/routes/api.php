@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\GeocodingController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,4 +40,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deliveries', [DeliveryController::class, 'store']);
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show']);
     Route::post('/deliveries/{id}/cancel', [DeliveryController::class, 'cancel']);
+    Route::post('/deliveries/{id}/pay', [PaymentController::class, 'pay']);
 });

@@ -6,7 +6,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 4 — Paiement**
+**Sprint en cours : Sprint 5 — Gestion livreurs & statuts**
 Dernière mise à jour : 2026-06-22
 
 ### Sprint 1 — Authentification ✅
@@ -42,7 +42,22 @@ Dernière mise à jour : 2026-06-22
 | Frontend : `RouteMap` (polyline entre les deux points + distance estimée dans le récap) | ✅ Terminé |
 | Frontend : wizard nouvelle livraison — étapes 0 & 1 avec carte interactive, distance dans étapes 3 & 4 | ✅ Terminé |
 
-**Sprint 3 terminé. Prochain sprint : Sprint 4 — Paiement**
+### Sprint 4 — Paiement ✅
+
+| Tâche | Statut |
+|---|---|
+| US-013bis Choix du service Standard/Express à l'étape paiement avec tarifs calculés | ✅ Terminé |
+| US-013 Paiement Mobile Money (MTN MoMo, Moov Money) — numéro de téléphone + simulation | ✅ Terminé |
+| US-014 Paiement par carte bancaire — formulaire sécurisé + simulation | ✅ Terminé |
+| US-015 Paiement physique (à la livraison / en agence) — statut `AwaitingValidation` | ✅ Terminé |
+| US-016 Génération de reçu — écran de confirmation avec référence de transaction | ✅ Terminé |
+| Backend : `PaymentController@pay` — `POST /deliveries/{id}/pay` avec validation par méthode | ✅ Terminé |
+| Backend : 12 tests PHPUnit PaymentTest (44 assertions au vert) | ✅ Terminé |
+| Frontend : wizard → redirect vers `/deliveries/{id}/payment` après création | ✅ Terminé |
+| Frontend : page de paiement `/deliveries/[id]/payment` — formulaire adaptatif par méthode | ✅ Terminé |
+| Frontend : écran de reçu inline après paiement (confirmé ou en attente de validation) | ✅ Terminé |
+
+**Sprint 4 terminé. Prochain sprint : Sprint 5 — Gestion livreurs & statuts**
 
 ---
 
@@ -84,7 +99,7 @@ La pipeline CI automatise :
 | Sprint 1 | Authentification | ✅ Terminé (2026-06-22) |
 | Sprint 2 | Création de livraison | ✅ Terminé (2026-06-22) |
 | Sprint 3 | Géolocalisation | ✅ Terminé (2026-06-22) |
-| Sprint 4 | Paiement | ⏳ À venir |
+| Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ⏳ À venir |
 | Sprint 6 | Suivi client & notifications | ⏳ À venir |
 | Sprint 7 | Administration (back-office) | ⏳ À venir |

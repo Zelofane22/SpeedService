@@ -82,11 +82,11 @@ User --< Address
 | Sprint 1 | Authentification (US-001 → US-004) ✅ |
 | Sprint 2 | Création de livraison ✅ |
 | Sprint 3 | Géolocalisation ✅ |
-| Sprint 4 | Paiement |
+| Sprint 4 | Paiement ✅ |
 | Sprint 5 | Gestion livreurs & statuts |
 | Sprint 6 | Suivi client & notifications |
 | Sprint 7 | Administration (back-office) |
 | Sprint 8 | Stabilisation & déploiement |
 
 ### avncement
-met à jours l'état d'avencement dans readme
+met à jours l'état d'avencement dans readme.md et claud.md
