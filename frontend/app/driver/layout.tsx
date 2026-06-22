@@ -3,62 +3,59 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, PlusCircle, History, User, LogOut, Bell } from 'lucide-react'
+import { Bike, History, LogOut, User, Bell } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { apiPost, apiGet } from '@/lib/api'
 import { AuthContext, type AuthUser } from '@/lib/auth-context'
 
 const navLinks = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-  { href: '/new-delivery', icon: PlusCircle, label: 'Nouvelle livraison' },
-  { href: '/history', icon: History, label: 'Historique' },
-  { href: '/profile', icon: User, label: 'Mon profil' },
+  { href: '/driver/missions', icon: Bike,    label: 'Missions disponibles' },
+  { href: '/driver/active',   icon: Bike,    label: 'Mission en cours' },
+  { href: '/driver/history',  icon: History, label: 'Historique' },
 ]
 
 const pageTitles: Record<string, string> = {
-  '/dashboard': 'Tableau de bord',
-  '/new-delivery': 'Nouvelle livraison',
-  '/history': 'Historique',
-  '/profile': 'Mon profil',
+  '/driver/missions': 'Missions disponibles',
+  '/driver/active':   'Mission en cours',
+  '/driver/history':  'Historique des missions',
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
+export default function DriverLayout({ children }: { children: React.ReactNode }) {
+  const router   = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<AuthUser | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
-    if (!token) {
-      router.replace('/login')
-      return
-    }
-    apiGet<AuthUser>('/profile').then(setUser).catch(() => {
+    if (!token) { router.replace('/driver-login'); return }
+
+    apiGet<AuthUser>('/profile').then((u) => {
+      if (u.role !== 'driver') { router.replace('/dashboard'); return }
+      setUser(u)
+    }).catch(() => {
       localStorage.removeItem('auth_token')
-      router.replace('/login')
+      router.replace('/driver-login')
     })
   }, [router])
 
   async function handleLogout() {
-    try {
-      await apiPost('/auth/logout', {}, true)
-    } finally {
+    try { await apiPost('/auth/logout', {}, true) } finally {
       localStorage.removeItem('auth_token')
-      router.replace('/login')
+      router.replace('/driver-login')
     }
   }
 
   if (!user) return null
 
-  const title = pageTitles[pathname] ?? 'Tableau de bord'
+  const title = pageTitles[pathname] ?? 'Espace livreur'
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <div className="min-h-screen bg-brand-background flex">
-        {/* Sidebar */}
         <aside className="w-64 shrink-0 bg-white border-r border-brand-border flex flex-col min-h-screen sticky top-0 h-screen">
           <div className="p-6 border-b border-brand-border">
             <Logo size="md" />
+            <p className="text-xs text-gray-700 mt-1">Espace livreur</p>
           </div>
           <nav className="p-3 flex-1 space-y-1">
             {navLinks.map(({ href, icon: Icon, label }) => {
@@ -91,7 +88,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </aside>
 
-        {/* Main column */}
         <div className="flex-1 flex flex-col min-h-screen">
           <header className="h-16 bg-white border-b border-brand-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-10">
             <h1 className="text-lg font-bold text-brand-foreground">{title}</h1>

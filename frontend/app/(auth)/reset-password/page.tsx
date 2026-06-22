@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
         <div className="flex justify-center mb-4">
           <Logo size="lg" />
         </div>
-        <p className="text-sm text-primary-400">Choisissez un nouveau mot de passe</p>
+        <p className="text-sm text-gray-700">Choisissez un nouveau mot de passe</p>
       </div>
 
       {/* Card */}
@@ -139,7 +139,7 @@ export default function ResetPasswordPage() {
       </div>
 
       {/* Back to login */}
-      <p className="text-center text-sm text-primary-400 mt-6">
+      <p className="text-center text-sm text-gray-700 mt-6">
         <Link href="/login" className="text-primary font-semibold hover:underline">
           ← Retour à la connexion
         </Link>

@@ -82,7 +82,7 @@ function FieldInput({
         {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <div className="relative">
-        {Icon && <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400" />}
+        {Icon && <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-700" />}
         <input
           type={type}
           name={name}
@@ -91,7 +91,7 @@ function FieldInput({
           placeholder={placeholder}
           className={cn(
             'w-full bg-brand-input border border-brand-border rounded-2xl py-3 pr-4 text-sm',
-            'placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all',
+            'placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all',
             Icon ? 'pl-10' : 'pl-4',
           )}
         />
@@ -126,7 +126,7 @@ function FieldSelect({
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
-        <ChevronRight size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 rotate-90 text-primary-400 pointer-events-none" />
+        <ChevronRight size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-700 pointer-events-none" />
       </div>
     </div>
   )
@@ -280,12 +280,12 @@ export default function NewDeliveryPage() {
                     'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all',
                     i < step   ? 'bg-primary text-white' :
                     i === step ? 'bg-primary text-white ring-4 ring-primary/20' :
-                                 'bg-brand-muted text-primary-400',
+                                 'bg-brand-muted text-gray-700',
                   )}
                 >
                   {i < step ? <Check size={16} /> : i + 1}
                 </div>
-                <span className={cn('text-xs font-medium hidden sm:block', i === step ? 'text-primary' : 'text-primary-400')}>
+                <span className={cn('text-xs font-medium hidden sm:block', i === step ? 'text-primary' : 'text-gray-700')}>
                   {label}
                 </span>
               </div>
@@ -356,7 +356,7 @@ export default function NewDeliveryPage() {
                 value={form.package_description}
                 onChange={(e) => set('package_description', e.target.value)}
                 placeholder="Vêtements, documents, électronique..."
-                className="w-full bg-brand-input border border-brand-border rounded-2xl px-4 py-3 text-sm placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none h-24 transition-all"
+                className="w-full bg-brand-input border border-brand-border rounded-2xl px-4 py-3 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none h-24 transition-all"
               />
             </div>
             <FieldInput label="Poids estimé (kg)" name="package_weight" value={form.package_weight} onChange={(v) => set('package_weight', v)} placeholder="2.5" type="number" icon={Package} />
@@ -389,15 +389,15 @@ export default function NewDeliveryPage() {
                 { l: 'Poids',               v: form.package_weight ? `${form.package_weight} kg` : 'Non renseigné' },
               ].map(({ l, v }) => (
                 <div key={l} className="bg-brand-muted/30 rounded-2xl p-4">
-                  <p className="text-xs text-primary-400 mb-1">{l}</p>
+                  <p className="text-xs text-gray-700 mb-1">{l}</p>
                   <p className="text-sm font-semibold text-brand-foreground">{v}</p>
                 </div>
               ))}
             </div>
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
-              <p className="text-xs text-primary-400 mb-3">Le service (Standard / Express) sera sélectionné à l&apos;étape suivante.</p>
+              <p className="text-xs text-gray-700 mb-3">Le service (Standard / Express) sera sélectionné à l&apos;étape suivante.</p>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-primary-400">Tarif Standard estimé</span>
+                <span className="text-gray-700">Tarif Standard estimé</span>
                 <span className="font-medium">{fmtPrice(BASE_PRICES[form.package_type] ?? 2500)}</span>
               </div>
             </div>
@@ -423,11 +423,11 @@ export default function NewDeliveryPage() {
                 >
                   <input type="radio" name="delivery_type" checked={form.delivery_type === id} onChange={() => set('delivery_type', id)} className="accent-primary" />
                   <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', form.delivery_type === id ? 'bg-primary' : 'bg-brand-muted')}>
-                    <Icon size={18} className={form.delivery_type === id ? 'text-white' : 'text-primary-400'} />
+                    <Icon size={18} className={form.delivery_type === id ? 'text-white' : 'text-gray-700'} />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-brand-foreground">{label}</p>
-                    <p className="text-xs text-primary-400">{delay}</p>
+                    <p className="text-xs text-gray-700">{delay}</p>
                   </div>
                   <p className="text-sm font-bold text-primary">{fmtPrice(calcPrice(form.package_type, id))}</p>
                 </label>
@@ -451,7 +451,7 @@ export default function NewDeliveryPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-brand-foreground">{m.label}</p>
-                    <p className="text-xs text-primary-400">{m.desc}</p>
+                    <p className="text-xs text-gray-700">{m.desc}</p>
                   </div>
                 </label>
               ))}
@@ -459,12 +459,12 @@ export default function NewDeliveryPage() {
 
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
               <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-primary-400">Service</span>
+                <span className="text-gray-700">Service</span>
                 <span className="font-medium">{form.delivery_type === 'express' ? 'Express' : 'Standard'}</span>
               </div>
               {distance !== null && (
                 <div className="flex justify-between items-center text-sm mb-2">
-                  <span className="text-primary-400">Distance estimée</span>
+                  <span className="text-gray-700">Distance estimée</span>
                   <span className="font-medium">{distance.toFixed(1)} km</span>
                 </div>
               )}

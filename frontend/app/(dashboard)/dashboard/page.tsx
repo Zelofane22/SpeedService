@@ -58,7 +58,7 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Greeting */}
-      <p className="text-sm text-primary-400">
+      <p className="text-sm text-gray-700">
         Bonjour, <span className="font-semibold text-brand-foreground">{user.name}</span> 👋
       </p>
 
@@ -76,8 +76,8 @@ export default function DashboardPage() {
             ) : (
               <p className="text-2xl font-bold text-brand-foreground mb-1">{k.value}</p>
             )}
-            <p className="text-xs text-primary-400">{k.label}</p>
-            <p className="text-xs text-primary-400 font-medium mt-1">{k.change}</p>
+            <p className="text-xs text-gray-700">{k.label}</p>
+            <p className="text-xs text-gray-700 font-medium mt-1">{k.change}</p>
           </div>
         ))}
       </div>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
               <Package size={28} className="text-primary" />
             </div>
             <h3 className="text-base font-semibold text-brand-foreground mb-1">Aucune livraison pour l&apos;instant</h3>
-            <p className="text-sm text-primary-400 mb-6 max-w-xs">
+            <p className="text-sm text-gray-700 mb-6 max-w-xs">
               Créez votre première commande et suivez-la en temps réel.
             </p>
             <Link
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             <thead>
               <tr className="border-b border-brand-border bg-brand-muted/20">
                 {['Référence', 'Date', 'Statut', 'Prix', ''].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-primary-400 uppercase tracking-wide">
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
@@ -126,7 +126,7 @@ export default function DashboardPage() {
               {recent.map((d) => (
                 <tr key={d.id} className="border-b border-brand-border last:border-0 hover:bg-brand-muted/10 transition-colors">
                   <td className="px-5 py-4 text-sm font-mono font-medium text-primary">{d.reference}</td>
-                  <td className="px-5 py-4 text-sm text-primary-400">{formatDate(d.created_at)}</td>
+                  <td className="px-5 py-4 text-sm text-gray-700">{formatDate(d.created_at)}</td>
                   <td className="px-5 py-4"><StatusBadge status={d.status} /></td>
                   <td className="px-5 py-4 text-sm font-semibold text-brand-foreground">{formatPrice(d.price)}</td>
                   <td className="px-5 py-4">

@@ -62,15 +62,15 @@ export default function HistoryPage() {
         <h2 className="text-xl font-bold text-brand-foreground">Historique des livraisons</h2>
         <div className="flex gap-2">
           <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Référence, adresse..."
-              className="pl-9 pr-4 py-2 bg-brand-input border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-primary-400 w-56"
+              className="pl-9 pr-4 py-2 bg-brand-input border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-700 w-56"
             />
           </div>
-          <button className="flex items-center gap-2 px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-primary-400 hover:border-primary/40 transition-colors">
+          <button className="flex items-center gap-2 px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-gray-700 hover:border-primary/40 transition-colors">
             <Filter size={14} /> Filtrer
           </button>
         </div>
@@ -104,7 +104,7 @@ export default function HistoryPage() {
             <thead>
               <tr className="border-b border-brand-border bg-brand-muted/20">
                 {['Référence', 'Date', 'De → Vers', 'Statut', 'Prix', ''].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-primary-400 uppercase tracking-wide">
+                  <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide">
                     {h}
                   </th>
                 ))}
@@ -114,7 +114,7 @@ export default function HistoryPage() {
               {filtered.map((d) => (
                 <tr key={d.id} className="border-b border-brand-border last:border-0 hover:bg-brand-muted/10 transition-colors">
                   <td className="px-5 py-4 text-sm font-mono font-medium text-primary">{d.reference}</td>
-                  <td className="px-5 py-4 text-sm text-primary-400">{formatDate(d.created_at)}</td>
+                  <td className="px-5 py-4 text-sm text-gray-700">{formatDate(d.created_at)}</td>
                   <td className="px-5 py-4 text-sm text-brand-foreground">
                     {shortAddress(d.pickup_address)} → {shortAddress(d.delivery_address)}
                   </td>

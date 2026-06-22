@@ -6,7 +6,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 5 — Gestion livreurs & statuts**
+**Sprint en cours : Sprint 6 — Suivi client & notifications**
 Dernière mise à jour : 2026-06-22
 
 ### Sprint 1 — Authentification ✅
@@ -57,7 +57,24 @@ Dernière mise à jour : 2026-06-22
 | Frontend : page de paiement `/deliveries/[id]/payment` — formulaire adaptatif par méthode | ✅ Terminé |
 | Frontend : écran de reçu inline après paiement (confirmé ou en attente de validation) | ✅ Terminé |
 
-**Sprint 4 terminé. Prochain sprint : Sprint 5 — Gestion livreurs & statuts**
+### Sprint 5 — Gestion livreurs & statuts ✅
+
+| Tâche | Statut |
+|---|---|
+| US-017 à US-022 — Cycle de vie des statuts (Confirmed → Assigned → PickingUp → InDelivery → Delivered \| Cancelled) | ✅ Terminé |
+| US-023 — Connexion livreur avec redirect automatique vers portail `/driver/` | ✅ Terminé |
+| US-024 — Liste des missions disponibles (statut Confirmed, sans driver) | ✅ Terminé |
+| US-025 — Acceptation d'une mission (Confirmed → Assigned, affectation driver_id) | ✅ Terminé |
+| US-026 — Refus d'une mission (masquage local, pas de changement de statut) | ✅ Terminé |
+| US-027 — Mise à jour du statut de livraison par le livreur (boutons d'avancement) | ✅ Terminé |
+| US-028 — Historique des missions du livreur | ✅ Terminé |
+| Backend : `DriverController` (5 endpoints : missions dispo, mes missions, accepter, refuser, statut) | ✅ Terminé |
+| Backend : validation des transitions de statut (ordre strict) | ✅ Terminé |
+| Frontend : portail livreur `/driver/` avec layout dédié (Missions, En cours, Historique) | ✅ Terminé |
+| Frontend : `apiPatch` ajouté à la lib API | ✅ Terminé |
+| Frontend : textes secondaires passés de rose à gris-noir (text-gray-700) sur toute l'app | ✅ Terminé |
+
+**Sprint 5 terminé. Prochain sprint : Sprint 6 — Suivi client & notifications**
 
 ---
 
@@ -100,7 +117,8 @@ La pipeline CI automatise :
 | Sprint 2 | Création de livraison | ✅ Terminé (2026-06-22) |
 | Sprint 3 | Géolocalisation | ✅ Terminé (2026-06-22) |
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
-| Sprint 5 | Gestion livreurs & statuts | ⏳ À venir |
+| Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ⏳ À venir |
 | Sprint 7 | Administration (back-office) | ⏳ À venir |
-| Sprint 8 | Stabilisation & déploiement | ⏳ À venir |
+| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ⏳ À venir |
+| Sprint 9 | Stabilisation & déploiement | ⏳ À venir |

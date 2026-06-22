@@ -104,7 +104,7 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      {label && <p className="text-xs text-primary-400">{label}</p>}
+      {label && <p className="text-xs text-gray-700">{label}</p>}
 
       <div className="flex gap-2">
         <input
@@ -113,7 +113,7 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
           onChange={(e) => { setSearch(e.target.value); setSearchErr(null) }}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           placeholder="Quartier, rue… puis appuyez sur Localiser"
-          className="flex-1 bg-brand-input border border-brand-border rounded-xl px-3 py-2 text-sm placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          className="flex-1 bg-brand-input border border-brand-border rounded-xl px-3 py-2 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         />
         <button
           type="button"
@@ -145,11 +145,11 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
       </div>
 
       {value ? (
-        <p className="text-xs text-primary-400 truncate">
+        <p className="text-xs text-gray-700 truncate">
           <span className="font-medium text-primary">Sélectionné : </span>{value.address}
         </p>
       ) : (
-        <p className="text-xs text-primary-400">Cliquez sur la carte ou utilisez la recherche.</p>
+        <p className="text-xs text-gray-700">Cliquez sur la carte ou utilisez la recherche.</p>
       )}
     </div>
   )

@@ -11,7 +11,7 @@ export interface RouteMapProps {
 
 const Loading = () => (
   <div className="rounded-2xl h-[276px] bg-brand-muted/50 flex items-center justify-center border border-brand-border">
-    <p className="text-sm text-primary-400">Chargement de la carte…</p>
+    <p className="text-sm text-gray-700">Chargement de la carte…</p>
   </div>
 )
 

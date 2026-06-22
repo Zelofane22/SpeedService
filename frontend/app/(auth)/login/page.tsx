@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, Bike } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { Input } from '@/components/input'
 import { Button } from '@/components/button'
@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       const data = await apiPost<LoginResponse>('/auth/login', form)
       localStorage.setItem('auth_token', data.token)
-      router.push('/dashboard')
+      router.push(data.user.role === 'driver' ? '/driver/missions' : '/dashboard')
     } catch (err: unknown) {
       if (err instanceof Error && 'errors' in err) {
         const apiErrors = (err as Error & { errors?: Record<string, string[]> }).errors
@@ -70,7 +70,7 @@ export default function LoginPage() {
         <div className="flex justify-center mb-4">
           <Logo size="lg" />
         </div>
-        <p className="text-sm text-primary-400">Bienvenue ! Connectez-vous à votre espace</p>
+        <p className="text-sm text-gray-700">Bienvenue ! Connectez-vous à votre espace</p>
       </div>
 
       {/* Card */}
@@ -125,12 +125,23 @@ export default function LoginPage() {
       </div>
 
       {/* Link to register */}
-      <p className="text-center text-sm text-primary-400 mt-6">
+      <p className="text-center text-sm text-gray-700 mt-6">
         Pas encore de compte ?{' '}
         <Link href="/register" className="text-primary font-semibold hover:underline">
           Créer un compte
         </Link>
       </p>
+
+      {/* Driver access */}
+      <div className="mt-6 border-t border-brand-border pt-6">
+        <Link
+          href="/driver-login"
+          className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-brand-foreground text-white text-sm font-semibold rounded-2xl hover:opacity-90 transition-all"
+        >
+          <Bike size={16} />
+          Vous êtes livreur ? Accéder à l&apos;espace livreur
+        </Link>
+      </div>
     </div>
   )
 }

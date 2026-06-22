@@ -266,25 +266,103 @@ Canaux :
 
 ---
 
-# 5. Interface Livreur
+# 5. Interface Livreur — `rider.speedservice.bj`
 
-## Tableau de bord
+> L'espace livreur est une **application web distincte**, déployée sur un sous-domaine séparé. Elle utilise le même backend Laravel mais possède son propre frontend Next.js, son design mobile-first et un tunnel d'inscription dédié. Voir [Espace Rider.md](Espace%20Rider.md) pour la spécification complète.
 
-Le livreur doit pouvoir consulter :
+## 5.1 Architecture — Sous-domaine séparé
 
-* Livraisons assignées
-* Livraisons terminées
-* Livraisons en cours
+| Élément | Valeur |
+|---|---|
+| URL | `rider.speedservice.bj` |
+| Technologie | Next.js (PWA, mobile-first) |
+| Backend | Même API Laravel — endpoints `/driver/*` |
+| Design | Distinct de la plateforme client (fond sombre, grands boutons d'action) |
+| Installation | Installable sur Android/iOS via navigateur (PWA) |
 
-## Actions
+## 5.2 Accès et inscription
 
-Le livreur doit pouvoir :
+L'accès livreur ne passe **pas** par la page de création de compte standard. Le processus est le suivant :
 
-* Accepter une mission
-* Refuser une mission
-* Marquer "Colis récupéré"
-* Marquer "En livraison"
-* Marquer "Livré"
+1. Le candidat accède à `rider.speedservice.bj/rejoindre`.
+2. Il complète le tunnel de candidature en 7 étapes (voir §5.3).
+3. Son dossier est soumis pour examen par un administrateur.
+4. Après validation, il reçoit un email d'activation et peut se connecter sur `rider.speedservice.bj`.
+
+La page de connexion client (`speedservice.bj/login`) affiche un bouton "Espace Livreur" qui redirige vers `rider.speedservice.bj`.
+
+## 5.3 Tunnel d'inscription livreur (7 étapes)
+
+Inspiré du modèle Deliveroo Rider, adapté au contexte béninois.
+
+### Étape 1 — Informations personnelles
+
+* Prénom, Nom de famille
+* Email (unique)
+* Téléphone principal (unique, MTN ou Moov)
+* Date de naissance (candidat ≥ 18 ans)
+* Ville d'intervention (Cotonou, Abomey-Calavi, Porto-Novo, Parakou)
+* Quartier(s) couverts
+* Mot de passe
+
+### Étape 2 — Pièce d'identité
+
+* Type : CNI / Passeport / Carte de séjour
+* Numéro et date d'expiration
+* Photo recto + verso (JPG/PNG, max 5 Mo chacune)
+
+### Étape 3 — Véhicule
+
+* Type : Vélo / Moto / Tricycle (Keke) / Voiture
+* Marque, modèle, année, couleur (si motorisé)
+* Plaque d'immatriculation (si motorisé)
+* Photo du véhicule
+
+### Étape 4 — Documents du véhicule *(sauf vélo)*
+
+* Permis de conduire (numéro, catégorie, photo)
+* Carte grise (numéro, photo)
+* Attestation d'assurance (compagnie, numéro, expiration, photo)
+
+### Étape 5 — Informations de paiement
+
+* Mode préféré : MTN MoMo / Moov Money / Compte bancaire
+* Numéro de compte et nom du titulaire
+
+### Étape 6 — Photo de profil
+
+* Selfie récent, fond neutre, visage dégagé
+
+### Étape 7 — Acceptation des conditions
+
+* Contrat de prestataire indépendant Speed Service
+* Charte du livreur
+* Politique de confidentialité
+
+## 5.4 États du dossier de candidature
+
+```
+Soumis → En cours d'examen → Validé   → Compte actif
+                           → Rejeté   (motif envoyé par email)
+                           → Complément demandé (livreur peut soumettre les docs manquants)
+```
+
+## 5.5 Tableau de bord opérationnel (après validation)
+
+Le livreur connecté peut :
+
+* Consulter la liste des missions disponibles (statut Confirmée, sans livreur affecté)
+* Accepter ou refuser une mission
+* Suivre sa mission en cours avec boutons d'avancement de statut
+* Consulter l'historique de ses missions terminées
+
+## 5.6 Actions de statut
+
+| Action | Transition |
+|---|---|
+| J'arrive au point d'enlèvement | Assigned → PickingUp |
+| Colis récupéré — Départ livraison | PickingUp → InDelivery |
+| Colis livré | InDelivery → Delivered |
 
 ---
 
@@ -347,18 +425,30 @@ Affichage :
 
 # 8. Exigences techniques
 
+## Architecture multi-application
+
+La plateforme Speed Service se compose de **deux applications frontend distinctes** partageant un seul backend :
+
+| Application | URL | Cible | Notes |
+|---|---|---|---|
+| Plateforme client | `speedservice.bj` | Clients expéditeurs | Desktop + mobile responsive |
+| Espace rider | `rider.speedservice.bj` | Livreurs | Mobile-first, PWA, installable |
+
+Un seul backend Laravel sert les deux applications via CORS configuré pour les deux origines.
+
 ## Frontend
 
-* Next.js 15
-* TypeScript
-* TailwindCSS + Shadcn UI
-* Responsive mobile (first)
+* Next.js (App Router) + TypeScript + Tailwind CSS
+* Application client : desktop-first, responsive
+* Application rider : mobile-first, PWA (service worker, manifest)
+* Déploiement séparé sur deux sous-domaines (Nginx / Vercel)
 
 ## Backend
 
 * Laravel 12 / PHP 8.4
 * API REST (JSON)
 * Laravel Sanctum (authentification SPA)
+* CORS configuré pour `speedservice.bj` et `rider.speedservice.bj`
 
 ## Base de données
 

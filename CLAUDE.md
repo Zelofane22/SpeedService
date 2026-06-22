@@ -83,10 +83,21 @@ User --< Address
 | Sprint 2 | Création de livraison ✅ |
 | Sprint 3 | Géolocalisation ✅ |
 | Sprint 4 | Paiement ✅ |
-| Sprint 5 | Gestion livreurs & statuts |
+| Sprint 5 | Gestion livreurs & statuts ✅ |
 | Sprint 6 | Suivi client & notifications |
 | Sprint 7 | Administration (back-office) |
-| Sprint 8 | Stabilisation & déploiement |
+| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj |
+| Sprint 9 | Stabilisation & déploiement |
+
+### Architecture multi-app (MVP)
+```
+frontend/   → Next.js — app client (speedservice.bj)
+rider/      → Next.js — app rider (rider.speedservice.bj) — Sprint 8
+backend/    → Laravel 12 — API partagée (api.speedservice.bj)
+```
+- L'espace rider (`/driver/*`) dans `frontend/` est provisoire. Il sera migré dans `rider/` au Sprint 8.
+- Le backend est partagé : les endpoints `/driver/*` servent les deux apps.
+- CORS configuré pour `speedservice.bj` et `rider.speedservice.bj`.
 
 ### avncement
 met à jours l'état d'avencement dans readme.md et claud.md

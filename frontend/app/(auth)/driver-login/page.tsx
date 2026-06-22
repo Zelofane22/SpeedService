@@ -3,29 +3,23 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { User, Mail, Phone, Lock } from 'lucide-react'
+import { Mail, Lock, Bike, ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { Input } from '@/components/input'
 import { Button } from '@/components/button'
 import { apiPost } from '@/lib/api'
 
-type FieldErrors = Partial<Record<'name' | 'email' | 'phone' | 'password', string>>
+type FieldErrors = Partial<Record<'email' | 'password', string>>
 
-type RegisterResponse = {
+type LoginResponse = {
   user: { id: string; name: string; email: string; phone: string; role: string }
   token: string
 }
 
-export default function RegisterPage() {
+export default function DriverLoginPage() {
   const router = useRouter()
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    password_confirmation: '',
-  })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [globalError, setGlobalError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -45,26 +39,28 @@ export default function RegisterPage() {
     setGlobalError('')
 
     try {
-      const data = await apiPost<RegisterResponse>('/auth/register', form)
-      // Persiste le token côté client (Sprint 2+ utilisera un store dédié)
+      const data = await apiPost<LoginResponse>('/auth/login', form)
+
+      if (data.user.role !== 'driver') {
+        setGlobalError('Ce compte n\'est pas un compte livreur. Utilisez la connexion client.')
+        return
+      }
+
       localStorage.setItem('auth_token', data.token)
-      router.push('/dashboard')
+      router.push('/driver/missions')
     } catch (err: unknown) {
       if (err instanceof Error && 'errors' in err) {
         const apiErrors = (err as Error & { errors?: Record<string, string[]> }).errors
         if (apiErrors) {
           const mapped: FieldErrors = {}
           for (const [key, msgs] of Object.entries(apiErrors)) {
-            const k = key as keyof FieldErrors
-            mapped[k] = msgs[0]
+            mapped[key as keyof FieldErrors] = msgs[0]
           }
           setFieldErrors(mapped)
           return
         }
       }
-      setGlobalError(
-        err instanceof Error ? err.message : 'Une erreur inattendue est survenue.',
-      )
+      setGlobalError(err instanceof Error ? err.message : 'Une erreur inattendue est survenue.')
     } finally {
       setLoading(false)
     }
@@ -72,17 +68,27 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-md">
-      {/* Logo */}
-      <div className="text-center mb-8">
+      {/* Header livreur */}
+      <div className="bg-brand-foreground rounded-3xl p-8 mb-6 text-white text-center">
         <div className="flex justify-center mb-4">
-          <Logo size="lg" />
+          <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center">
+            <Bike size={32} className="text-white" />
+          </div>
         </div>
-        <p className="text-sm text-gray-700">Créez votre compte pour commencer</p>
+        <div className="flex justify-center mb-3">
+          <Logo size="lg" className="[&_span]:text-white [&_.text-primary]:text-primary-300" />
+        </div>
+        <span className="inline-block text-xs font-bold uppercase tracking-widest bg-primary px-3 py-1 rounded-full">
+          Espace Livreur
+        </span>
+        <p className="text-sm text-white/70 mt-3">
+          Connectez-vous pour accéder à vos missions
+        </p>
       </div>
 
-      {/* Card */}
+      {/* Form card */}
       <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
-        <h1 className="text-xl font-bold text-brand-foreground mb-6">Inscription</h1>
+        <h1 className="text-xl font-bold text-brand-foreground mb-6">Connexion livreur</h1>
 
         {globalError && (
           <div className="mb-5 px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-600">
@@ -92,21 +98,9 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <Input
-            label="Nom complet"
-            type="text"
-            placeholder="Koffi Mensah"
-            autoComplete="name"
-            icon={User}
-            value={form.name}
-            onChange={set('name')}
-            error={fieldErrors.name}
-            required
-          />
-
-          <Input
             label="Adresse email"
             type="email"
-            placeholder="koffi@gmail.com"
+            placeholder="livreur@speedservice.bj"
             autoComplete="email"
             icon={Mail}
             value={form.email}
@@ -116,22 +110,10 @@ export default function RegisterPage() {
           />
 
           <Input
-            label="Numéro de téléphone"
-            type="tel"
-            placeholder="+229 97 00 00 00"
-            autoComplete="tel"
-            icon={Phone}
-            value={form.phone}
-            onChange={set('phone')}
-            error={fieldErrors.phone}
-            required
-          />
-
-          <Input
             label="Mot de passe"
             type="password"
-            placeholder="8 caractères minimum"
-            autoComplete="new-password"
+            placeholder="••••••••"
+            autoComplete="current-password"
             icon={Lock}
             value={form.password}
             onChange={set('password')}
@@ -139,34 +121,26 @@ export default function RegisterPage() {
             required
           />
 
-          <Input
-            label="Confirmer le mot de passe"
-            type="password"
-            placeholder="Répétez votre mot de passe"
-            autoComplete="new-password"
-            icon={Lock}
-            value={form.password_confirmation}
-            onChange={set('password_confirmation')}
-            required
-          />
-
           <Button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 h-12 rounded-2xl bg-primary text-white font-semibold hover:bg-primary-800 shadow-lg shadow-primary/25 transition-all active:scale-[0.98]"
+            className="w-full mt-2 h-12 rounded-2xl bg-brand-foreground text-white font-semibold hover:opacity-90 shadow-lg transition-all active:scale-[0.98]"
           >
-            {loading ? 'Création en cours…' : 'Créer mon compte'}
+            {loading ? 'Connexion en cours…' : 'Accéder à mes missions'}
           </Button>
         </form>
       </div>
 
-      {/* Link to login */}
-      <p className="text-center text-sm text-gray-700 mt-6">
-        Déjà un compte ?{' '}
-        <Link href="/login" className="text-primary font-semibold hover:underline">
-          Se connecter
+      {/* Back to client login */}
+      <div className="mt-6 text-center">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-brand-foreground transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Retour à la connexion client
         </Link>
-      </p>
+      </div>
     </div>
   )
 }

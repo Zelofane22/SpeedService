@@ -58,10 +58,10 @@ export default function RouteMapInner({ pickup, delivery, distanceKm }: Props) {
         </MapContainer>
       </div>
       <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-2xl px-4 py-3 text-sm">
-        <span className="text-primary-400">Distance estimée</span>
+        <span className="text-gray-700">Distance estimée</span>
         <span className="font-bold text-primary">{distanceKm.toFixed(1)} km</span>
       </div>
-      <p className="text-xs text-primary-400">
+      <p className="text-xs text-gray-700">
         Distance à vol d&apos;oiseau × 1,3 — trajet réel peut varier.
       </p>
     </div>

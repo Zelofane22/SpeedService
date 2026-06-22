@@ -378,13 +378,21 @@ SP : 1
 
 ## EPIC 6 — Gestion des Livreurs
 
-### Feature : Application livreur
+> **Note architecturale** : L'espace livreur est une application web distincte déployée sur le sous-domaine `rider.speedservice.bj`. Elle utilise le même backend Laravel (endpoints `/driver/*`). Le tunnel d'inscription fait l'objet du Sprint 8 (MVP). Voir [Espace Rider.md](Espace%20Rider.md) pour la spécification complète.
+
+### Feature : Opérations livreur (MVP — `rider.speedservice.bj`)
 
 #### US-023
 
-Connexion livreur.
+Connexion livreur via page dédiée (`/driver-login`).
 
 SP : 3
+
+Critères d'acceptation :
+
+* Page séparée de la connexion client.
+* Validation du rôle : un compte client ne peut pas accéder à l'espace livreur.
+* Redirect automatique vers la liste des missions si déjà authentifié.
 
 ---
 
@@ -394,6 +402,12 @@ Liste des missions disponibles.
 
 SP : 5
 
+Critères d'acceptation :
+
+* Affiche uniquement les livraisons au statut `Confirmed` sans livreur affecté.
+* Informations visibles : référence, adresses de collecte et livraison, type de colis, prix, distance estimée.
+* Actualisation manuelle (bouton) ou automatique toutes les 30 secondes.
+
 ---
 
 #### US-025
@@ -401,6 +415,12 @@ SP : 5
 Acceptation d'une mission.
 
 SP : 3
+
+Critères d'acceptation :
+
+* La mission passe au statut `Assigned` et le `driver_id` est enregistré.
+* La mission disparaît de la liste des missions disponibles pour les autres livreurs.
+* Le livreur est redirigé vers la vue "Mission en cours".
 
 ---
 
@@ -410,6 +430,11 @@ Refus d'une mission.
 
 SP : 2
 
+Critères d'acceptation :
+
+* La mission reste disponible pour les autres livreurs (aucun changement de statut).
+* La mission masquée localement pour la session en cours (sans persistance en MVP).
+
 ---
 
 #### US-027
@@ -418,6 +443,18 @@ Mise à jour du statut de livraison.
 
 SP : 5
 
+Transitions autorisées (dans l'ordre) :
+
+* `Assigned` → `PickingUp` (En route vers l'enlèvement)
+* `PickingUp` → `InDelivery` (Colis récupéré, départ livraison)
+* `InDelivery` → `Delivered` (Livraison confirmée)
+
+Critères d'acceptation :
+
+* Chaque transition est historisée dans `delivery_status_histories`.
+* Un seul bouton d'action contextuel est affiché selon le statut actuel.
+* La transition `Delivered` archive la mission dans l'historique.
+
 ---
 
 #### US-028
@@ -425,6 +462,111 @@ SP : 5
 Historique des missions.
 
 SP : 3
+
+Critères d'acceptation :
+
+* Liste toutes les missions terminées (statuts `Delivered` et `Cancelled`) du livreur connecté.
+* Affiche : référence, date, trajet, statut final, montant.
+
+---
+
+### Feature : Inscription livreur (Sprint 8 — `rider.speedservice.bj/rejoindre`)
+
+> Tunnel de candidature en 7 étapes, validation manuelle par un administrateur. Voir [Espace Rider.md](Espace%20Rider.md) pour le détail complet de chaque étape.
+
+#### US-R01
+
+Accéder au formulaire de candidature livreur.
+
+SP : 2 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R02
+
+Saisir ses informations personnelles (nom, email, téléphone, date de naissance, ville d'intervention, mot de passe).
+
+SP : 3 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R03
+
+Uploader sa pièce d'identité (CNI / Passeport / Carte de séjour — recto/verso).
+
+SP : 5 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R04
+
+Déclarer son véhicule (type, marque, modèle, plaque, photo).
+
+SP : 5 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R05
+
+Uploader les documents du véhicule (permis, carte grise, assurance). Ignoré pour les cyclistes.
+
+SP : 5 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R06
+
+Renseigner ses informations de paiement (MTN MoMo / Moov Money / banque).
+
+SP : 3 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R07
+
+Uploader sa photo de profil (selfie fond neutre).
+
+SP : 2 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R08
+
+Accepter les CGU, la charte livreur et soumettre sa candidature.
+
+SP : 2 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R09
+
+Recevoir un email de confirmation immédiat après soumission.
+
+SP : 2 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R10
+
+Suivre l'état de sa candidature (pending / under_review / approved / rejected / complement_requested).
+
+SP : 3 — Priorité : Should Have (Sprint 8)
+
+---
+
+#### US-R11
+
+Être notifié par email de la décision de l'administrateur (validé / rejeté avec motif / complément demandé).
+
+SP : 3 — Priorité : Must Have (Sprint 8)
+
+---
+
+#### US-R12
+
+Soumettre des documents complémentaires si l'admin le demande.
+
+SP : 3 — Priorité : Should Have (Sprint 8)
 
 ---
 
@@ -684,23 +826,81 @@ Note : US-030 (affichage position GPS du livreur en temps réel) reportée en Ve
 US :
 
 * 036 — Gestion utilisateurs
-* 037 — Gestion livreurs
+* 037 — Gestion livreurs (liste, suspension, **validation des dossiers de candidature rider**)
 * 038 — Gestion commandes
 * 039 — Gestion paiements
 * 040 — Dashboard d'activité
 
 Objectif :
 
-Back-office fonctionnel.
+Back-office fonctionnel, y compris la validation manuelle des dossiers livreur.
+
+Critères d'acceptation spécifiques US-037 (dossiers rider) :
+
+* L'admin peut consulter les dossiers en attente (`pending`, `under_review`).
+* L'admin peut visualiser tous les documents uploadés (pièce d'identité, véhicule, permis, assurance) via URL signée.
+* L'admin peut **valider** un dossier → statut `approved`, email d'activation envoyé au livreur.
+* L'admin peut **rejeter** un dossier avec motif → statut `rejected`, email avec motif envoyé.
+* L'admin peut **demander un complément** → statut `complement_requested`, email avec instructions.
+* L'admin peut **suspendre** un livreur actif.
 
 ---
 
 ## Sprint 8
 
+### Rider App — Tunnel d'inscription + Application `rider.speedservice.bj`
+
+Objectif :
+
+Livreur autonome : candidature en ligne, validation par l'admin, accès à l'espace rider sur sous-domaine dédié.
+
+#### 8.1 Backend — Modèles et migrations
+
+* Migration `driver_applications` (statut, véhicule, paiement, dates)
+* Migration `driver_documents` (type, fichier, statut de validation)
+* Model `DriverApplication` + `DriverDocument`
+* Laravel Storage configuré (disque S3 ou local sécurisé pour les documents d'identité)
+
+#### 8.2 Backend — API tunnel d'inscription
+
+* `POST /api/rider/apply` — soumettre une candidature (étapes 1–7)
+* `POST /api/rider/apply/documents` — upload des documents
+* `GET  /api/rider/apply/status` — consulter l'état de son dossier
+* `POST /api/rider/apply/complement` — soumettre des documents complémentaires
+* Email automatique à chaque changement de statut (confirmation, décision, complément)
+
+#### 8.3 Frontend — Application `rider.speedservice.bj`
+
+Nouveau projet Next.js distinct, mobile-first, PWA.
+
+US tunnel :
+
+* R01 — Page d'accueil rider + accès au formulaire de candidature
+* R02 — Étape 1 : Informations personnelles (nom, email, téléphone, ville, mot de passe)
+* R03 — Étape 2 : Pièce d'identité (CNI/Passeport — upload recto/verso)
+* R04 — Étape 3 : Déclaration du véhicule (type, marque, plaque, photo)
+* R05 — Étape 4 : Documents du véhicule (permis, carte grise, assurance) — ignoré si vélo
+* R06 — Étape 5 : Informations de paiement (MTN MoMo / Moov / banque)
+* R07 — Étape 6 : Photo de profil (selfie)
+* R08 — Étape 7 : Acceptation CGU + soumission
+* R09 — Email de confirmation immédiat après soumission
+* R10 — Page de suivi de candidature (statut en temps réel)
+* R11 — Notification de décision (email validé / rejeté / complément demandé)
+* R12 — Page de soumission de documents complémentaires
+
+US opérationnel (migration depuis MVP provisoire) :
+
+* Espace livreur connecté sur `rider.speedservice.bj` (missions, statuts, historique)
+* PWA : manifest.json, service worker, icône installable
+* Configuration DNS + Nginx + SSL pour `rider.speedservice.bj`
+
+---
+
+## Sprint 9
+
 ### Stabilisation
 
-* Correctifs
-* Tests d'intégration
+* Correctifs et tests d'intégration end-to-end
 * Audit de sécurité
 * Optimisation des performances
 * Déploiement pré-production

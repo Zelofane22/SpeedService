@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\GeocodingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
@@ -41,4 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show']);
     Route::post('/deliveries/{id}/cancel', [DeliveryController::class, 'cancel']);
     Route::post('/deliveries/{id}/pay', [PaymentController::class, 'pay']);
+
+    // Driver routes
+    Route::prefix('driver')->group(function () {
+        Route::get('/missions/available', [DriverController::class, 'availableMissions']);
+        Route::get('/missions', [DriverController::class, 'myMissions']);
+        Route::post('/missions/{id}/accept', [DriverController::class, 'acceptMission']);
+        Route::post('/missions/{id}/decline', [DriverController::class, 'declineMission']);
+        Route::patch('/missions/{id}/status', [DriverController::class, 'updateStatus']);
+    });
 });

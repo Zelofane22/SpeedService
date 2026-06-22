@@ -83,7 +83,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className="w-full bg-brand-input border border-brand-border rounded-2xl px-4 py-3 text-sm placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+        className="w-full bg-brand-input border border-brand-border rounded-2xl px-4 py-3 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
       />
     </div>
   )
@@ -205,7 +205,7 @@ export default function PaymentPage() {
             <h2 className="text-2xl font-bold text-brand-foreground mb-1">
               {isConfirmed ? 'Paiement confirmé !' : 'Demande enregistrée'}
             </h2>
-            <p className="text-sm text-primary-400 mb-6">
+            <p className="text-sm text-gray-700 mb-6">
               {isConfirmed
                 ? 'Votre commande est confirmée et sera traitée prochainement.'
                 : 'Votre commande est en attente de validation par notre équipe.'
@@ -262,7 +262,7 @@ export default function PaymentPage() {
 
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary mb-6 transition-colors"
+        className="flex items-center gap-2 text-sm text-gray-700 hover:text-primary mb-6 transition-colors"
       >
         <ArrowLeft size={16} /> Retour
       </button>
@@ -271,30 +271,30 @@ export default function PaymentPage() {
 
       {/* Delivery summary */}
       <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 mb-5">
-        <h2 className="text-sm font-semibold text-primary-400 uppercase tracking-wide mb-4">Récapitulatif</h2>
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Récapitulatif</h2>
 
         <div className="flex items-start gap-3 mb-3">
           <MapPin size={16} className="text-primary mt-0.5 shrink-0" />
           <div className="text-sm">
-            <p className="text-primary-400 text-xs mb-0.5">De</p>
+            <p className="text-gray-700 text-xs mb-0.5">De</p>
             <p className="font-medium text-brand-foreground">{delivery.sender_name}</p>
-            <p className="text-primary-400">{delivery.pickup_address}</p>
+            <p className="text-gray-700">{delivery.pickup_address}</p>
           </div>
         </div>
 
         <div className="flex items-start gap-3 mb-4">
           <MapPin size={16} className="text-secondary mt-0.5 shrink-0" />
           <div className="text-sm">
-            <p className="text-primary-400 text-xs mb-0.5">À</p>
+            <p className="text-gray-700 text-xs mb-0.5">À</p>
             <p className="font-medium text-brand-foreground">{delivery.recipient_name}</p>
-            <p className="text-primary-400">{delivery.delivery_address}</p>
+            <p className="text-gray-700">{delivery.delivery_address}</p>
           </div>
         </div>
 
         <div className="border-t border-brand-border pt-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Package size={16} className="text-primary-400" />
-            <span className="text-sm text-primary-400">
+            <Package size={16} className="text-gray-700" />
+            <span className="text-sm text-gray-700">
               {delivery.delivery_type === 'express' ? 'Express' : 'Standard'} — {delivery.reference}
             </span>
           </div>
@@ -304,7 +304,7 @@ export default function PaymentPage() {
 
       {/* Payment method block */}
       <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 mb-5">
-        <h2 className="text-sm font-semibold text-primary-400 uppercase tracking-wide mb-4">Mode de paiement</h2>
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Mode de paiement</h2>
 
         <div className="flex items-center gap-3 p-4 bg-primary/5 border-2 border-primary rounded-2xl mb-5">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -312,18 +312,18 @@ export default function PaymentPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-brand-foreground">{METHOD_LABELS[method]}</p>
-            {method === 'mtn_momo' && <p className="text-xs text-primary-400">Paiement mobile MTN</p>}
-            {method === 'moov_money' && <p className="text-xs text-primary-400">Paiement mobile Moov</p>}
-            {method === 'card' && <p className="text-xs text-primary-400">Visa, Mastercard</p>}
-            {method === 'cash_on_delivery' && <p className="text-xs text-primary-400">En espèces à la réception</p>}
-            {method === 'agency' && <p className="text-xs text-primary-400">Dans une agence partenaire</p>}
+            {method === 'mtn_momo' && <p className="text-xs text-gray-700">Paiement mobile MTN</p>}
+            {method === 'moov_money' && <p className="text-xs text-gray-700">Paiement mobile Moov</p>}
+            {method === 'card' && <p className="text-xs text-gray-700">Visa, Mastercard</p>}
+            {method === 'cash_on_delivery' && <p className="text-xs text-gray-700">En espèces à la réception</p>}
+            {method === 'agency' && <p className="text-xs text-gray-700">Dans une agence partenaire</p>}
           </div>
         </div>
 
         {/* Mobile Money form */}
         {(method === 'mtn_momo' || method === 'moov_money') && (
           <div className="space-y-4">
-            <p className="text-sm text-primary-400">
+            <p className="text-sm text-gray-700">
               Entrez votre numéro {method === 'mtn_momo' ? 'MTN' : 'Moov'} pour recevoir la demande de paiement.
             </p>
             <Field
@@ -371,7 +371,7 @@ export default function PaymentPage() {
               onChange={setCardholderName}
               placeholder="KOFFI MENSAH"
             />
-            <div className="flex items-center gap-2 text-xs text-primary-400 mt-1">
+            <div className="flex items-center gap-2 text-xs text-gray-700 mt-1">
               <ShieldCheck size={14} className="text-green-500" />
               Paiement sécurisé — vos données sont chiffrées
             </div>
@@ -431,7 +431,7 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-xs text-primary-400 shrink-0">{label}</span>
+      <span className="text-xs text-gray-700 shrink-0">{label}</span>
       <span className={cn('text-sm text-right', mono ? 'font-mono font-bold text-brand-foreground' : 'font-medium text-brand-foreground', valueClass)}>
         {value}
       </span>

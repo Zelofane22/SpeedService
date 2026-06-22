@@ -47,13 +47,13 @@ export default function ForgotPasswordPage() {
         <div className="flex justify-center mb-4">
           <Logo size="lg" />
         </div>
-        <p className="text-sm text-primary-400">Réinitialisez votre mot de passe</p>
+        <p className="text-sm text-gray-700">Réinitialisez votre mot de passe</p>
       </div>
 
       {/* Card */}
       <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
         <h1 className="text-xl font-bold text-brand-foreground mb-2">Mot de passe oublié ?</h1>
-        <p className="text-sm text-primary-400 mb-6">
+        <p className="text-sm text-gray-700 mb-6">
           Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
         </p>
 
@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Back to login */}
-      <p className="text-center text-sm text-primary-400 mt-6">
+      <p className="text-center text-sm text-gray-700 mt-6">
         <Link href="/login" className="text-primary font-semibold hover:underline">
           ← Retour à la connexion
         </Link>
