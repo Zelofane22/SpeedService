@@ -27,7 +27,7 @@ export default function HomePage() {
           <Card>
             <Card.Header>
               <Card.Title>Infrastructure</Card.Title>
-              <Card.Description>Next.js, Tailwind CSS et shadcn UI prêts à l'emploi.</Card.Description>
+              <Card.Description>Next.js, Tailwind CSS et shadcn UI prêts à l&apos;emploi.</Card.Description>
             </Card.Header>
           </Card>
           <Card>
