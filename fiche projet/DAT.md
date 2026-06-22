@@ -569,7 +569,93 @@ Docker Compose
       │    Redis    │
       └─────────────┘
 ```
+# 14.1 Chaîne CI/CD
 
+## Objectif
+
+Automatiser les étapes de vérification, test, build et déploiement de la plateforme Speed Service afin de sécuriser les mises en production.
+
+## Outil retenu
+
+GitHub Actions
+
+## Branches Git
+
+- main : production
+- develop : préproduction / intégration
+- feature/* : développement de nouvelles fonctionnalités
+- release/* : préparation des releases
+- hotfix/* : correctifs urgents
+
+## Pipeline Frontend Next.js
+
+Déclenchement :
+
+- Pull request vers develop
+- Push sur develop
+- Push sur main
+
+Étapes :
+
+1. Installation des dépendances
+2. Vérification TypeScript
+3. Lint
+4. Build Next.js
+5. Tests unitaires
+6. Création image Docker
+7. Déploiement selon branche
+
+## Pipeline Backend Laravel
+
+Étapes :
+
+1. Installation des dépendances Composer
+2. Vérification syntaxe PHP
+3. Tests PHPUnit/Pest
+4. Analyse statique PHPStan ou Laravel Pint
+5. Build image Docker
+6. Exécution des migrations en environnement cible
+7. Redémarrage des services Laravel Queue
+
+## Environnements
+
+### Développement
+
+Local via Docker Compose.
+
+### Préproduction
+
+Déploiement automatique depuis develop.
+
+### Production
+
+Déploiement automatique ou manuel après validation depuis main.
+
+## Gestion des secrets
+
+Les secrets sont stockés dans GitHub Actions Secrets :
+
+- APP_KEY
+- DB_PASSWORD
+- REDIS_PASSWORD
+- FEDAPAY_SECRET_KEY
+- MTN_MOMO_API_KEY
+- MOOV_MONEY_API_KEY
+- SMTP_PASSWORD
+
+Aucun secret ne doit être présent dans le dépôt Git.
+
+## Stratégie de déploiement
+
+Déploiement Docker Compose sur VPS Ubuntu 24.04 LTS.
+
+Commandes principales :
+
+```bash
+docker compose pull
+docker compose up -d --build
+docker compose exec backend php artisan migrate --force
+docker compose exec backend php artisan queue:restart
 ---
 
 # 15. Sécurité
