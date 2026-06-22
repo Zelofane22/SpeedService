@@ -13,6 +13,7 @@ backend/vendor/
 backend/.phpunit.result.cache
 backend/.env
 backend/.env.*
+!backend/.env.example
 backend/storage/*.key
 backend/storage/*.sqlite
 backend/storage/app/public
