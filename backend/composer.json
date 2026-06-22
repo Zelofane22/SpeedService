@@ -1,6 +1,8 @@
 {
   "name": "speedservice/backend",
   "type": "project",
+  "description": "Backend API for the Speed Service delivery platform.",
+  "license": "proprietary",
  "require": {
     "php": "^8.4",
     "laravel/framework": "^12.0"
