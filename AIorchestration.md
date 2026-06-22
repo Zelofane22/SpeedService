@@ -34,9 +34,14 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - ✅ Frontend : `app/(admin)/admin/reports/page.tsx` — graphiques CSS, top clients, taux de complétion
 
 **À faire :**
-- 🔲 Commit + vérification lint/build frontend
+- 🔲 Commit + vérification lint/build `admin/`
 - 🔲 Vérification tests backend (`composer test`)
+- 🔲 Supprimer `frontend/app/(admin)/` une fois l'app `admin/` complète
 - 🔲 Merge `develop` → `main` en fin de sprint
+
+🔒 En cours : `admin/` — nouvelle app Next.js admin.speedservice.bj (port 3001)
+
+**Note architecture :** L'espace admin est extrait en app séparée (`admin/`) au lieu d'être embarqué dans `frontend/app/(admin)/`. Même pattern que `rider/` prévu au Sprint 8. Le `frontend/app/(admin)/` sera supprimé une fois la migration terminée.
 
 **Fichiers libres (sprint 7 complet côté Claude) :**
 - `backend/app/Http/Controllers/Api/AdminController.php`
@@ -44,7 +49,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - `backend/routes/api.php`
 - `backend/bootstrap/app.php`
 - `backend/tests/Feature/Admin/AdminControllerTest.php`
-- `frontend/app/(admin)/**`
+- `admin/` (entire directory — nouvelle app admin séparée)
+- `frontend/app/(admin)/**` (à supprimer après migration vers `admin/`)
 - `frontend/components/admin/**`
 - `frontend/lib/api/admin.ts`
 - `frontend/types/admin.ts`

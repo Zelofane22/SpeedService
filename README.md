@@ -96,11 +96,41 @@ Dernière mise à jour : 2026-06-22
 
 ---
 
+## Architecture multi-app
+
+| Répertoire | Description | URL | Port |
+|---|---|---|---|
+| `frontend/` | Next.js — app client | speedservice.bj | 3000 |
+| `admin/` | Next.js — back-office admin | admin.speedservice.bj | 3001 |
+| `rider/` | Next.js — app rider (Sprint 8) | rider.speedservice.bj | 3002 |
+| `backend/` | Laravel 12 — API partagée | api.speedservice.bj | 8000 |
+
+### Démarrage en développement
+
+```bash
+# Client
+cd frontend && npm run dev       # port 3000
+
+# Back-office admin (Sprint 7)
+cd admin && npm run dev          # port 3001
+
+# Rider (Sprint 8)
+cd rider && npm run dev          # port 3002
+
+# Backend API
+cd backend && php artisan serve  # port 8000
+
+# Stack complète via Docker
+docker compose up -d
+```
+
 ## Structure du dépôt
 
-- `frontend/`: application Next.js 16 en TypeScript
+- `frontend/`: application Next.js 16 — espace client (speedservice.bj)
+- `admin/`: application Next.js — back-office admin (admin.speedservice.bj) — Sprint 7
+- `rider/`: application Next.js — espace livreur (rider.speedservice.bj) — Sprint 8 (à venir)
 - `backend/`: API Laravel 12
-- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, backend)
+- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, backend)
 - `.github/workflows/ci.yml`: pipeline CI/CD automatisée
 
 ## Git
@@ -140,6 +170,6 @@ Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter 
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
-| Sprint 7 | Administration (back-office) | 🔄 En cours (démarré le 2026-06-22) |
+| Sprint 7 | Administration (back-office) — app séparée `admin/` (admin.speedservice.bj) | 🔄 En cours (démarré le 2026-06-22) |
 | Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ⏳ À venir |
 | Sprint 9 | Stabilisation & déploiement | ⏳ À venir |
