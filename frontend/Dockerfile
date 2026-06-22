@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM cgr.dev/chainguard/node:latest
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
