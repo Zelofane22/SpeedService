@@ -90,3 +90,5 @@ User --< Address
 
 ### avncement
 met à jours l'état d'avencement dans readme
+### workflow git
+exécute le  Workflow Git dans le fichier README après validation d'une fonctionnalité
