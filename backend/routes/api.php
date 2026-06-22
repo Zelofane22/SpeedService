@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\RiderApplicationController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\GeocodingController;
@@ -19,6 +20,14 @@ Route::get('/status', function () {
 Route::prefix('geo')->group(function () {
     Route::get('/geocode', [GeocodingController::class, 'geocode']);
     Route::post('/distance', [GeocodingController::class, 'distance']);
+});
+
+// Rider application tunnel (public — no account required to apply)
+Route::prefix('rider')->group(function () {
+    Route::post('/apply', [RiderApplicationController::class, 'apply']);
+    Route::post('/apply/documents', [RiderApplicationController::class, 'uploadDocuments']);
+    Route::get('/apply/status', [RiderApplicationController::class, 'status']);
+    Route::post('/apply/complement', [RiderApplicationController::class, 'complement']);
 });
 
 // Auth (public)
@@ -71,5 +80,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/drivers', [AdminController::class, 'listDrivers']);
         Route::patch('/drivers/{id}/toggle-active', [AdminController::class, 'toggleDriverStatus']);
         Route::get('/reports', [AdminController::class, 'reports']);
+
+        // Rider application management
+        Route::prefix('riders/applications')->group(function () {
+            Route::get('/', [RiderApplicationController::class, 'adminList']);
+            Route::get('/{id}', [RiderApplicationController::class, 'adminShow']);
+            Route::patch('/{id}/review', [RiderApplicationController::class, 'adminReview']);
+        });
     });
 });

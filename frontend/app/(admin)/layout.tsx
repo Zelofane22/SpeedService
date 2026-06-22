@@ -11,6 +11,7 @@ import {
   BarChart2,
   LogOut,
   Menu,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { apiPost } from '@/lib/api'
@@ -21,6 +22,7 @@ const navLinks = [
   { href: '/admin/users', icon: Users, label: 'Utilisateurs', exact: false },
   { href: '/admin/deliveries', icon: Package, label: 'Livraisons', exact: false },
   { href: '/admin/drivers', icon: Truck, label: 'Livreurs', exact: false },
+  { href: '/admin/riders', icon: ClipboardList, label: 'Candidatures', exact: false },
   { href: '/admin/reports', icon: BarChart2, label: 'Rapports', exact: false },
 ]
 

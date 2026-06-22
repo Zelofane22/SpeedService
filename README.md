@@ -6,7 +6,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 7 — Administration (back-office)**
+**Sprint en cours : Sprint 8 — Rider App (tunnel inscription + rider.speedservice.bj)**
 Dernière mise à jour : 2026-06-22
 
 ### Sprint 1 — Authentification ✅
@@ -92,14 +92,46 @@ Dernière mise à jour : 2026-06-22
 | Frontend : centre de notifications accessible depuis la cloche | ✅ Terminé |
 | Tests : 67 tests PHPUnit, 241 assertions, lint et build Next.js au vert | ✅ Terminé |
 
-**Sprint 6 terminé. Sprint 7 — Administration (back-office) en cours depuis le 2026-06-22.**
+**Sprint 6 terminé. Sprint 7 — Administration (back-office) terminé le 2026-06-22.**
+
+### Sprint 7 — Administration (back-office) ✅
+
+| Tâche | Statut |
+|---|---|
+| US-036 — Dashboard admin (KPI : revenus, livraisons, clients, livreurs, taux de complétion) | ✅ Terminé |
+| US-037 — Gestion livreurs (liste, toggle actif/inactif) | ✅ Terminé |
+| US-038 — Gestion commandes (liste, filtres, changement statut, validation paiement physique) | ✅ Terminé |
+| US-039 — Gestion paiements (validation manuelle cash/agency) | ✅ Terminé |
+| US-040 — Dashboard d'activité (top clients, évolution, taux de complétion) | ✅ Terminé |
+| Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints) | ✅ Terminé |
+| Frontend : layout admin avec sidebar + 5 pages (`/admin`, `/admin/users`, `/admin/deliveries`, `/admin/drivers`, `/admin/reports`) | ✅ Terminé |
+
+**Sprint 7 terminé. Sprint 8 — Rider App démarré le 2026-06-22 (branche `sprint8`).**
+
+### Sprint 8 — Rider App 🔄
+
+| Tâche | Statut |
+|---|---|
+| Backend : migrations `driver_applications` + `driver_documents` | ✅ Terminé |
+| Backend : enums `VehicleType`, `DriverApplicationStatus`, `DocumentType` | ✅ Terminé |
+| Backend : modèles `DriverApplication` + `DriverDocument` | ✅ Terminé |
+| Backend : `RiderApplicationController` (4 endpoints publics + 3 admin) | ✅ Terminé |
+| Backend : `RiderApplicationStatusMail` + template Blade | ✅ Terminé |
+| Frontend admin : page `/admin/riders` — validation dossiers (approbation/rejet/complément) | ✅ Terminé |
+| Rider app `rider/` : scaffolding Next.js PWA mobile-first | ✅ Terminé |
+| Rider app : page d'accueil R01 | ✅ Terminé |
+| Rider app : tunnel candidature R02–R08 (7 étapes) | ✅ Terminé |
+| Rider app : page suivi candidature R10 | ✅ Terminé |
+| Rider app : page complément R12 | ✅ Terminé |
+| Rider app : page connexion | ✅ Terminé |
 
 ---
 
 ## Structure du dépôt
 
-- `frontend/`: application Next.js 16 en TypeScript
-- `backend/`: API Laravel 12
+- `frontend/`: application Next.js 16 en TypeScript (speedservice.bj)
+- `rider/`: application Next.js 16 PWA mobile-first (rider.speedservice.bj) — Sprint 8
+- `backend/`: API Laravel 12 partagée
 - `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, backend)
 - `.github/workflows/ci.yml`: pipeline CI/CD automatisée
 
@@ -140,6 +172,6 @@ Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter 
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
-| Sprint 7 | Administration (back-office) | 🔄 En cours (démarré le 2026-06-22) |
-| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ⏳ À venir |
+| Sprint 7 | Administration (back-office) | ✅ Terminé (2026-06-22) |
+| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | 🔄 En cours (démarré le 2026-06-22) |
 | Sprint 9 | Stabilisation & déploiement | ⏳ À venir |

@@ -18,36 +18,26 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-06-22
 
-### Sprint 7 — Administration (back-office) — 🔄 En cours
+### Sprint 7 — Administration (back-office) — ✅ Terminé (worktree develop)
+
+- ✅ Backend + Frontend admin complet (voir commits sur `develop`)
+- 🔲 Merge `develop` → `main` en fin de sprint (post-sprint 8)
+
+---
+
+### Sprint 8 — Rider App — 🔒 En cours (branche `sprint8`, worktree `/home/zelofane/Projet/SpeedService-sprint8`)
+
+**Fichiers en cours de modification :**
+- `backend/database/migrations/` — migrations driver_applications + driver_documents
+- `backend/app/Enums/` — VehicleType, DriverApplicationStatus, DocumentType
+- `backend/app/Models/` — DriverApplication, DriverDocument
+- `backend/app/Http/Controllers/Api/RiderApplicationController.php`
+- `backend/routes/api.php`
+- `rider/` — nouveau projet Next.js PWA mobile-first (à créer)
+- `frontend/app/(admin)/admin/riders/` — interface validation dossiers (déporté Sprint 7)
 
 **Tâches terminées :**
-- ✅ Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints : stats, users, deliveries, drivers, reports) + routes `/admin/*` dans `api.php` + enregistrement dans `bootstrap/app.php`
-- ✅ Backend : `tests/Feature/Admin/AdminControllerTest.php`
-- ✅ Frontend : `types/admin.ts` — interfaces TypeScript AdminStats, AdminUser, AdminDelivery, AdminDriver, AdminReport
-- ✅ Frontend : `lib/api/admin.ts` — client API (9 fonctions fetch)
-- ✅ Frontend : `app/(admin)/layout.tsx` — layout admin avec sidebar, auth guard, navigation
-- ✅ Frontend : `app/(admin)/admin/page.tsx` — dashboard KPI (stats, breakdown statuts)
-- ✅ Frontend : `components/admin/` — StatCard, PageHeader, StatusBadge
-- ✅ Frontend : `app/(admin)/admin/users/page.tsx` — table users, search, role filter, changement de rôle
-- ✅ Frontend : `app/(admin)/admin/deliveries/page.tsx` — table livraisons, filtres, validation paiement, changement statut
-- ✅ Frontend : `app/(admin)/admin/drivers/page.tsx` — table livreurs, toggle actif/inactif
-- ✅ Frontend : `app/(admin)/admin/reports/page.tsx` — graphiques CSS, top clients, taux de complétion
-
-**À faire :**
-- 🔲 Commit + vérification lint/build frontend
-- 🔲 Vérification tests backend (`composer test`)
-- 🔲 Merge `develop` → `main` en fin de sprint
-
-**Fichiers libres (sprint 7 complet côté Claude) :**
-- `backend/app/Http/Controllers/Api/AdminController.php`
-- `backend/app/Http/Middleware/EnsureAdmin.php`
-- `backend/routes/api.php`
-- `backend/bootstrap/app.php`
-- `backend/tests/Feature/Admin/AdminControllerTest.php`
-- `frontend/app/(admin)/**`
-- `frontend/components/admin/**`
-- `frontend/lib/api/admin.ts`
-- `frontend/types/admin.ts`
+_(en cours — mise à jour progressive)_
 
 ---
 

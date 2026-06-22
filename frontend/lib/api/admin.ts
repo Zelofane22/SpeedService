@@ -108,3 +108,52 @@ export async function getAdminReports(): Promise<AdminReport> {
   const res = await fetch(`${BASE_URL}/admin/reports`, { headers: authHeaders() })
   return handleResponse<AdminReport>(res)
 }
+
+// --- Rider applications ---
+
+export type RiderApplication = {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  city: string
+  vehicle_type: string
+  status: string
+  submitted_at: string | null
+  reviewed_at: string | null
+  rejection_reason?: string
+  complement_request?: string
+  documents: Array<{ document_type: string; validation_status: string }>
+}
+
+export async function getRiderApplications(params?: {
+  page?: number
+  status?: string
+}): Promise<{ data: RiderApplication[]; meta: unknown }> {
+  const qs = buildQuery(params ?? {})
+  const res = await fetch(`${BASE_URL}/admin/riders/applications${qs}`, { headers: authHeaders() })
+  return handleResponse<{ data: RiderApplication[]; meta: unknown }>(res)
+}
+
+export async function getRiderApplication(id: string): Promise<RiderApplication> {
+  const res = await fetch(`${BASE_URL}/admin/riders/applications/${id}`, { headers: authHeaders() })
+  return handleResponse<RiderApplication>(res)
+}
+
+export async function reviewRiderApplication(
+  id: string,
+  action: 'approve' | 'reject' | 'request_complement',
+  reason?: string,
+): Promise<{ message: string }> {
+  const body: Record<string, string> = { action }
+  if (action === 'reject') body['rejection_reason'] = reason ?? ''
+  if (action === 'request_complement') body['complement_request'] = reason ?? ''
+
+  const res = await fetch(`${BASE_URL}/admin/riders/applications/${id}/review`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify(body),
+  })
+  return handleResponse<{ message: string }>(res)
+}
