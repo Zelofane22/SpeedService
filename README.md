@@ -12,8 +12,8 @@ Dernière mise à jour : 2026-06-22
 | Tâche | Statut |
 |---|---|
 | US-001 Inscription (email, téléphone, mot de passe) | ✅ Terminé |
-| US-002 Connexion utilisateur | ⏳ À faire |
-| US-003 Réinitialisation du mot de passe | ⏳ À faire |
+| US-002 Connexion utilisateur | ✅ Terminé |
+| US-003 Réinitialisation du mot de passe | ✅ Terminé |
 | US-004 Modification du profil | ⏳ À faire |
 
 **Prochain sprint : Sprint 2 — Création de livraison**
@@ -29,24 +29,10 @@ Dernière mise à jour : 2026-06-22
 
 ## Git
 
-Branches recommandées :
+Deux branches principales :
 
-- `main` : version stable / production-ready
-- `develop` : version d'intégration et préparation des versions
-- `feature/*` : nouvelles fonctionnalités
-- `release/*` : préparation des releases
-- `hotfix/*` : corrections urgentes en production
-
-## Workflow Git
-
-1. Créer une branche depuis `develop` : `feature/<description>`.
-2. Faire des commits atomiques et lisibles.
-3. Ouvrir une Pull Request vers `develop`.
-4. Revue + validation CI.
-5. Fusionner dans `develop`.
-6. Créer une branche `release/<version>` depuis `develop` si nécessaire.
-7. Fusionner `release/*` dans `main` puis `develop`.
-8. Pour une correction urgente, créer `hotfix/<description>` depuis `main`.
+- `develop` : développement courant (commits des sprints)
+- `main` : version stable — merge depuis `develop` en fin de sprint, ou `hotfix/*` pour les urgences
 
 Conventions de commits :
 
@@ -54,15 +40,7 @@ Conventions de commits :
 - `fix(scope): description` — correction de bug
 - `chore(scope): description` — tâche d'infrastructure
 - `docs(scope): description` — documentation
-- `refactor(scope): description` — refactorisation
 - `test(scope): description` — ajout ou mise à jour de tests
-- `style(scope): description` — modifications sans impact fonctionnel
-
-Exemples :
-
-- `feat(order): add content category field`
-- `fix(payment): ensure physical payment requires approval`
-- `chore(ci): add GitHub Actions pipeline`
 
 ## CI/CD
 La chaîne CI/CD repose sur GitHub Actions, Docker et Docker Compose.

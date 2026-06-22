@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -55,5 +58,37 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        Password::sendResetLink($request->only('email'));
+
+        // Always return the same message to prevent email enumeration.
+        return response()->json([
+            'message' => 'Si un compte correspond à cette adresse, vous recevrez un lien de réinitialisation.',
+        ]);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->password = $password;
+                $user->save();
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Ce lien de réinitialisation est invalide ou a expiré.',
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Mot de passe réinitialisé avec succès.',
+        ]);
     }
 }
