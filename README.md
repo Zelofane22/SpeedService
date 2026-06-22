@@ -73,7 +73,7 @@ Exemples :
 - `chore(ci): add GitHub Actions pipeline`
 
 ## CI/CD
-
+La chaîne CI/CD repose sur GitHub Actions, Docker et Docker Compose.
 La pipeline CI automatise :
 
 - lint et build frontend
