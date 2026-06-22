@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DriverApplicationStatus;
 use App\Enums\VehicleType;
+use Database\Factories\DriverApplicationFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DriverApplication extends Model
 {
     use HasFactory, HasUuids;
+
+    protected static function newFactory(): DriverApplicationFactory
+    {
+        return DriverApplicationFactory::new();
+    }
 
     protected $fillable = [
         'user_id',
