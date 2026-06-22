@@ -1,6 +1,6 @@
 # Speed Service
 
-Plateforme de livraison de colis au Bénin — application web full-stack (Next.js 15 + Laravel 12).
+Plateforme de livraison de colis au Bénin — application web full-stack (Next.js 16 + Laravel 12).
 
 ---
 
@@ -15,8 +15,8 @@ Dernière mise à jour : 2026-06-22
 | Configuration Docker Compose (PostgreSQL, Redis) | ✅ Terminé |
 | Pipeline CI/CD (GitHub Actions) | ✅ Terminé |
 | Conventions Git et workflow documentés | ✅ Terminé |
-| Setup Tailwind CSS + Shadcn UI (frontend) | ⏳ À faire |
-| Modélisation base de données + migrations Laravel | ⏳ À faire |
+| Setup Tailwind CSS + Shadcn UI (frontend) | ✅ Terminé |
+| Modélisation base de données + migrations Laravel | ✅ Terminé |
 | Configuration Laravel Sanctum | ⏳ À faire |
 | Wireframes / Maquettes UI | ⏳ À faire |
 
