@@ -25,19 +25,28 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ---
 
-### Sprint 8 — Rider App — 🔒 En cours (branche `sprint8`, worktree `/home/zelofane/Projet/SpeedService-sprint8`)
-
-**Fichiers en cours de modification :**
-- `backend/database/migrations/` — migrations driver_applications + driver_documents
-- `backend/app/Enums/` — VehicleType, DriverApplicationStatus, DocumentType
-- `backend/app/Models/` — DriverApplication, DriverDocument
-- `backend/app/Http/Controllers/Api/RiderApplicationController.php`
-- `backend/routes/api.php`
-- `rider/` — nouveau projet Next.js PWA mobile-first (à créer)
-- `frontend/app/(admin)/admin/riders/` — interface validation dossiers (déporté Sprint 7)
+### Sprint 8 — Rider App — ✅ Terminé (branche `sprint8`, 4 commits)
 
 **Tâches terminées :**
-_(en cours — mise à jour progressive)_
+- ✅ Backend : migrations `driver_applications` + `driver_documents`
+- ✅ Backend : enums `VehicleType`, `DriverApplicationStatus`, `DocumentType`
+- ✅ Backend : modèles `DriverApplication` + `DriverDocument`
+- ✅ Backend : `RiderApplicationController` (4 endpoints publics + 3 admin)
+- ✅ Backend : `RiderApplicationStatusMail` + template Blade
+- ✅ Backend : `DriverApplicationFactory` + 13 tests PHPUnit (33 assertions ✅)
+- ✅ Frontend admin : page `/admin/riders` (React Compiler compatible), sidebar mise à jour
+- ✅ Rider app `rider/` : scaffolding Next.js 16 PWA mobile-first — build ✅
+- ✅ Rider app : tunnel candidature R01–R08 (7 étapes), suivi R10, complément R12, login
+- ✅ Rider app : espace livreur connecté (bottom nav, missions, mission active, historique)
+
+**Fichiers libres — sprint 8 complet côté Claude :**
+- `backend/` — tous les fichiers sprint 8
+- `rider/` — toute l'app
+- `frontend/app/(admin)/admin/riders/`
+- `frontend/app/(admin)/layout.tsx`
+- `frontend/lib/api/admin.ts`
+
+**Prochaine étape :** merge `sprint8` → `develop` → `main` (Sprint 9)
 
 ---
 
