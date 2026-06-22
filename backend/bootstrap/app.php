@@ -11,7 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->statefulApi();
+        // Token-based API uniquement — pas de mode SPA/cookie Sanctum
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

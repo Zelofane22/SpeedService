@@ -6,25 +6,17 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 0 — Infrastructure & Setup**
+**Sprint en cours : Sprint 1 — Authentification**
 Dernière mise à jour : 2026-06-22
 
 | Tâche | Statut |
 |---|---|
-| Structure du dépôt (frontend / backend) | ✅ Terminé |
-| Configuration Docker Compose (PostgreSQL, Redis) | ✅ Terminé |
-| Pipeline CI/CD (GitHub Actions) | ✅ Terminé |
-| Conventions Git et workflow documentés | ✅ Terminé |
-| Setup Tailwind CSS + Shadcn UI (frontend) | ✅ Terminé |
-| Modélisation base de données + migrations Laravel | ✅ Terminé |
-| Configuration Laravel Sanctum | ✅ Terminé |
-| Wireframes / Maquettes UI | ⏳ À faire |
+| US-001 Inscription (email, téléphone, mot de passe) | ✅ Terminé |
+| US-002 Connexion utilisateur | ⏳ À faire |
+| US-003 Réinitialisation du mot de passe | ⏳ À faire |
+| US-004 Modification du profil | ⏳ À faire |
 
-**Prochain sprint : Sprint 1 — Authentification**
-- US-001 Inscription (email, téléphone, mot de passe)
-- US-002 Connexion utilisateur
-- US-003 Réinitialisation du mot de passe
-- US-004 Modification du profil
+**Prochain sprint : Sprint 2 — Création de livraison**
 
 ---
 
@@ -84,8 +76,8 @@ La pipeline CI automatise :
 
 | Sprint | Thème | Statut |
 |---|---|---|
-| Sprint 0 | Infrastructure & Setup | ✅ Terminé |
-| Sprint 1 | Authentification | ⏳ À venir |
+| Sprint 0 | Infrastructure & Setup | ✅ Terminé (2026-06-22) |
+| Sprint 1 | Authentification | 🔄 En cours |
 | Sprint 2 | Création de livraison | ⏳ À venir |
 | Sprint 3 | Géolocalisation | ⏳ À venir |
 | Sprint 4 | Paiement | ⏳ À venir |
