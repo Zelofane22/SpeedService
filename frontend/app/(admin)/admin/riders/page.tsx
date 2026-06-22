@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
 type Application = {
   id: string
@@ -30,11 +30,11 @@ function authHeaders(): Record<string, string> {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  pending:              { label: 'En attente',          cls: 'bg-amber-100 text-amber-800' },
-  under_review:         { label: 'En cours d\'examen',  cls: 'bg-blue-100 text-blue-800' },
-  approved:             { label: 'Approuvée',           cls: 'bg-green-100 text-green-800' },
-  rejected:             { label: 'Rejetée',             cls: 'bg-red-100 text-red-800' },
-  complement_requested: { label: 'Complément demandé',  cls: 'bg-orange-100 text-orange-800' },
+  pending:              { label: 'En attente',         cls: 'bg-amber-100 text-amber-800' },
+  under_review:         { label: "En cours d'examen",  cls: 'bg-blue-100 text-blue-800' },
+  approved:             { label: 'Approuvée',          cls: 'bg-green-100 text-green-800' },
+  rejected:             { label: 'Rejetée',            cls: 'bg-red-100 text-red-800' },
+  complement_requested: { label: 'Complément demandé', cls: 'bg-orange-100 text-orange-800' },
 }
 
 const VEHICLE_ICONS: Record<string, string> = {
@@ -42,27 +42,35 @@ const VEHICLE_ICONS: Record<string, string> = {
 }
 
 export default function RiderApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([])
-  const [loading, setLoading] = useState(true)
+  // null = loading, [] | Application[] = loaded
+  const [applications, setApplications] = useState<Application[] | null>(null)
   const [filterStatus, setFilterStatus] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
   const [selected, setSelected] = useState<Application | null>(null)
   const [action, setAction] = useState<'approve' | 'reject' | 'request_complement' | null>(null)
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const fetchApplications = useCallback(async () => {
-    setLoading(true)
-    try {
-      const qs = filterStatus ? `?status=${filterStatus}` : ''
-      const res = await fetch(`${BASE_URL}/admin/riders/applications${qs}`, { headers: authHeaders() })
-      const json = await res.json()
-      setApplications(json.data ?? [])
-    } finally {
-      setLoading(false)
-    }
-  }, [filterStatus])
+  useEffect(() => {
+    let cancelled = false
+    const qs = filterStatus ? `?status=${filterStatus}` : ''
+    fetch(`${BASE_URL}/admin/riders/applications${qs}`, { headers: authHeaders() })
+      .then((r) => r.json())
+      .then((json) => { if (!cancelled) setApplications(json.data ?? []) })
+      .catch(() => { if (!cancelled) setApplications([]) })
+    return () => { cancelled = true }
+  }, [filterStatus, refreshKey])
 
-  useEffect(() => { fetchApplications() }, [fetchApplications])
+  // State updates in event handlers are always fine for React Compiler
+  const applyFilter = (status: string) => {
+    setApplications(null)
+    setFilterStatus(status)
+  }
+
+  const refresh = () => {
+    setApplications(null)
+    setRefreshKey((k) => k + 1)
+  }
 
   const openDetail = async (id: string) => {
     const res = await fetch(`${BASE_URL}/admin/riders/applications/${id}`, { headers: authHeaders() })
@@ -86,11 +94,13 @@ export default function RiderApplicationsPage() {
         body: JSON.stringify(body),
       })
       setSelected(null)
-      fetchApplications()
+      refresh()
     } finally {
       setSubmitting(false)
     }
   }
+
+  const loading = applications === null
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -106,7 +116,7 @@ export default function RiderApplicationsPage() {
         {['', 'pending', 'under_review', 'approved', 'rejected', 'complement_requested'].map((s) => (
           <button
             key={s}
-            onClick={() => setFilterStatus(s)}
+            onClick={() => applyFilter(s)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${filterStatus === s ? 'bg-[#861D6D] text-white border-[#861D6D]' : 'border-gray-200 text-gray-600 hover:border-[#861D6D]'}`}
           >
             {s === '' ? 'Tous' : (STATUS_LABELS[s]?.label ?? s)}
