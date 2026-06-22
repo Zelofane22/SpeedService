@@ -20,7 +20,7 @@ const Loading = () => (
 
 const MapPickerInner = dynamic(
   () =>
-    import('./map-picker-inner.js') as unknown as Promise<{ default: ComponentType<MapPickerProps> }>,
+    import('./map-picker-inner') as unknown as Promise<{ default: ComponentType<MapPickerProps> }>,
   { ssr: false, loading: Loading },
 )
 

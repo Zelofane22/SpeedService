@@ -17,7 +17,7 @@ const Loading = () => (
 
 const RouteMapInner = dynamic(
   () =>
-    import('./route-map-inner.js') as unknown as Promise<{ default: ComponentType<RouteMapProps> }>,
+    import('./route-map-inner') as unknown as Promise<{ default: ComponentType<RouteMapProps> }>,
   { ssr: false, loading: Loading },
 )
 
