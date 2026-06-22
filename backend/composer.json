@@ -5,7 +5,8 @@
     "license": "proprietary",
     "require": {
         "php": "^8.4",
-        "laravel/framework": "^12.0"
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

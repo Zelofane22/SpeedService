@@ -17,7 +17,7 @@ Dernière mise à jour : 2026-06-22
 | Conventions Git et workflow documentés | ✅ Terminé |
 | Setup Tailwind CSS + Shadcn UI (frontend) | ✅ Terminé |
 | Modélisation base de données + migrations Laravel | ✅ Terminé |
-| Configuration Laravel Sanctum | ⏳ À faire |
+| Configuration Laravel Sanctum | ✅ Terminé |
 | Wireframes / Maquettes UI | ⏳ À faire |
 
 **Prochain sprint : Sprint 1 — Authentification**
@@ -84,7 +84,7 @@ La pipeline CI automatise :
 
 | Sprint | Thème | Statut |
 |---|---|---|
-| Sprint 0 | Infrastructure & Setup | 🔄 En cours |
+| Sprint 0 | Infrastructure & Setup | ✅ Terminé |
 | Sprint 1 | Authentification | ⏳ À venir |
 | Sprint 2 | Création de livraison | ⏳ À venir |
 | Sprint 3 | Géolocalisation | ⏳ À venir |
