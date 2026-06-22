@@ -3,6 +3,8 @@ export const metadata = {
   description: 'SpeedService frontend',
 }
 
+import './globals.css'
+
 export default function RootLayout({
   children,
 }: {
