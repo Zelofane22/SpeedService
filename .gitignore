@@ -28,5 +28,8 @@ docker-compose.override.yml
 .vscode/
 .idea/
 
+# Local agent worktrees
+.claude/worktrees/
+
 # Figma mockup (référence visuelle locale uniquement)
 SpeedService UI_UX Mockup/

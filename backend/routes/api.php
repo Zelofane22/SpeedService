@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
@@ -55,5 +56,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/missions/{id}/accept', [DriverController::class, 'acceptMission']);
         Route::post('/missions/{id}/decline', [DriverController::class, 'declineMission']);
         Route::patch('/missions/{id}/status', [DriverController::class, 'updateStatus']);
+    });
+
+    // Admin routes
+    Route::prefix('admin')->middleware('admin')->group(function () {
+        Route::get('/stats', [AdminController::class, 'stats']);
+        Route::get('/users', [AdminController::class, 'listUsers']);
+        Route::get('/users/{id}', [AdminController::class, 'showUser']);
+        Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+        Route::get('/deliveries', [AdminController::class, 'listDeliveries']);
+        Route::get('/deliveries/{id}', [AdminController::class, 'showDelivery']);
+        Route::patch('/deliveries/{id}/status', [AdminController::class, 'updateDeliveryStatus']);
+        Route::post('/deliveries/{id}/validate-payment', [AdminController::class, 'validatePayment']);
+        Route::get('/drivers', [AdminController::class, 'listDrivers']);
+        Route::patch('/drivers/{id}/toggle-active', [AdminController::class, 'toggleDriverStatus']);
+        Route::get('/reports', [AdminController::class, 'reports']);
     });
 });
