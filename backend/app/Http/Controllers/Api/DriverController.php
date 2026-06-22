@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
+use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DriverController extends Controller
 {
+    public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
     private function ensureDriver(): ?JsonResponse
     {
         if (Auth::user()->role !== UserRole::Driver) {
@@ -62,6 +66,15 @@ class DriverController extends Controller
             'status' => DeliveryStatus::Assigned,
         ]);
 
+        try {
+            $this->notifications->send(
+                $delivery->fresh(['client', 'driver']),
+                DeliveryNotificationEvent::DriverAssigned,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return response()->json($delivery->load('client:id,name,phone', 'statusHistories'));
     }
 
@@ -98,6 +111,20 @@ class DriverController extends Controller
 
         $delivery->update(['status' => $next]);
         $delivery->statusHistories()->create(['status' => $next]);
+
+        $event = match ($next) {
+            DeliveryStatus::InDelivery => DeliveryNotificationEvent::PackagePickedUp,
+            DeliveryStatus::Delivered => DeliveryNotificationEvent::PackageDelivered,
+            default => null,
+        };
+
+        if ($event !== null) {
+            try {
+                $this->notifications->send($delivery->fresh(['client', 'driver']), $event);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return response()->json($delivery->load('client:id,name,phone', 'statusHistories'));
     }

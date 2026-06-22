@@ -6,7 +6,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 6 — Suivi client & notifications**
+**Sprint en cours : Sprint 7 — Administration (back-office)**
 Dernière mise à jour : 2026-06-22
 
 ### Sprint 1 — Authentification ✅
@@ -74,13 +74,31 @@ Dernière mise à jour : 2026-06-22
 | Frontend : `apiPatch` ajouté à la lib API | ✅ Terminé |
 | Frontend : textes secondaires passés de rose à gris-noir (text-gray-700) sur toute l'app | ✅ Terminé |
 
-**Sprint 5 terminé. Prochain sprint : Sprint 6 — Suivi client & notifications**
+### Sprint 6 — Suivi client & notifications ✅
+
+| Tâche | Statut |
+|---|---|
+| US-029 — Suivi d’une commande par statut avec chronologie complète | ✅ Terminé |
+| US-031 — Historique client avec recherche, filtre par statut et accès au détail | ✅ Terminé |
+| US-032 — Notification de validation de commande | ✅ Terminé |
+| US-033 — Notification d’affectation d’un livreur | ✅ Terminé |
+| US-034 — Notification de récupération du colis | ✅ Terminé |
+| US-035 — Notification de livraison terminée | ✅ Terminé |
+| Backend : journal de notifications idempotent (in-app, email et SMS) | ✅ Terminé |
+| Backend : emails et SMS asynchrones via les files Laravel | ✅ Terminé |
+| Backend : API notifications (liste, compteur, lecture unitaire/globale) | ✅ Terminé |
+| Frontend : page `/deliveries/[id]` avec statut, timeline, trajet, colis, paiement et livreur | ✅ Terminé |
+| Frontend : actualisation automatique du suivi toutes les 30 secondes | ✅ Terminé |
+| Frontend : centre de notifications accessible depuis la cloche | ✅ Terminé |
+| Tests : 67 tests PHPUnit, 241 assertions, lint et build Next.js au vert | ✅ Terminé |
+
+**Sprint 6 terminé. Prochain sprint : Sprint 7 — Administration (back-office)**
 
 ---
 
 ## Structure du dépôt
 
-- `frontend/`: application Next.js 15 en TypeScript
+- `frontend/`: application Next.js 16 en TypeScript
 - `backend/`: API Laravel 12
 - `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, backend)
 - `.github/workflows/ci.yml`: pipeline CI/CD automatisée
@@ -118,7 +136,7 @@ La pipeline CI automatise :
 | Sprint 3 | Géolocalisation | ✅ Terminé (2026-06-22) |
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
-| Sprint 6 | Suivi client & notifications | ⏳ À venir |
+| Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
 | Sprint 7 | Administration (back-office) | ⏳ À venir |
 | Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ⏳ À venir |
 | Sprint 9 | Stabilisation & déploiement | ⏳ À venir |

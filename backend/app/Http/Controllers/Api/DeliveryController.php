@@ -74,7 +74,11 @@ class DeliveryController extends Controller
     public function show(string $id): JsonResponse
     {
         $delivery = Delivery::where('client_id', Auth::id())
-            ->with(['payment', 'statusHistories' => fn ($q) => $q->orderBy('created_at')])
+            ->with([
+                'payment',
+                'driver:id,name,phone',
+                'statusHistories' => fn ($q) => $q->orderBy('created_at'),
+            ])
             ->findOrFail($id);
 
         return response()->json($delivery);

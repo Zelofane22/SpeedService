@@ -187,10 +187,20 @@ class DeliveryTest extends TestCase
     public function test_client_can_view_own_delivery(): void
     {
         $delivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        $delivery->statusHistories()->create([
+            'status' => DeliveryStatus::AwaitingPayment,
+            'created_at' => now()->subMinute(),
+        ]);
+        $delivery->statusHistories()->create([
+            'status' => DeliveryStatus::Confirmed,
+            'created_at' => now(),
+        ]);
 
         $this->getJson("/api/deliveries/{$delivery->id}", $this->auth())
             ->assertOk()
-            ->assertJsonPath('id', $delivery->id);
+            ->assertJsonPath('id', $delivery->id)
+            ->assertJsonPath('status_histories.0.status', 'awaiting_payment')
+            ->assertJsonPath('status_histories.1.status', 'confirmed');
     }
 
     public function test_client_cannot_view_another_users_delivery(): void

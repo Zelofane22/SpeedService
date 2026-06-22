@@ -84,8 +84,8 @@ User --< Address
 | Sprint 3 | Géolocalisation ✅ |
 | Sprint 4 | Paiement ✅ |
 | Sprint 5 | Gestion livreurs & statuts ✅ |
-| Sprint 6 | Suivi client & notifications |
-| Sprint 7 | Administration (back-office) |
+| Sprint 6 | Suivi client & notifications ✅ |
+| Sprint 7 | Administration (back-office) — en cours |
 | Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj |
 | Sprint 9 | Stabilisation & déploiement |
 
@@ -101,3 +101,5 @@ backend/    → Laravel 12 — API partagée (api.speedservice.bj)
 
 ### avncement
 met à jours l'état d'avencement dans readme.md et claud.md
+
+Dernier état : Sprint 6 terminé le 2026-06-22 (suivi client par statut, historique, notifications in-app/email/SMS). Prochain chantier : Sprint 7 — Administration.

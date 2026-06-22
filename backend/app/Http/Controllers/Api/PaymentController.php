@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
+use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +17,8 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
+    public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
     public function pay(Request $request, string $id): JsonResponse
     {
         $delivery = Delivery::where('client_id', Auth::id())
@@ -83,6 +87,14 @@ class PaymentController extends Controller
                 ]);
             }
         });
+
+        if ($isElectronic) {
+            try {
+                $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderConfirmed);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return response()->json(
             $delivery->fresh(['payment', 'statusHistories' => fn ($q) => $q->orderBy('created_at')]),

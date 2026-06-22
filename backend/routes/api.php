@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\GeocodingController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
@@ -42,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show']);
     Route::post('/deliveries/{id}/cancel', [DeliveryController::class, 'cancel']);
     Route::post('/deliveries/{id}/pay', [PaymentController::class, 'pay']);
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
     // Driver routes
     Route::prefix('driver')->group(function () {

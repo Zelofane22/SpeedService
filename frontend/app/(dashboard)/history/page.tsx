@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Filter, Eye, Package } from 'lucide-react'
+import Link from 'next/link'
+import { Search, Eye, Package } from 'lucide-react'
 import { apiGet } from '@/lib/api'
 import { StatusBadge } from '@/components/status-badge'
 
@@ -40,6 +41,7 @@ export default function HistoryPage() {
   const router = useRouter()
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -49,11 +51,13 @@ export default function HistoryPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = deliveries.filter((d) =>
-    d.reference.toLowerCase().includes(search.toLowerCase()) ||
-    d.pickup_address.toLowerCase().includes(search.toLowerCase()) ||
-    d.delivery_address.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = deliveries.filter((d) => {
+    const matchesSearch = d.reference.toLowerCase().includes(search.toLowerCase()) ||
+      d.pickup_address.toLowerCase().includes(search.toLowerCase()) ||
+      d.delivery_address.toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = status === 'all' || d.status === status
+    return matchesSearch && matchesStatus
+  })
 
   return (
     <div className="p-6 space-y-5">
@@ -70,9 +74,22 @@ export default function HistoryPage() {
               className="pl-9 pr-4 py-2 bg-brand-input border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-700 w-56"
             />
           </div>
-          <button className="flex items-center gap-2 px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-gray-700 hover:border-primary/40 transition-colors">
-            <Filter size={14} /> Filtrer
-          </button>
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+            aria-label="Filtrer par statut"
+            className="px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-gray-700 hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="awaiting_payment">Paiement en attente</option>
+            <option value="awaiting_validation">Validation en attente</option>
+            <option value="confirmed">Confirmée</option>
+            <option value="assigned">Assignée</option>
+            <option value="picking_up">Récupération</option>
+            <option value="in_delivery">En livraison</option>
+            <option value="delivered">Livrée</option>
+            <option value="cancelled">Annulée</option>
+          </select>
         </div>
       </div>
 
@@ -123,9 +140,9 @@ export default function HistoryPage() {
                   </td>
                   <td className="px-5 py-4 text-sm font-semibold text-brand-foreground">{formatPrice(d.price)}</td>
                   <td className="px-5 py-4">
-                    <button className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
+                    <Link href={`/deliveries/${d.id}`} className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
                       <Eye size={12} /> Voir
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

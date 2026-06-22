@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryNotificationEvent;
 use App\Enums\NotificationChannel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,8 @@ class NotificationLog extends Model
 
     protected $fillable = [
         'user_id',
+        'delivery_id',
+        'event',
         'channel',
         'title',
         'message',
@@ -26,6 +29,7 @@ class NotificationLog extends Model
     {
         return [
             'channel' => NotificationChannel::class,
+            'event'   => DeliveryNotificationEvent::class,
             'data'    => 'array',
             'read_at' => 'datetime',
         ];
@@ -34,5 +38,10 @@ class NotificationLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function delivery(): BelongsTo
+    {
+        return $this->belongsTo(Delivery::class);
     }
 }

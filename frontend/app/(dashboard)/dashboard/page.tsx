@@ -102,7 +102,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-base font-semibold text-brand-foreground mb-1">Aucune livraison pour l&apos;instant</h3>
             <p className="text-sm text-gray-700 mb-6 max-w-xs">
-              Créez votre première commande et suivez-la en temps réel.
+              Créez votre première commande et suivez son avancement à chaque étape.
             </p>
             <Link
               href="/new-delivery"
@@ -130,9 +130,9 @@ export default function DashboardPage() {
                   <td className="px-5 py-4"><StatusBadge status={d.status} /></td>
                   <td className="px-5 py-4 text-sm font-semibold text-brand-foreground">{formatPrice(d.price)}</td>
                   <td className="px-5 py-4">
-                    <button className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
+                    <Link href={`/deliveries/${d.id}`} className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
                       <Eye size={12} /> Détail
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

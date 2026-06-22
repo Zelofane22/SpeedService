@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, PlusCircle, History, User, LogOut, Bell } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, History, User, LogOut } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { apiPost, apiGet } from '@/lib/api'
 import { AuthContext, type AuthUser } from '@/lib/auth-context'
+import { NotificationBell } from '@/components/notification-bell'
 
 const navLinks = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -50,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) return null
 
-  const title = pageTitles[pathname] ?? 'Tableau de bord'
+  const title = pathname.startsWith('/deliveries/') ? 'Suivi de livraison' : (pageTitles[pathname] ?? 'Tableau de bord')
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
@@ -96,9 +97,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="h-16 bg-white border-b border-brand-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-10">
             <h1 className="text-lg font-bold text-brand-foreground">{title}</h1>
             <div className="flex items-center gap-3">
-              <button className="w-9 h-9 rounded-xl bg-brand-muted flex items-center justify-center hover:bg-primary/10 transition-colors">
-                <Bell size={16} className="text-gray-700" />
-              </button>
+              <NotificationBell />
               <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center">
                 <User size={16} className="text-primary" />
               </div>
