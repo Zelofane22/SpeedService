@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
@@ -16,18 +17,18 @@ const config: Config = {
           DEFAULT: '#B24799',
           foreground: '#FFFFFF',
         },
-        background: '#FAF7FB',
-        foreground: '#1D1D1F',
+        background: 'rgb(var(--background) / <alpha-value>)',
+        foreground: 'rgb(var(--foreground) / <alpha-value>)',
         muted: {
-          DEFAULT: '#F4F0F5',
-          foreground: '#717182',
+          DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
+          foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
         },
-        border: 'rgba(134,29,109,0.12)',
+        border: 'rgb(var(--border) / <alpha-value>)',
         card: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#1D1D1F',
+          DEFAULT: 'rgb(var(--card) / <alpha-value>)',
+          foreground: 'rgb(var(--card-foreground) / <alpha-value>)',
         },
-        'input-background': '#F8F4F9',
+        'input-background': 'rgb(var(--input-background) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

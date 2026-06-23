@@ -55,6 +55,6 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-06-23
 
-✅ Terminé : `fiche projet/` aligné sur l'extraction du back-office dans `admin/` ; thème clair/sombre de `frontend/` validé par lint et build. `admin/` n'a pas été modifié, conformément au verrou Sprint 7 de Claude.
+✅ Terminé à la demande explicite de l'utilisateur : thème clair/sombre global ajouté à `admin/` (préférence système, persistance locale, bouton sur toutes les routes et graphiques adaptés). TypeScript et build Next.js au vert.
 
 ---

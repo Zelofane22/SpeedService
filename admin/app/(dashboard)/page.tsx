@@ -168,22 +168,24 @@ export default function DashboardPage() {
               data={chartData}
               margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
                   borderRadius: '12px',
-                  border: 'none',
+                  border: '1px solid rgb(var(--border))',
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                 }}
               />
-              <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="orders" fill="rgb(var(--chart-primary))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -200,22 +202,24 @@ export default function DashboardPage() {
             >
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#861D6D" stopOpacity={0.05} />
-                  <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
+                  <stop offset="0%" stopColor="rgb(var(--chart-primary))" stopOpacity={0.18} />
+                  <stop offset="100%" stopColor="rgb(var(--chart-primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
                   borderRadius: '12px',
-                  border: 'none',
+                  border: '1px solid rgb(var(--border))',
+                  backgroundColor: 'rgb(var(--card))',
+                  color: 'rgb(var(--foreground))',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                 }}
                 formatter={(v: number) => [formatXOF(v), 'Revenus']}
@@ -223,7 +227,7 @@ export default function DashboardPage() {
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="#861D6D"
+                stroke="rgb(var(--chart-primary))"
                 strokeWidth={2}
                 fill="url(#revenueGradient)"
               />
