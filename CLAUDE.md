@@ -86,18 +86,27 @@ User --< Address
 | Sprint 5 | Gestion livreurs & statuts ✅ |
 | Sprint 6 | Suivi client & notifications ✅ |
 | Sprint 7 | Administration (back-office) — 🔄 en cours (démarré 2026-06-22) |
-| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj |
+| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj |
 | Sprint 9 | Stabilisation & déploiement |
 
 ### Architecture multi-app (MVP)
 ```
 frontend/   → Next.js — app client (speedservice.bj)
-rider/      → Next.js — app rider (rider.speedservice.bj) — Sprint 8
+driver/     → Next.js — app livreur (driver.speedservice.bj) — Sprint 8
 backend/    → Laravel 12 — API partagée (api.speedservice.bj)
 ```
-- L'espace rider (`/driver/*`) dans `frontend/` est provisoire. Il sera migré dans `rider/` au Sprint 8.
+- L'espace driver (`/driver/*`) dans `frontend/` est provisoire. Il sera migré dans `driver/` au Sprint 8.
 - Le backend est partagé : les endpoints `/driver/*` servent les deux apps.
-- CORS configuré pour `speedservice.bj` et `rider.speedservice.bj`.
+- CORS configuré pour `speedservice.bj` et `driver.speedservice.bj`.
+
+### Terminologie canonique
+- **UI (labels, titres)** → "Livreur" / "Livreurs" (français, côté utilisateur)
+- **Code interne (modèles, controllers, enums, routes)** → `Driver` (terme anglais unique)
+- Aucune occurrence de "Rider" ou "Courier" dans le code — tout est `Driver`
+
+### Chantiers Sprint 9
+- **Monorepo pnpm workspaces** : extraire `packages/ui/` (status-badge, theme-toggle, card, utils) et `packages/api-client/` partagés entre `frontend/`, `driver/` et `admin/`. Actuellement ces fichiers sont copiés manuellement dans chaque app.
+- **Refactor terminologie** : renommer `rider/` → `driver/`, `RiderApplicationController` → `DriverApplicationController`, routes `/rider/apply/*` → `/driver/apply/*`, pages admin `riders/` et `couriers/` → `drivers/`. Labels UI : remplacer tout "Driver"/"Rider" visible par "Livreur".
 
 ### avncement
 met à jours l'état d'avencement dans readme.md et claud.md

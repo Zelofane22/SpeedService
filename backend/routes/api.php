@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\RiderApplicationController;
+use App\Http\Controllers\Api\DriverApplicationController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\GeocodingController;
@@ -22,12 +22,12 @@ Route::prefix('geo')->group(function () {
     Route::post('/distance', [GeocodingController::class, 'distance']);
 });
 
-// Rider application tunnel (public — no account required to apply)
-Route::prefix('rider')->group(function () {
-    Route::post('/apply', [RiderApplicationController::class, 'apply']);
-    Route::post('/apply/documents', [RiderApplicationController::class, 'uploadDocuments']);
-    Route::get('/apply/status', [RiderApplicationController::class, 'status']);
-    Route::post('/apply/complement', [RiderApplicationController::class, 'complement']);
+// Driver application tunnel (public — no account required to apply)
+Route::prefix('driver/apply')->group(function () {
+    Route::post('/', [DriverApplicationController::class, 'apply']);
+    Route::post('/documents', [DriverApplicationController::class, 'uploadDocuments']);
+    Route::get('/status', [DriverApplicationController::class, 'status']);
+    Route::post('/complement', [DriverApplicationController::class, 'complement']);
 });
 
 // Auth (public)
@@ -81,11 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/drivers/{id}/toggle-active', [AdminController::class, 'toggleDriverStatus']);
         Route::get('/reports', [AdminController::class, 'reports']);
 
-        // Rider application management
-        Route::prefix('riders/applications')->group(function () {
-            Route::get('/', [RiderApplicationController::class, 'adminList']);
-            Route::get('/{id}', [RiderApplicationController::class, 'adminShow']);
-            Route::patch('/{id}/review', [RiderApplicationController::class, 'adminReview']);
+        // Driver application management
+        Route::prefix('drivers/applications')->group(function () {
+            Route::get('/', [DriverApplicationController::class, 'adminList']);
+            Route::get('/{id}', [DriverApplicationController::class, 'adminShow']);
+            Route::patch('/{id}/review', [DriverApplicationController::class, 'adminReview']);
         });
     });
 });

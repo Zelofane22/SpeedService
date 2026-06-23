@@ -118,9 +118,9 @@ export function getAdminPayments(params?: {
   )
 }
 
-// ── Rider applications ────────────────────────────────────────────────────────
+// ── Driver applications ───────────────────────────────────────────────────────
 
-export type RiderApplication = {
+export type DriverApplication = {
   id: string
   first_name: string
   last_name: string
@@ -136,18 +136,18 @@ export type RiderApplication = {
   documents: Array<{ document_type: string; validation_status: string }>
 }
 
-export function getRiderApplications(params?: {
+export function getDriverApplications(params?: {
   page?: number
   status?: string
-}): Promise<{ data: RiderApplication[]; current_page: number; total: number }> {
-  return apiFetch(`/admin/riders/applications${buildQuery(params)}`)
+}): Promise<{ data: DriverApplication[]; current_page: number; total: number }> {
+  return apiFetch(`/admin/drivers/applications${buildQuery(params)}`)
 }
 
-export function getRiderApplication(id: string): Promise<RiderApplication> {
-  return apiFetch(`/admin/riders/applications/${id}`)
+export function getDriverApplication(id: string): Promise<DriverApplication> {
+  return apiFetch(`/admin/drivers/applications/${id}`)
 }
 
-export function reviewRiderApplication(
+export function reviewDriverApplication(
   id: string,
   payload: {
     action: 'approve' | 'reject' | 'request_complement'
@@ -155,7 +155,7 @@ export function reviewRiderApplication(
     complement_request?: string
   }
 ): Promise<{ message: string }> {
-  return apiFetch(`/admin/riders/applications/${id}/review`, {
+  return apiFetch(`/admin/drivers/applications/${id}/review`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   })

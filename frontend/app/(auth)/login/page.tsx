@@ -40,16 +40,21 @@ export default function LoginPage() {
 
     try {
       const data = await apiPost<LoginResponse>('/auth/login', form)
-      localStorage.setItem('auth_token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-
       if (data.user.role === 'admin') {
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'
         window.location.href = adminUrl
         return
       }
-      const destination = data.user.role === 'driver' ? '/driver/missions' : '/dashboard'
-      router.push(destination)
+
+      if (data.user.role === 'driver') {
+        const driverUrl = process.env.NEXT_PUBLIC_DRIVER_URL ?? 'http://localhost:3002'
+        window.location.href = `${driverUrl}/login`
+        return
+      }
+
+      localStorage.setItem('auth_token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      router.push('/dashboard')
     } catch (err: unknown) {
       if (err instanceof Error && 'errors' in err) {
         const apiErrors = (err as Error & { errors?: Record<string, string[]> }).errors
@@ -142,13 +147,13 @@ export default function LoginPage() {
 
       {/* Driver access */}
       <div className="mt-6 border-t border-brand-border pt-6">
-        <Link
-          href="/driver-login"
+        <a
+          href={process.env.NEXT_PUBLIC_DRIVER_URL ?? 'http://localhost:3002'}
           className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-brand-foreground text-white text-sm font-semibold rounded-2xl hover:opacity-90 transition-all"
         >
           <Bike size={16} />
           Vous êtes livreur ? Accéder à l&apos;espace livreur
-        </Link>
+        </a>
       </div>
     </div>
   )

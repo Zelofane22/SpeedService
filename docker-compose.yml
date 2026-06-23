@@ -27,6 +27,21 @@ services:
       - backend
     restart: unless-stopped
 
+  driver:
+    build:
+      context: ./driver
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://backend:8000/api
+    ports:
+      - 3002:3002
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+    depends_on:
+      - backend
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -42,6 +57,8 @@ services:
       - DB_DATABASE=speedservice
       - DB_USERNAME=speedservice
       - DB_PASSWORD=password
+      - QUEUE_CONNECTION=sync
+      - REDIS_HOST=redis
     volumes:
       - ./backend:/var/www/html
     depends_on:

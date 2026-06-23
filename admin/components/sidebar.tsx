@@ -26,9 +26,9 @@ const navLinks: NavLink[] = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { href: '/orders', icon: Package, label: 'Commandes', exact: false },
   { href: '/clients', icon: Users, label: 'Clients', exact: false },
-  { href: '/couriers', icon: Truck, label: 'Livreurs', exact: false },
+  { href: '/drivers', icon: Truck, label: 'Livreurs', exact: false },
   { href: '/payments', icon: CreditCard, label: 'Paiements', exact: false },
-  { href: '/riders', icon: ClipboardList, label: 'Candidatures', exact: false },
+  { href: '/driver-applications', icon: ClipboardList, label: 'Candidatures', exact: false },
 ]
 
 interface UserInfo {

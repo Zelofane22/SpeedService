@@ -539,3 +539,406 @@ into your web browser: <span class="break-all" style="box-sizing: border-box; fo
 #59 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
 #60 {main}
 "} 
+[2026-06-23 20:37:24] local.ERROR: Command "tinker" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"tinker\" is not defined. at /var/www/html/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 /var/www/html/vendor/symfony/console/Application.php(298): Symfony\\Component\\Console\\Application->find('tinker')
+#1 /var/www/html/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 /var/www/html/artisan(15): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 {main}
+"} 
+[2026-06-23 20:40:22] local.ERROR: Class "Redis" not found {"exception":"[object] (Error(code: 0): Class \"Redis\" not found at /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php:80)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php(34): Illuminate\\Redis\\Connectors\\PhpRedisConnector->createClient(Array)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php(39): Illuminate\\Redis\\Connectors\\PhpRedisConnector->{closure:Illuminate\\Redis\\Connectors\\PhpRedisConnector::connect():33}()
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/RedisManager.php(111): Illuminate\\Redis\\Connectors\\PhpRedisConnector->connect(Array, Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/RedisManager.php(92): Illuminate\\Redis\\RedisManager->resolve('default')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(452): Illuminate\\Redis\\RedisManager->connection('default')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(226): Illuminate\\Queue\\RedisQueue->getConnection()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(211): Illuminate\\Queue\\RedisQueue->pushRaw('{\"uuid\":\"4fc0b5...', NULL)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/Queue.php(379): Illuminate\\Queue\\RedisQueue->{closure:Illuminate\\Queue\\RedisQueue::push():210}('{\"uuid\":\"4fc0b5...', NULL, NULL)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(205): Illuminate\\Queue\\Queue->enqueueUsing(Object(Illuminate\\Mail\\SendQueuedMailable), '{\"uuid\":\"4fc0b5...', NULL, NULL, Object(Closure))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/Queue.php(72): Illuminate\\Queue\\RedisQueue->push(Object(Illuminate\\Mail\\SendQueuedMailable), '', NULL)
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/Mailable.php(235): Illuminate\\Queue\\Queue->pushOn(NULL, Object(Illuminate\\Mail\\SendQueuedMailable))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/Mailer.php(482): Illuminate\\Mail\\Mailable->queue(Object(Illuminate\\Queue\\QueueManager))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/PendingMail.php(145): Illuminate\\Mail\\Mailer->queue(Object(App\\Mail\\RiderApplicationStatusMail))
+#13 /var/www/html/app/Http/Controllers/Api/RiderApplicationController.php(42): Illuminate\\Mail\\PendingMail->queue(Object(App\\Mail\\RiderApplicationStatusMail))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App\\Http\\Controllers\\Api\\RiderApplicationController->apply(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\Api\\RiderApplicationController), 'apply')
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\\Routing\\Route->run()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():821}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():197}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(74): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#52 {main}
+"} 
+[2026-06-23 20:41:26] local.ERROR: Class "Redis" not found {"exception":"[object] (Error(code: 0): Class \"Redis\" not found at /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php:80)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php(34): Illuminate\\Redis\\Connectors\\PhpRedisConnector->createClient(Array)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/Connectors/PhpRedisConnector.php(39): Illuminate\\Redis\\Connectors\\PhpRedisConnector->{closure:Illuminate\\Redis\\Connectors\\PhpRedisConnector::connect():33}()
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/RedisManager.php(111): Illuminate\\Redis\\Connectors\\PhpRedisConnector->connect(Array, Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Redis/RedisManager.php(92): Illuminate\\Redis\\RedisManager->resolve('default')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(452): Illuminate\\Redis\\RedisManager->connection('default')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(226): Illuminate\\Queue\\RedisQueue->getConnection()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(211): Illuminate\\Queue\\RedisQueue->pushRaw('{\"uuid\":\"60a965...', NULL)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/Queue.php(379): Illuminate\\Queue\\RedisQueue->{closure:Illuminate\\Queue\\RedisQueue::push():210}('{\"uuid\":\"60a965...', NULL, NULL)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/RedisQueue.php(205): Illuminate\\Queue\\Queue->enqueueUsing(Object(Illuminate\\Mail\\SendQueuedMailable), '{\"uuid\":\"60a965...', NULL, NULL, Object(Closure))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Queue/Queue.php(72): Illuminate\\Queue\\RedisQueue->push(Object(Illuminate\\Mail\\SendQueuedMailable), '', NULL)
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/Mailable.php(235): Illuminate\\Queue\\Queue->pushOn(NULL, Object(Illuminate\\Mail\\SendQueuedMailable))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/Mailer.php(482): Illuminate\\Mail\\Mailable->queue(Object(Illuminate\\Queue\\QueueManager))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Mail/PendingMail.php(145): Illuminate\\Mail\\Mailer->queue(Object(App\\Mail\\RiderApplicationStatusMail))
+#13 /var/www/html/app/Http/Controllers/Api/RiderApplicationController.php(42): Illuminate\\Mail\\PendingMail->queue(Object(App\\Mail\\RiderApplicationStatusMail))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App\\Http\\Controllers\\Api\\RiderApplicationController->apply(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\\Routing\\ControllerDispatcher->dispatch(Object(Illuminate\\Routing\\Route), Object(App\\Http\\Controllers\\Api\\RiderApplicationController), 'apply')
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\\Routing\\Route->runController()
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\\Routing\\Route->run()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():821}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():197}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(74): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#39 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#40 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#41 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#42 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#43 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#44 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#45 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#46 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#47 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#48 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#49 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#50 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#51 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#52 {main}
+"} 
+[2026-06-23 20:41:56] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: testdriver3@speedservice.bj
+Subject: Votre candidature a =?utf-8?Q?=C3=A9t=C3=A9_re=C3=A7u?=
+ =?utf-8?Q?e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Tue, 23 Jun 2026 20:41:56 +0100
+Message-ID: <969364c71e37356454534d8342722002@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Test,</p>
+
+                    <p>Nous avons bien reçu votre candidature pour devenir livreur SpeedService.</p>
+            <div class="status-box">
+                <strong>Statut :</strong> En attente d'examen<br>
+                <strong>Référence :</strong> 019ef600-ed2d-7398-9632-6c233011efdd
+            </div>
+            <p>Notre équipe va examiner votre dossier dans les prochaines 48 heures. Vous recevrez un email dès qu'une décision sera prise.</p>
+
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
+[2026-06-23 20:42:08] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: testdriver3@speedservice.bj
+Subject: =?utf-8?Q?F=C3=A9licitations?= ! Votre candidature est
+ =?utf-8?Q?approuv=C3=A9e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Tue, 23 Jun 2026 20:42:08 +0100
+Message-ID: <551118f5d76e3d2635c938a1031b4a86@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Test,</p>
+
+                    <p>Félicitations ! Votre candidature a été <strong>approuvée</strong>.</p>
+            <p>Votre compte livreur est maintenant actif. Connectez-vous sur rider.speedservice.bj pour commencer à accepter des missions.</p>
+            <a class="btn" href="https://rider.speedservice.bj">Accéder à mon espace</a>
+
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
+[2026-06-23 20:58:46] local.ERROR: Route [login] not defined. {"exception":"[object] (Symfony\\Component\\Routing\\Exception\\RouteNotFoundException(code: 0): Route [login] not defined. at /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/UrlGenerator.php:534)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(870): Illuminate\\Routing\\UrlGenerator->route('login', Array, true)
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php(278): route('login')
+#2 [internal function]: Illuminate\\Foundation\\Configuration\\ApplicationBuilder->{closure:{closure:Illuminate\\Foundation\\Configuration\\ApplicationBuilder::withMiddleware():276}:278}(Object(Illuminate\\Http\\Request))
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(117): call_user_func(Object(Closure), Object(Illuminate\\Http\\Request))
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(104): Illuminate\\Auth\\Middleware\\Authenticate->redirectTo(Object(Illuminate\\Http\\Request))
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(87): Illuminate\\Auth\\Middleware\\Authenticate->unauthenticated(Object(Illuminate\\Http\\Request), Array)
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(61): Illuminate\\Auth\\Middleware\\Authenticate->authenticate(Object(Illuminate\\Http\\Request), Array)
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Auth\\Middleware\\Authenticate->handle(Object(Illuminate\\Http\\Request), Object(Closure), 'sanctum')
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\\Routing\\Router->runRouteWithinStack(Object(Illuminate\\Routing\\Route), Object(Illuminate\\Http\\Request))
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\\Routing\\Router->runRoute(Object(Illuminate\\Http\\Request), Object(Illuminate\\Routing\\Route))
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\\Routing\\Router->dispatchToRoute(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch(Object(Illuminate\\Http\\Request))
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():197}(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(Object(Illuminate\\Http\\Request))
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#19 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#21 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#22 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePostSize->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#23 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#25 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(74): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#26 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\HandleCors->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#27 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#28 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\TrustProxies->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#29 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#30 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#31 /var/www/html/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#32 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\\Http\\Middleware\\ValidatePathEncoding->handle(Object(Illuminate\\Http\\Request), Object(Closure))
+#33 /var/www/html/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(Object(Illuminate\\Http\\Request))
+#34 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then(Object(Closure))
+#35 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#36 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#37 /var/www/html/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#38 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#39 {main}
+"} 
+[2026-06-23 21:10:43] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: koffi.agbeko@test.bj
+Subject: Votre candidature a =?utf-8?Q?=C3=A9t=C3=A9_re=C3=A7u?=
+ =?utf-8?Q?e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Tue, 23 Jun 2026 21:10:43 +0100
+Message-ID: <064013fc0c5f358d240a101e7f124870@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Koffi,</p>
+
+                    <p>Nous avons bien reçu votre candidature pour devenir livreur SpeedService.</p>
+            <div class="status-box">
+                <strong>Statut :</strong> En attente d'examen<br>
+                <strong>Référence :</strong> 019ef61b-4809-738e-a14e-ec4b5aee1e5d
+            </div>
+            <p>Notre équipe va examiner votre dossier dans les prochaines 48 heures. Vous recevrez un email dès qu'une décision sera prise.</p>
+
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
+[2026-06-23 21:10:45] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: koffi.agbeko@test.bj
+Subject: =?utf-8?Q?F=C3=A9licitations?= ! Votre candidature est
+ =?utf-8?Q?approuv=C3=A9e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Tue, 23 Jun 2026 21:10:45 +0100
+Message-ID: <3fc4062076414cea5bf312f9a96f45ac@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Koffi,</p>
+
+                    <p>Félicitations ! Votre candidature a été <strong>approuvée</strong>.</p>
+            <p>Votre compte livreur a été créé. Cliquez sur le bouton ci-dessous pour choisir votre mot de passe et accéder à votre espace.</p>
+                            <a class="btn" href="http://localhost:3002/set-password?token=431533faf9d5fc13239606fd1779870fc16db6da76a5ee6585a927b76fc62693&amp;email=koffi.agbeko%40test.bj">Créer mon mot de passe</a>
+                <p style="margin-top:16px; font-size:13px; color:#666;">Ce lien est valable 60 minutes. Si vous ne l'utilisez pas dans ce délai, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+            
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
+[2026-06-23 21:21:14] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: seni@test.bj
+Subject: Votre candidature a =?utf-8?Q?=C3=A9t=C3=A9_re=C3=A7u?=
+ =?utf-8?Q?e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Tue, 23 Jun 2026 21:21:14 +0100
+Message-ID: <2bd5f11eff1cdd1a5b04963339719103@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Seni,</p>
+
+                    <p>Nous avons bien reçu votre candidature pour devenir livreur SpeedService.</p>
+            <div class="status-box">
+                <strong>Statut :</strong> En attente d'examen<br>
+                <strong>Référence :</strong> 019ef624-e823-725e-83a3-2121c6a75f2d
+            </div>
+            <p>Notre équipe va examiner votre dossier dans les prochaines 48 heures. Vous recevrez un email dès qu'une décision sera prise.</p>
+
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
