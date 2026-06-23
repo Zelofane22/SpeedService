@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-type Application = {
+type RiderApplication = {
   id: string
   first_name: string
   last_name: string
@@ -32,9 +32,9 @@ function authHeaders(): Record<string, string> {
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   pending:              { label: 'En attente',         cls: 'bg-amber-100 text-amber-800' },
   under_review:         { label: "En cours d'examen",  cls: 'bg-blue-100 text-blue-800' },
-  approved:             { label: 'Approuvée',          cls: 'bg-green-100 text-green-800' },
-  rejected:             { label: 'Rejetée',            cls: 'bg-red-100 text-red-800' },
-  complement_requested: { label: 'Complément demandé', cls: 'bg-orange-100 text-orange-800' },
+  approved:             { label: 'Approuvée',           cls: 'bg-green-100 text-green-800' },
+  rejected:             { label: 'Rejetée',             cls: 'bg-red-100 text-red-800' },
+  complement_requested: { label: 'Complément demandé',  cls: 'bg-orange-100 text-orange-800' },
 }
 
 const VEHICLE_ICONS: Record<string, string> = {
@@ -42,11 +42,11 @@ const VEHICLE_ICONS: Record<string, string> = {
 }
 
 export default function RiderApplicationsPage() {
-  // null = loading, [] | Application[] = loaded
-  const [applications, setApplications] = useState<Application[] | null>(null)
+  // null = loading, [] | RiderApplication[] = loaded
+  const [applications, setApplications] = useState<RiderApplication[] | null>(null)
   const [filterStatus, setFilterStatus] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
-  const [selected, setSelected] = useState<Application | null>(null)
+  const [selected, setSelected] = useState<RiderApplication | null>(null)
   const [action, setAction] = useState<'approve' | 'reject' | 'request_complement' | null>(null)
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -61,7 +61,6 @@ export default function RiderApplicationsPage() {
     return () => { cancelled = true }
   }, [filterStatus, refreshKey])
 
-  // State updates in event handlers are always fine for React Compiler
   const applyFilter = (status: string) => {
     setApplications(null)
     setFilterStatus(status)
@@ -75,7 +74,7 @@ export default function RiderApplicationsPage() {
   const openDetail = async (id: string) => {
     const res = await fetch(`${BASE_URL}/admin/riders/applications/${id}`, { headers: authHeaders() })
     const json = await res.json()
-    setSelected(json)
+    setSelected(json as RiderApplication)
     setAction(null)
     setReason('')
   }
@@ -104,11 +103,9 @@ export default function RiderApplicationsPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Candidatures livreurs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Validation des dossiers d&apos;inscription</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Candidatures livreurs</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Validation des dossiers d&apos;inscription</p>
       </div>
 
       {/* Filters */}
@@ -117,7 +114,11 @@ export default function RiderApplicationsPage() {
           <button
             key={s}
             onClick={() => applyFilter(s)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${filterStatus === s ? 'bg-[#861D6D] text-white border-[#861D6D]' : 'border-gray-200 text-gray-600 hover:border-[#861D6D]'}`}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              filterStatus === s
+                ? 'bg-primary text-white border-primary'
+                : 'border-border text-muted-foreground hover:border-primary hover:text-foreground'
+            }`}
           >
             {s === '' ? 'Tous' : (STATUS_LABELS[s]?.label ?? s)}
           </button>
@@ -126,45 +127,48 @@ export default function RiderApplicationsPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Chargement…</div>
+        <div className="text-center py-12 text-muted-foreground">Chargement…</div>
       ) : applications.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">Aucune candidature</div>
+        <div className="text-center py-12 text-muted-foreground">Aucune candidature</div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Candidat</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Véhicule</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Ville</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Statut</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Soumis le</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Candidat</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Véhicule</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Ville</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Statut</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Soumis le</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {applications.map((app) => {
                 const st = STATUS_LABELS[app.status]
                 return (
-                  <tr key={app.id} className="hover:bg-gray-50">
+                  <tr key={app.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{app.first_name} {app.last_name}</p>
-                      <p className="text-xs text-gray-500">{app.email}</p>
+                      <p className="font-medium text-foreground">{app.first_name} {app.last_name}</p>
+                      <p className="text-xs text-muted-foreground">{app.email}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-4 py-3 text-foreground">
                       {VEHICLE_ICONS[app.vehicle_type] ?? '🚗'} {app.vehicle_type}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{app.city}</td>
+                    <td className="px-4 py-3 text-foreground">{app.city}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${st?.cls ?? 'bg-gray-100 text-gray-700'}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${st?.cls ?? 'bg-muted text-muted-foreground'}`}>
                         {st?.label ?? app.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
                       {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('fr-FR') : '—'}
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => openDetail(app.id)} className="text-[#861D6D] font-medium text-xs hover:underline">
+                      <button
+                        onClick={() => openDetail(app.id)}
+                        className="text-primary font-medium text-xs hover:underline"
+                      >
                         Examiner →
                       </button>
                     </td>
@@ -176,13 +180,13 @@ export default function RiderApplicationsPage() {
         </div>
       )}
 
-      {/* Detail panel */}
+      {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h2 className="font-bold text-lg">{selected.first_name} {selected.last_name}</h2>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-700 text-xl">✕</button>
+          <div className="bg-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h2 className="font-bold text-lg text-foreground">{selected.first_name} {selected.last_name}</h2>
+              <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground text-xl">✕</button>
             </div>
 
             <div className="p-5 flex flex-col gap-4 text-sm">
@@ -194,38 +198,50 @@ export default function RiderApplicationsPage() {
                   ['Véhicule', `${VEHICLE_ICONS[selected.vehicle_type] ?? ''} ${selected.vehicle_type}`],
                 ].map(([k, v]) => (
                   <div key={k}>
-                    <p className="text-xs text-gray-500">{k}</p>
-                    <p className="font-medium text-gray-800">{v}</p>
+                    <p className="text-xs text-muted-foreground">{k}</p>
+                    <p className="font-medium text-foreground">{v}</p>
                   </div>
                 ))}
               </div>
 
               {/* Documents */}
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Documents</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Documents</p>
                 <div className="flex flex-col gap-1">
                   {selected.documents.map((d, i) => (
                     <div key={i} className="flex justify-between text-xs">
-                      <span className="text-gray-600">{d.document_type}</span>
-                      <span className={d.validation_status === 'approved' ? 'text-green-600' : d.validation_status === 'rejected' ? 'text-red-600' : 'text-amber-600'}>
+                      <span className="text-muted-foreground">{d.document_type}</span>
+                      <span className={
+                        d.validation_status === 'approved' ? 'text-green-600' :
+                        d.validation_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
+                      }>
                         {d.validation_status}
                       </span>
                     </div>
                   ))}
+                  {selected.documents.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">Aucun document soumis</p>
+                  )}
                 </div>
               </div>
 
               {/* Decision */}
               {['pending', 'under_review', 'complement_requested'].includes(selected.status) && (
-                <div className="border-t pt-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Décision</p>
+                <div className="border-t border-border pt-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Décision</p>
                   <div className="flex gap-2 mb-3">
                     {([
                       { value: 'approve', label: '✓ Approuver', cls: 'bg-green-600 text-white' },
                       { value: 'reject', label: '✗ Rejeter', cls: 'bg-red-600 text-white' },
                       { value: 'request_complement', label: '📎 Complément', cls: 'bg-orange-500 text-white' },
                     ] as const).map(({ value, label, cls }) => (
-                      <button key={value} onClick={() => { setAction(value); setReason('') }} className={`flex-1 py-2 rounded-lg text-xs font-medium transition-opacity ${action === value ? cls : 'border border-gray-200 text-gray-600 hover:border-gray-400'}`}>
+                      <button
+                        key={value}
+                        onClick={() => { setAction(value); setReason('') }}
+                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                          action === value ? cls : 'border border-border text-muted-foreground hover:border-foreground'
+                        }`}
+                      >
                         {label}
                       </button>
                     ))}
@@ -235,7 +251,7 @@ export default function RiderApplicationsPage() {
                     <textarea
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#861D6D]"
+                      className="w-full border border-border rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                       rows={3}
                       placeholder={action === 'reject' ? 'Motif de rejet…' : 'Documents manquants à demander…'}
                     />
@@ -244,7 +260,7 @@ export default function RiderApplicationsPage() {
                   <button
                     disabled={!action || submitting || ((action === 'reject' || action === 'request_complement') && !reason)}
                     onClick={submitDecision}
-                    className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold mt-3"
+                    className="w-full bg-primary disabled:bg-muted text-white disabled:text-muted-foreground py-3 rounded-xl font-semibold mt-3 transition-colors"
                   >
                     {submitting ? 'Enregistrement…' : 'Confirmer la décision'}
                   </button>

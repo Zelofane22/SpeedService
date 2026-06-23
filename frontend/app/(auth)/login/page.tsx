@@ -43,11 +43,12 @@ export default function LoginPage() {
       localStorage.setItem('auth_token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
 
-      const destination = data.user.role === 'admin'
-        ? '/admin'
-        : data.user.role === 'driver'
-          ? '/driver/missions'
-          : '/dashboard'
+      if (data.user.role === 'admin') {
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'
+        window.location.href = adminUrl
+        return
+      }
+      const destination = data.user.role === 'driver' ? '/driver/missions' : '/dashboard'
       router.push(destination)
     } catch (err: unknown) {
       if (err instanceof Error && 'errors' in err) {
