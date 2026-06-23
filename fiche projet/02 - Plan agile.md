@@ -861,14 +861,13 @@ Back-office fonctionnel pour l'activité existante.
 * API admin protégée par Sanctum + middleware de rôle.
 * Statistiques, listes paginées d'utilisateurs/livraisons/livreurs et rapports.
 * Changement de rôle, modification administrative du statut d'une livraison et validation des paiements physiques.
-* Écrans `/admin`, `/admin/users`, `/admin/deliveries`, `/admin/drivers` et `/admin/reports` présents.
+* Application autonome `admin/` destinée à `admin.speedservice.bj`, avec écrans Dashboard, Commandes, Clients, Livreurs et Paiements.
 
 Restes avant clôture :
 
-* Stabiliser les contrats de données et le routage après connexion admin.
-* Ajouter une persistance `is_active` avant d'activer réellement la suspension des livreurs.
+* Stabiliser les contrats de données et le routage après connexion dans l'application admin autonome.
 * Ajouter l'affectation manuelle d'une livraison à un livreur si elle reste dans le périmètre US-038.
-* Obtenir lint, build et tests au vert sur l'ensemble intégré.
+* Obtenir lint et build au vert pour `admin/`, puis valider l'ensemble avec les tests backend.
 
 La validation des **dossiers de candidature rider** est déplacée au Sprint 8 : les tables et endpoints correspondants n'existent pas encore.
 

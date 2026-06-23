@@ -1,7 +1,7 @@
 # DAT — INFRASTRUCTURE & DÉPLOIEMENT
 # Speed Service
 
-**Version :** 1.1 — cible d'infrastructure et état du dépôt
+**Version :** 1.2 — cible d'infrastructure et état du dépôt au 23 juin 2026
 **Date :** Juin 2026
 **Complément :** [03 - DAT Architecture.md](03%20-%20DAT%20Architecture.md)
 
@@ -17,25 +17,27 @@ Pour l'architecture logicielle (code, BDD, modules métier), voir [03 - DAT Arch
 
 # 2. Architecture multi-application cible
 
-La cible de production prévoit **trois sous-domaines** desservis par un VPS. Aucun élément du dépôt ne permet d'affirmer que ce déploiement ou ces DNS existent déjà.
+La cible de production prévoit **quatre sous-domaines** desservis par un VPS. Aucun élément du dépôt ne permet d'affirmer que ce déploiement ou ces DNS existent déjà.
 
 | Sous-domaine | Application | Port interne | Notes |
 |---|---|---|---|
 | `speedservice.bj` | Next.js client | 3000 | Desktop-first |
-| `rider.speedservice.bj` | Next.js rider | 3001 | Mobile-first, PWA — Sprint 8 |
-| `api.speedservice.bj` | Laravel API | 8000 | Partagé entre les deux apps |
+| `admin.speedservice.bj` | Next.js admin | 3001 | Back-office — Sprint 7 en cours |
+| `rider.speedservice.bj` | Next.js rider | 3002 | Mobile-first, PWA — Sprint 8 |
+| `api.speedservice.bj` | Laravel API | 8000 | Partagé entre les trois frontends |
 
 Nginx joue le rôle de **reverse proxy** : il reçoit toutes les requêtes HTTPS entrantes et les distribue au bon processus selon le `server_name`.
 
-```
+**État courant vérifié :** le développement local repose sur `frontend/`, `admin/`, `backend/`, PostgreSQL et Redis via Docker Compose. Le dossier `rider/` n'existe pas encore. Le back-office autonome du Sprint 7 reste un chantier **en cours piloté par Claude**.
 
-**État courant vérifié :** le développement local repose sur `frontend/`, `backend/`, PostgreSQL et Redis via Docker Compose. Le dossier `rider/` n'existe pas encore. Le back-office du Sprint 7 reste un chantier **en cours piloté par Claude** dans le frontend principal.
+```
 Internet
     │ :443 HTTPS
     ▼
   Nginx
     ├── speedservice.bj       → localhost:3000  (Next.js client)
-    ├── rider.speedservice.bj → localhost:3001  (Next.js rider)
+    ├── admin.speedservice.bj → localhost:3001  (Next.js admin)
+    ├── rider.speedservice.bj → localhost:3002  (Next.js rider)
     └── api.speedservice.bj   → localhost:8000  (Laravel)
 ```
 
@@ -43,7 +45,7 @@ Internet
 
 # 3. Configuration DNS
 
-À configurer chez le registrar (OVH, Namecheap, Contabo DNS…) lors des Sprints 8 et 9.
+À configurer chez le registrar (OVH, Namecheap, Contabo DNS…) lors de la mise en ligne progressive des Sprints 7 à 9.
 
 ## 3.1 Enregistrements à créer
 
@@ -54,6 +56,9 @@ www.speedservice.bj     CNAME   speedservice.bj
 
 ; Sous-domaine API
 api.speedservice.bj     A       <IP_VPS>
+
+; Sous-domaine admin
+admin.speedservice.bj   A       <IP_VPS>
 
 ; Sous-domaine rider
 rider.speedservice.bj   A       <IP_VPS>
@@ -72,9 +77,10 @@ rider.speedservice.bj   A       <IP_VPS>
 
 ```bash
 dig speedservice.bj A
+dig admin.speedservice.bj A
 dig rider.speedservice.bj A
 dig api.speedservice.bj A
-# Doit retourner <IP_VPS> pour les trois
+# Doit retourner <IP_VPS> pour les quatre
 ```
 
 ---
@@ -120,7 +126,37 @@ server {
 }
 ```
 
-## 4.3 Bloc — Application rider (`rider.speedservice.bj`)
+## 4.3 Bloc — Back-office (`admin.speedservice.bj`)
+
+`/etc/nginx/sites-available/admin`
+
+```nginx
+server {
+    listen 80;
+    server_name admin.speedservice.bj;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name admin.speedservice.bj;
+
+    ssl_certificate     /etc/letsencrypt/live/admin.speedservice.bj/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/admin.speedservice.bj/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+
+    location / {
+        proxy_pass         http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## 4.4 Bloc — Application rider (`rider.speedservice.bj`)
 
 `/etc/nginx/sites-available/rider`
 
@@ -140,7 +176,7 @@ server {
     include             /etc/letsencrypt/options-ssl-nginx.conf;
 
     location / {
-        proxy_pass         http://localhost:3001;
+        proxy_pass         http://localhost:3002;
         proxy_http_version 1.1;
         proxy_set_header   Upgrade $http_upgrade;
         proxy_set_header   Connection 'upgrade';
@@ -150,7 +186,7 @@ server {
 }
 ```
 
-## 4.4 Bloc — API Laravel (`api.speedservice.bj`)
+## 4.5 Bloc — API Laravel (`api.speedservice.bj`)
 
 `/etc/nginx/sites-available/api`
 
@@ -218,6 +254,9 @@ sudo certbot --nginx -d speedservice.bj -d www.speedservice.bj
 # API
 sudo certbot --nginx -d api.speedservice.bj
 
+# Administration (Sprint 7)
+sudo certbot --nginx -d admin.speedservice.bj
+
 # Rider (à déployer en Sprint 8)
 sudo certbot --nginx -d rider.speedservice.bj
 ```
@@ -237,7 +276,7 @@ sudo systemctl status certbot.timer
 
 # 6. CORS — Configuration Laravel
 
-Le backend devra autoriser les deux origines frontend en production. À la date de l'audit, aucun fichier `backend/config/cors.php` n'est présent : la politique doit donc être publiée/configurée et testée avant mise en ligne.
+Le backend devra autoriser les trois origines frontend en production. À la date de l'audit, aucun fichier `backend/config/cors.php` n'est présent : la politique doit donc être publiée/configurée et testée avant mise en ligne.
 
 `backend/config/cors.php`
 
@@ -248,6 +287,7 @@ return [
     'allowed_origins'     => [
         'https://speedservice.bj',
         'https://www.speedservice.bj',
+        'https://admin.speedservice.bj',
         'https://rider.speedservice.bj',
     ],
     'allowed_origins_patterns' => [],
@@ -258,7 +298,7 @@ return [
 ];
 ```
 
-En développement local, autoriser `http://localhost:3000` et, seulement après création de l'app rider, `http://localhost:3001`. Le backend utilise actuellement des Bearer tokens Sanctum, pas l'authentification SPA par cookie ; `supports_credentials` doit être choisi en cohérence avec le mode final.
+En développement local, autoriser `http://localhost:3000`, `http://localhost:3001` pour l'admin et, après création de l'app rider, `http://localhost:3002`. Le backend utilise actuellement des Bearer tokens Sanctum ; le cookie de l'application admin sert à son middleware Next.js, tandis que les appels API emploient toujours le token Bearer.
 
 ---
 
@@ -276,6 +316,15 @@ services:
     ports: ["3000:3000"]
     environment:
       NODE_ENV: development
+
+  admin:
+    build:
+      context: ./admin
+    ports: ["3001:3001"]
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://backend:8000/api
+    depends_on: [backend]
 
   backend:
     build:
@@ -298,7 +347,7 @@ volumes:
   db_data:
 ```
 
-Ce résumé reflète les noms de services actuels. Deux points restent à corriger/valider pour un démarrage intégré : exposer `NEXT_PUBLIC_API_URL` au frontend si la valeur par défaut ne convient pas, et définir `REDIS_HOST=redis` côté backend pour les queues (la valeur par défaut actuelle est `127.0.0.1`). Aucun worker de queue dédié n'est déclaré dans Compose.
+Ce résumé reflète les noms de services actuels, dont le service `admin`. Trois points restent à corriger/valider pour un démarrage intégré : suivre et valider le `Dockerfile` de l'admin, exposer `NEXT_PUBLIC_API_URL` au frontend client si la valeur par défaut ne convient pas, et définir `REDIS_HOST=redis` côté backend pour les queues. Aucun worker de queue dédié n'est déclaré dans Compose.
 
 ## 7.2 Production cible
 
@@ -312,9 +361,13 @@ npm install -g pm2
 cd /var/www/speedservice/frontend
 pm2 start npm --name "speedservice-client" -- start -- -p 3000
 
-# Lancer l'app rider (port 3001) — Sprint 8
+# Lancer l'app admin (port 3001) — Sprint 7
+cd /var/www/speedservice/admin
+pm2 start npm --name "speedservice-admin" -- start -- -p 3001
+
+# Lancer l'app rider (port 3002) — Sprint 8
 cd /var/www/speedservice/rider
-pm2 start npm --name "speedservice-rider" -- start -- -p 3001
+pm2 start npm --name "speedservice-rider" -- start -- -p 3002
 
 # Persister au redémarrage
 pm2 save
@@ -362,6 +415,8 @@ Déclenchement : PR vers `develop`, push sur `develop` ou `main`.
 
 La CI se déclenche sur push et pull request vers `main` ou `develop`. Elle ne contient actuellement **aucune étape de déploiement** ; la partie CD (SSH, migrations, redémarrage PM2/queues) reste à concevoir au Sprint 9.
 
+> **Écart Sprint 7 :** l'application `admin/` n'a pas encore de job lint/build dédié dans la CI GitHub Actions. Son ajout fait partie de la stabilisation du back-office.
+
 ## 8.5 Secrets GitHub Actions cibles pour le déploiement
 
 | Secret | Usage |
@@ -385,7 +440,7 @@ La CI se déclenche sur push et pull request vers `main` ou `develop`. Elle ne c
 
 | Environnement | URL | Source | Déploiement |
 |---|---|---|---|
-| Développement | `localhost:3000` / `localhost:8000` | Branche courante | Manuel (`docker compose up`) |
+| Développement | client `:3000`, admin `:3001`, API `:8000` | Branche courante | Manuel (`docker compose up`) |
 | Préproduction cible | `staging.speedservice.bj` | `develop` | À mettre en place |
 | Production cible | `speedservice.bj` | `main` | À mettre en place après validation |
 
@@ -437,7 +492,7 @@ Au Sprint 8, les fichiers d'identité et documents livreur devront être stocké
 
 | Outil | Usage |
 |---|---|
-| Uptime Kuma | Surveillance de disponibilité (`speedservice.bj`, `api.speedservice.bj`, `rider.speedservice.bj`) |
+| Uptime Kuma | Surveillance de disponibilité (`speedservice.bj`, `admin.speedservice.bj`, `api.speedservice.bj`, `rider.speedservice.bj`) |
 | Grafana + Prometheus | Métriques serveur (CPU, RAM, disque, réseau) |
 
 ## 12.3 Alertes
@@ -466,13 +521,13 @@ Les durées de rétention ci-dessus constituent une politique à mettre en œuvr
 
 ```
 1. Provisionner le VPS (Ubuntu 24.04)
-2. Configurer le DNS (enregistrements A pour les 3 sous-domaines)
+2. Configurer le DNS (enregistrements A pour les 4 sous-domaines)
 3. Installer : Nginx, PHP 8.4, PHP-FPM, une version Node validée avec Next.js (CI actuelle : Node 24), PM2, PostgreSQL 16, Redis, Certbot
 4. Cloner le dépôt Git sur le serveur
-5. Configurer les fichiers .env (backend + frontend)
+5. Configurer les fichiers .env (backend + frontends client/admin)
 6. php artisan migrate --seed
-7. npm run build (frontend client)
-8. Démarrer les processus PM2 (client :3000, Laravel via PHP-FPM)
+7. npm run build (frontend client et admin)
+8. Démarrer les processus PM2 (client :3000, admin :3001, Laravel via PHP-FPM)
 9. Configurer les blocs Nginx (§4)
 10. Générer les certificats SSL (§5)
 11. Vérifier : curl https://api.speedservice.bj/api/status → { "status": "ok" }
@@ -490,8 +545,8 @@ Checklist spécifique à la mise en production de `rider.speedservice.bj` :
 □ Créer l'enregistrement DNS A : rider.speedservice.bj → <IP_VPS>
 □ Créer le projet Next.js rider (dossier /rider)
 □ npm run build dans /rider
-□ Démarrer PM2 sur le port 3001
-□ Créer le bloc Nginx /etc/nginx/sites-available/rider (§4.3)
+□ Démarrer PM2 sur le port 3002
+□ Créer le bloc Nginx /etc/nginx/sites-available/rider (§4.4)
 □ Activer le site (ln -s + nginx -t + reload)
 □ Générer le certificat SSL : certbot --nginx -d rider.speedservice.bj
 □ Ajouter rider.speedservice.bj dans config/cors.php
@@ -503,13 +558,13 @@ Checklist spécifique à la mise en production de `rider.speedservice.bj` :
 
 ## 16. État d'exécution vérifié
 
-| Élément | État au 22 juin 2026 |
+| Élément | État au 23 juin 2026 |
 |---|---|
-| Dockerfiles frontend/backend | Présents, orientés développement |
-| Docker Compose local | Présent ; ajustements Redis/API/worker à valider |
-| GitHub Actions | CI unique : lint/build frontend, validation/tests backend, validation Compose |
+| Dockerfiles frontend/backend | Présents ; Dockerfile admin visible localement mais pas encore suivi dans Git |
+| Docker Compose local | Présent avec services frontend, admin, backend, PostgreSQL et Redis ; ajustements Redis/API/worker à valider |
+| GitHub Actions | CI : lint/build du frontend client, validation/tests backend, validation Compose ; job admin absent |
 | Déploiement automatique | Absent |
 | DNS, Nginx, TLS | Cibles documentées, non vérifiées comme déployées |
 | Sauvegardes et monitoring | Recommandations, non versionnés |
 | Rider `rider.speedservice.bj` | Sprint 8, application absente |
-| Sprint 7 Administration | **En cours — chantier Claude**, ne constitue pas encore une version livrable validée |
+| Sprint 7 Administration | **En cours — chantier Claude** dans `admin/` sur le port 3001 ; ne constitue pas encore une version livrable validée |

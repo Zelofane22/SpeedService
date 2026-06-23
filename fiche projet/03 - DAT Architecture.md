@@ -1,7 +1,7 @@
 # DAT — ARCHITECTURE APPLICATIVE
 # Speed Service
 
-**Version :** 1.1 — MVP (état du dépôt au 22 juin 2026)
+**Version :** 1.2 — MVP (état du dépôt au 23 juin 2026)
 **Date :** Juin 2026
 **Complément :** [04 - DAT Infrastructure.md](04%20-%20DAT%20Infrastructure.md)
 
@@ -17,14 +17,15 @@ Pour la configuration des serveurs, du réseau, du déploiement et de la CI/CD, 
 
 # 2. Vue d'ensemble applicative
 
-Le dépôt courant contient **deux applications exécutables** : un frontend Next.js et une API Laravel. Le frontend regroupe encore les espaces client, administrateur et rider provisoire.
+Le dépôt courant contient **trois applications exécutables** : le frontend client Next.js, le back-office Next.js autonome et l'API Laravel. L'espace rider reste provisoirement intégré au frontend client.
 
 ```
 frontend/ (Next.js 16)
 ├── site public et authentification
 ├── espace client
-├── back-office /admin (Sprint 7 en cours)
 └── espace rider /driver (provisoire)
+admin/ (Next.js 15 — Sprint 7 en cours)
+└── back-office destiné à admin.speedservice.bj
               │ HTTP / JSON + Bearer token
               ▼
 backend/ (Laravel 12 API)
@@ -35,11 +36,12 @@ backend/ (Laravel 12 API)
 
 | Élément | État courant | Cible |
 |---|---|---|
-| `frontend/` | Client + admin + rider provisoire | Client + admin sur `speedservice.bj` |
+| `frontend/` | Client + rider provisoire | Client sur `speedservice.bj` |
+| `admin/` | Back-office autonome, Sprint 7 en cours | `admin.speedservice.bj` |
 | `rider/` | Absent | PWA mobile-first sur `rider.speedservice.bj` au Sprint 8 |
 | `backend/` | API Laravel REST partagée | `api.speedservice.bj` au déploiement |
 
-L'architecture finale à trois applications (client, rider, API) reste la cible, pas l'état déployé constaté.
+L'architecture finale à quatre applications (client, admin, rider et API) reste une cible de déploiement ; aucun déploiement public n'est constaté dans le dépôt.
 
 ---
 
@@ -117,11 +119,11 @@ Responsabilités :
 - Validation manuelle des paiements physiques
 - Dashboard d'activité (commandes, livreurs, revenus)
 
-Le socle Sprint 7 inclut aussi des rapports sur six mois et le changement de rôle. La suspension persistante des livreurs et les dossiers de candidature rider ne sont pas encore disponibles.
+Le socle Sprint 7 inclut aussi des rapports, le changement de rôle et une suspension persistante via `users.is_active`. Les dossiers de candidature rider ne sont pas encore disponibles. Le frontend correspondant a été extrait dans `admin/` et reste un chantier en cours piloté par Claude.
 
 ---
 
-# 5. Architecture Frontend
+# 5. Architecture des frontends
 
 ## 5.1 Application client — `speedservice.bj`
 
@@ -164,16 +166,10 @@ app/
 │   │   └── payment/        → /deliveries/:id/payment
 │   ├── history/            → /history
 │   └── profile/            → /profile
-├── driver/                 (espace rider provisoire — sera migré vers rider.speedservice.bj en Sprint 8)
+└── driver/                 (espace rider provisoire — sera migré vers rider.speedservice.bj en Sprint 8)
 │   ├── missions/           → /driver/missions
 │   ├── active/             → /driver/active
 │   └── history/            → /driver/history
-└── (admin)/admin/          (back-office — Sprint 7 en cours)
-    ├── page.tsx            → /admin
-    ├── users/              → /admin/users
-    ├── deliveries/         → /admin/deliveries
-    ├── drivers/            → /admin/drivers
-    └── reports/            → /admin/reports
 ```
 
 > **Note Sprint 5-7 :** L'espace rider est actuellement intégré au projet client à `/driver/*`. En Sprint 8, il sera extrait dans un projet Next.js distinct déployé sur `rider.speedservice.bj`.
@@ -190,19 +186,36 @@ components/
 ├── map-picker.tsx      (sélection d'adresse sur carte Leaflet)
 ├── route-map.tsx       (visualisation trajet entre deux points)
 ├── notification-bell.tsx
-├── theme-toggle.tsx    (sélecteur clair/sombre global)
-└── admin/              (en-têtes, cartes statistiques, badges)
+└── theme-toggle.tsx    (sélecteur clair/sombre global)
 
 lib/
 ├── api.ts              (apiGet, apiPost, apiPut, apiPatch, apiDelete)
-├── api/admin.ts        (client des endpoints d'administration)
 ├── auth-context.tsx    (AuthContext, useAuthUser)
 └── utils.ts            (cn — clsx + tailwind-merge)
 ```
 
 ---
 
-## 5.2 Application rider cible — `rider.speedservice.bj` (Sprint 8)
+## 5.2 Application administrateur — `admin.speedservice.bj` (Sprint 7)
+
+L'application `admin/`, distincte du client, utilise Next.js 15, React 19, TypeScript et Tailwind CSS 3. Elle écoute sur le port local 3001.
+
+```
+admin/app/
+├── (auth)/login/       → /login
+└── (dashboard)/
+    ├── page.tsx        → /
+    ├── orders/         → /orders
+    ├── clients/        → /clients
+    ├── couriers/       → /couriers
+    └── payments/       → /payments
+```
+
+Elle partage l'API Laravel et les endpoints `/api/admin/*` protégés par `auth:sanctum` et `EnsureAdmin`. Le Sprint 7 reste en cours jusqu'à stabilisation des contrats API et validation de son lint/build.
+
+---
+
+## 5.3 Application rider cible — `rider.speedservice.bj` (Sprint 8)
 
 Cette application n'existe pas encore dans le dépôt. Le tableau suivant décrit la cible après extraction de `/driver/*`.
 
@@ -354,7 +367,7 @@ GET    /api/admin/reports
 
 **Laravel Sanctum** — tokens API (SPA tokens).
 
-Le token est stocké dans `localStorage` côté frontend et transmis dans l'en-tête `Authorization: Bearer {token}`.
+Le token est stocké dans `localStorage` côté client. L'application admin le conserve dans `localStorage` pour les appels API et dans un cookie pour son middleware de navigation. Les appels métier le transmettent dans l'en-tête `Authorization: Bearer {token}`.
 
 ## 7.2 Flux de connexion
 
@@ -370,10 +383,10 @@ Retourne { user: { role, ... }, token }
 Frontend lit le rôle :
   - client → /dashboard
   - driver → /driver/missions (provisoire) ou rider.speedservice.bj (Sprint 8)
-  - admin  → /admin (cible Sprint 7)
+  - admin  → admin.speedservice.bj
 ```
 
-> Écart courant : la page de connexion redirige automatiquement les livreurs, mais dirige encore les administrateurs vers `/dashboard`. Le layout `/admin` protège bien l'accès par rôle ; la redirection post-connexion admin reste à corriger.
+La connexion du frontend client redirige désormais un administrateur vers `NEXT_PUBLIC_ADMIN_URL` (par défaut `http://localhost:3001`). L'application admin expose aussi sa propre page `/login`.
 
 ## 7.3 Validation du rôle à l'entrée des espaces protégés
 
@@ -381,7 +394,7 @@ Chaque layout protégé appelle `GET /api/profile` au chargement et vérifie le 
 
 - Layout `(dashboard)` → redirige vers `/login` si non authentifié
 - Layout `driver/` → redirige vers `/driver-login` si non authentifié, vers `/dashboard` si rôle client
-- Layout `(admin)` → redirige vers `/login` sans token et vers `/dashboard` si le rôle mémorisé n'est pas `admin`
+- Middleware `admin/` → redirige vers `/login` si le cookie de token est absent ; l'autorisation métier reste imposée par `EnsureAdmin` côté API
 - Page `/driver-login` → retourne une erreur si l'utilisateur connecté est un client
 
 Le layout client ne vérifie pas encore explicitement le rôle après `GET /api/profile`. Cette protection frontend doit être harmonisée ; les endpoints admin restent protégés côté serveur par `EnsureAdmin`.

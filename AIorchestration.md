@@ -59,8 +59,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section GPT Codex
 
-**Dernier état :** —
+**Dernier état :** 2026-06-23
 
-*(Codex écrit uniquement ici)*
+✅ Terminé : `fiche projet/` aligné sur l'extraction du back-office dans `admin/` ; thème clair/sombre de `frontend/` validé par lint et build. `admin/` n'a pas été modifié, conformément au verrou Sprint 7 de Claude.
 
 ---

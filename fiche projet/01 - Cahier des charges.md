@@ -6,7 +6,7 @@ Version : 1.1 — alignée sur le dépôt
 
 Date : Juin 2026
 
-**État au 22 juin 2026 :** Sprints 0 à 6 terminés ; Sprint 7 Administration en cours ; application rider autonome prévue au Sprint 8 ; stabilisation et déploiement prévus au Sprint 9.
+**État au 23 juin 2026 :** Sprints 0 à 6 terminés ; Sprint 7 Administration autonome dans `admin/` en cours sous la responsabilité de Claude ; application rider prévue au Sprint 8 ; stabilisation et déploiement prévus au Sprint 9.
 
 ---
 
@@ -379,6 +379,8 @@ Le livreur connecté peut :
 
 # 6. Interface Administrateur
 
+> **Architecture actuelle :** le back-office du Sprint 7 est une application Next.js autonome dans `admin/`, prévue pour `admin.speedservice.bj` et le port local 3001. Ce chantier reste piloté par Claude et n'est pas déclaré terminé.
+
 ## Tableau de bord
 
 Affichage :
@@ -399,7 +401,7 @@ Affichage :
 ## Gestion des livreurs
 
 * Lister les livreurs et compter leurs livraisons terminées
-* Suspendre/réactiver un livreur *(reste bloqué tant que la colonne persistante `is_active` n'est pas ajoutée)*
+* Suspendre/réactiver un livreur à partir de la colonne persistante `is_active`
 * Examiner les candidatures rider *(Sprint 8, non disponible actuellement)*
 
 ## Gestion des commandes
@@ -420,7 +422,7 @@ Affichage :
 * Meilleurs clients
 * Taux de livraison terminée
 
-> Le Sprint 7 reste **en cours** tant que les contrats de données frontend/backend, les contrôles de rôle à la connexion et les validations lint/build/tests ne sont pas entièrement stabilisés.
+> Le Sprint 7 reste **en cours** tant que les contrats de données de l'application `admin/`, les contrôles de rôle à la connexion et les validations lint/build/tests ne sont pas entièrement stabilisés.
 
 ---
 
@@ -448,29 +450,31 @@ Affichage :
 
 ## Architecture multi-application
 
-La cible Speed Service se compose de **deux applications frontend distinctes** partageant un seul backend. Le dépôt courant ne contient encore qu'un frontend :
+La cible Speed Service se compose de **trois applications frontend distinctes** partageant un seul backend. Deux sont présentes dans le dépôt ; l'application rider reste planifiée :
 
 | Application | URL | Cible | Notes |
 |---|---|---|---|
-| Plateforme client | `speedservice.bj` | Clients, admin et espace rider provisoire | Présente dans `frontend/` |
+| Plateforme client | `speedservice.bj` | Clients et espace rider provisoire | Présente dans `frontend/` |
+| Back-office | `admin.speedservice.bj` | Administrateurs | Présent dans `admin/`, Sprint 7 en cours |
 | Espace rider | `rider.speedservice.bj` | Livreurs | Cible Sprint 8 ; dossier `rider/` absent |
 
-Un seul backend Laravel servira les deux applications. La configuration CORS de production pour les deux origines reste à publier et valider avant le déploiement.
+Un seul backend Laravel sert ces applications. La configuration CORS de production pour les trois origines reste à publier et valider avant le déploiement.
 
 ## Frontend
 
 * Next.js (App Router) + TypeScript + Tailwind CSS
 * Application client : desktop-first, responsive
+* Application admin autonome : desktop-first, port local 3001
 * Application rider cible : mobile-first, PWA (service worker, manifest)
-* Déploiement séparé sur deux sous-domaines à mettre en place au Sprint 8/9
-* Thème clair/sombre global par classe CSS, préférence navigateur/localStorage et bouton « Thème »
+* Déploiement séparé sur trois sous-domaines à mettre en place au fil des Sprints 7 à 9
+* Application client : thème clair/sombre global par classe CSS, préférence navigateur/localStorage et bouton « Thème »
 
 ## Backend
 
 * Laravel 12 / PHP 8.4
 * API REST (JSON)
 * Laravel Sanctum (authentification SPA)
-* CORS configuré pour `speedservice.bj` et `rider.speedservice.bj`
+* CORS cible pour `speedservice.bj`, `admin.speedservice.bj` et `rider.speedservice.bj`
 
 ## Base de données
 

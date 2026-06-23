@@ -145,7 +145,7 @@ Développer une plateforme centralisée permettant la gestion complète des livr
 * Gestion des paiements
 * Tableau de bord statistique
 
-> **État au 22 juin 2026 :** le Sprint 7 est en cours. Le dépôt contient le socle `/admin` et des API protégées pour les statistiques, utilisateurs, livraisons, validations de paiement, livreurs et rapports. L'affectation manuelle d'un livreur, la suspension persistante et le traitement des candidatures rider ne sont pas encore opérationnels.
+> **État au 23 juin 2026 :** le Sprint 7, piloté par Claude, est en cours. Le back-office a été extrait dans l'application Next.js autonome `admin/`, destinée à `admin.speedservice.bj`, et s'appuie sur des API protégées pour les statistiques, utilisateurs, livraisons, validations de paiement, livreurs et rapports. L'affectation manuelle d'un livreur et le traitement des candidatures rider ne sont pas encore opérationnels.
 
 ---
 
@@ -200,13 +200,13 @@ Les revenus de la plateforme proviendront de :
 
 # 11. Technologies Envisagées
 
-## Frontend
+## Frontends
 
-* Next.js 16 (App Router)
-* React 19
+* Client `frontend/` : Next.js 16 (App Router) et React 19
+* Back-office `admin/` : Next.js 15 (App Router) et React 19 — Sprint 7 en cours
 * TypeScript
 * Tailwind CSS 3
-* Sélecteur global de thème clair/sombre avec préférence persistée
+* Sélecteur global de thème clair/sombre avec préférence persistée dans l'application client
 
 ## Backend
 
@@ -246,6 +246,7 @@ Les revenus de la plateforme proviendront de :
 
 * Back-office, statistiques et rapports
 * Gestion des utilisateurs, livraisons et paiements
+* Application indépendante `admin/` ciblant `admin.speedservice.bj`
 * Stabilisation des écrans et validation complète par lint, build et tests
 
 ## Étape 3 : Rider — Sprint 8 planifié
@@ -295,15 +296,15 @@ Speed Service ambitionne de devenir une plateforme de référence dans le domain
 
 ---
 
-## État de référence du dépôt — 22 juin 2026
+## État de référence du dépôt — 23 juin 2026
 
 | Périmètre | État constaté |
 |---|---|
 | Sprints 0 à 6 | Terminés selon le jalon projet et représentés dans le code |
-| Sprint 7 — Administration | En cours : backend et écrans intégrés, stabilisation/validation restantes |
+| Sprint 7 — Administration | En cours, piloté par Claude : API admin et application autonome `admin/` présentes ; stabilisation/validation restantes |
 | Sprint 8 — Rider autonome | Planifié ; aucun dossier `rider/` ni modèle de candidature dans le dépôt |
 | Sprint 9 — Déploiement | Planifié ; la documentation d'exploitation décrit une cible, pas une production existante |
-| Thèmes clair/sombre | Implémentés globalement dans le frontend courant |
+| Thèmes clair/sombre | Implémentés globalement dans l'application client `frontend/` |
 
 Les paiements électroniques sont simulés dans le code actuel. Les intégrations réelles FedaPay, MTN MoMo et Moov Money restent à brancher avant la production.
  
