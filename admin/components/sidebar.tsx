@@ -9,6 +9,7 @@ import {
   Users,
   Truck,
   CreditCard,
+  ClipboardList,
   LogOut,
   User,
 } from 'lucide-react'
@@ -27,6 +28,7 @@ const navLinks: NavLink[] = [
   { href: '/clients', icon: Users, label: 'Clients', exact: false },
   { href: '/couriers', icon: Truck, label: 'Livreurs', exact: false },
   { href: '/payments', icon: CreditCard, label: 'Paiements', exact: false },
+  { href: '/riders', icon: ClipboardList, label: 'Candidatures', exact: false },
 ]
 
 interface UserInfo {

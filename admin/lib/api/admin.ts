@@ -117,3 +117,46 @@ export function getAdminPayments(params?: {
     `/admin/payments${buildQuery(params)}`
   )
 }
+
+// ── Rider applications ────────────────────────────────────────────────────────
+
+export type RiderApplication = {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  city: string
+  vehicle_type: string
+  status: string
+  submitted_at: string | null
+  reviewed_at: string | null
+  rejection_reason?: string
+  complement_request?: string
+  documents: Array<{ document_type: string; validation_status: string }>
+}
+
+export function getRiderApplications(params?: {
+  page?: number
+  status?: string
+}): Promise<{ data: RiderApplication[]; current_page: number; total: number }> {
+  return apiFetch(`/admin/riders/applications${buildQuery(params)}`)
+}
+
+export function getRiderApplication(id: string): Promise<RiderApplication> {
+  return apiFetch(`/admin/riders/applications/${id}`)
+}
+
+export function reviewRiderApplication(
+  id: string,
+  payload: {
+    action: 'approve' | 'reject' | 'request_complement'
+    rejection_reason?: string
+    complement_request?: string
+  }
+): Promise<{ message: string }> {
+  return apiFetch(`/admin/riders/applications/${id}/review`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}

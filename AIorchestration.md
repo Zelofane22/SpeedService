@@ -16,44 +16,38 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section Claude Code
 
-**Dernier état :** 2026-06-22
+**Dernier état :** 2026-06-23
 
-### Sprint 7 — Administration (back-office) — 🔄 En cours
+### Sprint 7 — Administration (back-office) — ✅ Terminé
+
+- ✅ Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints) + routes + tests
+- ✅ Frontend admin extrait dans `admin/` standalone (admin.speedservice.bj, port 3001)
+- ✅ `frontend/app/(admin)/` supprimé — tout est dans `admin/`
+
+---
+
+### Sprint 8 — Rider App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
 
 **Tâches terminées :**
-- ✅ Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints : stats, users, deliveries, drivers, reports) + routes `/admin/*` dans `api.php` + enregistrement dans `bootstrap/app.php`
-- ✅ Backend : `tests/Feature/Admin/AdminControllerTest.php`
-- ✅ Frontend : `types/admin.ts` — interfaces TypeScript AdminStats, AdminUser, AdminDelivery, AdminDriver, AdminReport
-- ✅ Frontend : `lib/api/admin.ts` — client API (9 fonctions fetch)
-- ✅ Frontend : `app/(admin)/layout.tsx` — layout admin avec sidebar, auth guard, navigation
-- ✅ Frontend : `app/(admin)/admin/page.tsx` — dashboard KPI (stats, breakdown statuts)
-- ✅ Frontend : `components/admin/` — StatCard, PageHeader, StatusBadge
-- ✅ Frontend : `app/(admin)/admin/users/page.tsx` — table users, search, role filter, changement de rôle
-- ✅ Frontend : `app/(admin)/admin/deliveries/page.tsx` — table livraisons, filtres, validation paiement, changement statut
-- ✅ Frontend : `app/(admin)/admin/drivers/page.tsx` — table livreurs, toggle actif/inactif
-- ✅ Frontend : `app/(admin)/admin/reports/page.tsx` — graphiques CSS, top clients, taux de complétion
+- ✅ Backend : migrations `driver_applications` + `driver_documents`
+- ✅ Backend : enums `VehicleType`, `DriverApplicationStatus`, `DocumentType`
+- ✅ Backend : modèles `DriverApplication` + `DriverDocument`
+- ✅ Backend : `RiderApplicationController` (4 endpoints publics + 3 admin)
+- ✅ Backend : `RiderApplicationStatusMail` + template Blade
+- ✅ Backend : `DriverApplicationFactory` + 13 tests PHPUnit (33 assertions ✅)
+- ✅ Admin app `admin/` : page `/riders` candidatures livreurs + sidebar mise à jour
+- ✅ Rider app `rider/` : scaffolding Next.js 16 PWA mobile-first — build ✅
+- ✅ Rider app : tunnel candidature R01–R08 (7 étapes), suivi R10, complément R12, login
+- ✅ Rider app : espace livreur connecté (bottom nav, missions, mission active, historique)
 
-**À faire :**
-- 🔲 Commit + vérification lint/build `admin/`
-- 🔲 Vérification tests backend (`composer test`)
-- 🔲 Supprimer `frontend/app/(admin)/` une fois l'app `admin/` complète
-- 🔲 Merge `develop` → `main` en fin de sprint
+**Fichiers libres — sprint 8 complet côté Claude :**
+- `backend/` — tous les fichiers sprint 8
+- `rider/` — toute l'app
+- `admin/app/(dashboard)/riders/` — page candidatures
+- `admin/lib/api/admin.ts` — types + fonctions rider ajoutés
+- `admin/components/sidebar.tsx`
 
-🔒 En cours : `admin/` — nouvelle app Next.js admin.speedservice.bj (port 3001)
-
-**Note architecture :** L'espace admin est extrait en app séparée (`admin/`) au lieu d'être embarqué dans `frontend/app/(admin)/`. Même pattern que `rider/` prévu au Sprint 8. Le `frontend/app/(admin)/` sera supprimé une fois la migration terminée.
-
-**Fichiers libres (sprint 7 complet côté Claude) :**
-- `backend/app/Http/Controllers/Api/AdminController.php`
-- `backend/app/Http/Middleware/EnsureAdmin.php`
-- `backend/routes/api.php`
-- `backend/bootstrap/app.php`
-- `backend/tests/Feature/Admin/AdminControllerTest.php`
-- `admin/` (entire directory — nouvelle app admin séparée)
-- `frontend/app/(admin)/**` (à supprimer après migration vers `admin/`)
-- `frontend/components/admin/**`
-- `frontend/lib/api/admin.ts`
-- `frontend/types/admin.ts`
+**Prochaine étape :** merge `develop` → `main` (Sprint 9 — Stabilisation & déploiement)
 
 ---
 
