@@ -18,11 +18,13 @@ services:
     build:
       context: ./admin
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     ports:
       - 3001:3001
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
     restart: unless-stopped
@@ -32,12 +34,12 @@ services:
       context: ./driver
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://backend:8000/api
+        - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     ports:
       - 3002:3002
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
     restart: unless-stopped

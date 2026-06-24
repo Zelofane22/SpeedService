@@ -1,6 +1,14 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function HomePage() {
+  const router = useRouter()
+  useEffect(() => {
+    if (localStorage.getItem('driver_token')) router.replace('/missions')
+  }, [router])
   return (
     <main className="flex flex-col min-h-screen bg-[#FAF7FB]">
       {/* Header */}

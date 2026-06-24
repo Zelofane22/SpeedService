@@ -23,7 +23,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error('Identifiants incorrects.')
       const { token } = await res.json()
       localStorage.setItem('driver_token', token)
-      window.location.href = '/dashboard'
+      window.location.href = '/missions'
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
