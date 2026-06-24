@@ -117,13 +117,23 @@ Dernière mise à jour : 2026-06-22
 | Backend : modèles `DriverApplication` + `DriverDocument` | ✅ Terminé |
 | Backend : `RiderApplicationController` (4 endpoints publics + 3 admin) | ✅ Terminé |
 | Backend : `RiderApplicationStatusMail` + template Blade | ✅ Terminé |
-| Frontend admin : page `/admin/riders` — validation dossiers (approbation/rejet/complément) | ✅ Terminé |
-| Rider app `rider/` : scaffolding Next.js PWA mobile-first | ✅ Terminé |
-| Rider app : page d'accueil R01 | ✅ Terminé |
-| Rider app : tunnel candidature R02–R08 (7 étapes) | ✅ Terminé |
-| Rider app : page suivi candidature R10 | ✅ Terminé |
-| Rider app : page complément R12 | ✅ Terminé |
-| Rider app : page connexion | ✅ Terminé |
+| Frontend admin : page `/admin/drivers` — validation dossiers (approbation/rejet/complément) | ✅ Terminé |
+| Driver app `driver/` : scaffolding Next.js PWA mobile-first | ✅ Terminé |
+| Driver app : page d'accueil R01 | ✅ Terminé |
+| Driver app : tunnel candidature R02–R08 (7 étapes) | ✅ Terminé |
+| Driver app : page suivi candidature R10 | ✅ Terminé |
+| Driver app : page complément R12 | ✅ Terminé |
+| Driver app : page connexion + espace missions connecté | ✅ Terminé |
+
+### Sprint 9 — Stabilisation & déploiement 🔄
+
+| Tâche | Statut |
+|---|---|
+| Monorepo pnpm workspaces — `packages/ui/` (cn, ThemeToggle, StatusBadge) | ✅ Terminé |
+| Monorepo pnpm workspaces — `packages/api-client/` (apiGet, apiPost, apiPatch…) | ✅ Terminé |
+| Mise à jour des apps frontend/admin/driver pour consommer les packages partagés | ✅ Terminé |
+| Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur » | ✅ Terminé |
+| TypeScript au vert sur les 3 apps (tsc --noEmit) | ✅ Terminé |
 
 ---
 
@@ -133,23 +143,28 @@ Dernière mise à jour : 2026-06-22
 |---|---|---|---|
 | `frontend/` | Next.js — app client | speedservice.bj | 3000 |
 | `admin/` | Next.js — back-office admin | admin.speedservice.bj | 3001 |
-| `rider/` | Next.js — app rider (Sprint 8) | rider.speedservice.bj | 3002 |
+| `driver/` | Next.js — app livreur PWA | driver.speedservice.bj | 3002 |
 | `backend/` | Laravel 12 — API partagée | api.speedservice.bj | 8000 |
+| `packages/ui/` | Composants partagés (`@speedservice/ui`) | — | — |
+| `packages/api-client/` | Client HTTP partagé (`@speedservice/api-client`) | — | — |
 
 ### Démarrage en développement
 
 ```bash
+# Installer toutes les dépendances (monorepo pnpm)
+pnpm install
+
 # Client
-cd frontend && npm run dev       # port 3000
+pnpm --filter speedservice-frontend dev       # port 3000
 
-# Back-office admin (Sprint 7)
-cd admin && npm run dev          # port 3001
+# Back-office admin
+pnpm --filter speedservice-admin dev          # port 3001
 
-# Rider (Sprint 8)
-cd rider && npm run dev          # port 3002
+# App livreur
+pnpm --filter speedservice-driver dev         # port 3002
 
 # Backend API
-cd backend && php artisan serve  # port 8000
+cd backend && php artisan serve               # port 8000
 
 # Stack complète via Docker
 docker compose up -d
@@ -158,10 +173,12 @@ docker compose up -d
 ## Structure du dépôt
 
 - `frontend/`: application Next.js 16 — espace client (speedservice.bj)
-- `admin/`: application Next.js — back-office admin (admin.speedservice.bj) — Sprint 7
-- `rider/`: application Next.js 16 PWA mobile-first — espace livreur (rider.speedservice.bj) — Sprint 8
+- `admin/`: application Next.js — back-office admin (admin.speedservice.bj)
+- `driver/`: application Next.js 16 PWA mobile-first — espace livreur (driver.speedservice.bj)
+- `packages/ui/`: composants partagés `@speedservice/ui` (cn, ThemeToggle, StatusBadge)
+- `packages/api-client/`: client HTTP partagé `@speedservice/api-client`
 - `backend/`: API Laravel 12 partagée
-- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, backend)
+- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, driver, backend)
 - `.github/workflows/ci.yml`: pipeline CI/CD automatisée
 
 ## Git
@@ -202,5 +219,5 @@ Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter 
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
 | Sprint 7 | Administration (back-office) — app séparée `admin/` (admin.speedservice.bj) | ✅ Terminé (2026-06-22) |
-| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ✅ Terminé (2026-06-23) |
-| Sprint 9 | Stabilisation & déploiement | ⏳ À venir |
+| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj | ✅ Terminé (2026-06-23) |
+| Sprint 9 | Stabilisation & déploiement | 🔄 En cours (démarré 2026-06-24) |
