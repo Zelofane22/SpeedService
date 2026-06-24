@@ -16,38 +16,36 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section Claude Code
 
-**Dernier état :** 2026-06-23
+**Dernier état :** 2026-06-24
 
-### Sprint 7 — Administration (back-office) — ✅ Terminé
+### Sprint 8 — Driver App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
 
-- ✅ Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints) + routes + tests
-- ✅ Frontend admin extrait dans `admin/` standalone (admin.speedservice.bj, port 3001)
-- ✅ `frontend/app/(admin)/` supprimé — tout est dans `admin/`
+- ✅ Backend : `DriverApplicationController` + migrations + enums + tests
+- ✅ Admin : page `/drivers` candidatures livreurs
+- ✅ Driver app `driver/` : tunnel candidature complet + espace missions connecté
 
 ---
 
-### Sprint 8 — Rider App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
+### Sprint 9 — Stabilisation & déploiement — 🔄 En cours (branche `sprint9`)
 
 **Tâches terminées :**
-- ✅ Backend : migrations `driver_applications` + `driver_documents`
-- ✅ Backend : enums `VehicleType`, `DriverApplicationStatus`, `DocumentType`
-- ✅ Backend : modèles `DriverApplication` + `DriverDocument`
-- ✅ Backend : `RiderApplicationController` (4 endpoints publics + 3 admin)
-- ✅ Backend : `RiderApplicationStatusMail` + template Blade
-- ✅ Backend : `DriverApplicationFactory` + 13 tests PHPUnit (33 assertions ✅)
-- ✅ Admin app `admin/` : page `/riders` candidatures livreurs + sidebar mise à jour
-- ✅ Rider app `rider/` : scaffolding Next.js 16 PWA mobile-first — build ✅
-- ✅ Rider app : tunnel candidature R01–R08 (7 étapes), suivi R10, complément R12, login
-- ✅ Rider app : espace livreur connecté (bottom nav, missions, mission active, historique)
+- ✅ Monorepo pnpm workspaces configuré (`pnpm-workspace.yaml` + root `package.json`)
+- ✅ `packages/ui/` créé — `@speedservice/ui` (cn, ThemeToggle, StatusBadge)
+- ✅ `packages/api-client/` créé — `@speedservice/api-client` (apiGet, apiPost, apiPut, apiPatch, apiDelete)
+- ✅ `frontend/`, `admin/`, `driver/` mis à jour — consomment les packages workspace
+- ✅ Shims de rétrocompatibilité : `lib/utils.ts`, `components/theme-toggle.tsx`, `components/status-badge.tsx`
+- ✅ Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur »
+- ✅ TypeScript au vert sur les 3 apps (tsc --noEmit)
+- ✅ README + CLAUDE.md mis à jour
 
-**Fichiers libres — sprint 8 complet côté Claude :**
-- `backend/` — tous les fichiers sprint 8
-- `rider/` — toute l'app
-- `admin/app/(dashboard)/riders/` — page candidatures
-- `admin/lib/api/admin.ts` — types + fonctions rider ajoutés
-- `admin/components/sidebar.tsx`
-
-**Prochaine étape :** merge `develop` → `main` (Sprint 9 — Stabilisation & déploiement)
+**Fichiers touchés — sprint 9 :**
+- `packages/` — nouveau répertoire partagé
+- `pnpm-workspace.yaml`, root `package.json`, `pnpm-lock.yaml`
+- `frontend/lib/utils.ts`, `frontend/lib/api.ts`
+- `frontend/components/theme-toggle.tsx`, `frontend/components/status-badge.tsx`
+- `admin/lib/utils.ts`, `admin/components/theme-toggle.tsx`, `admin/components/status-badge.tsx`
+- `driver/lib/utils.ts`
+- `frontend/package.json`, `admin/package.json`, `driver/package.json`
 
 ---
 

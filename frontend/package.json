@@ -8,6 +8,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@speedservice/api-client": "workspace:*",
+    "@speedservice/ui": "workspace:*",
     "@radix-ui/react-slot": "^1.1.4",
     "@types/leaflet": "^1.9.21",
     "clsx": "^2.1.0",

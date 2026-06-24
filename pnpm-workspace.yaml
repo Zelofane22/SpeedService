@@ -1,0 +1,8 @@
+packages:
+  - 'packages/*'
+  - 'frontend'
+  - 'admin'
+  - 'driver'
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

@@ -1,0 +1,12 @@
+{
+  "name": "speedservice",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "dev:frontend": "pnpm --filter speedservice-frontend dev",
+    "dev:admin": "pnpm --filter speedservice-admin dev",
+    "dev:driver": "pnpm --filter speedservice-driver dev",
+    "build:all": "pnpm --filter '@speedservice/*' build && pnpm --filter './frontend' build && pnpm --filter './admin' build && pnpm --filter './driver' build",
+    "lint:all": "pnpm -r lint"
+  }
+}

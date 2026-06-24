@@ -6,124 +6,20 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 8 — Rider App (tunnel inscription + rider.speedservice.bj)**
-Dernière mise à jour : 2026-06-22
+**Sprint en cours : Sprint 9 — Stabilisation & déploiement**
+Dernière mise à jour : 2026-06-24
 
-### Sprint 1 — Authentification ✅
+Les sprints validés sont récapitulés dans la [roadmap](#roadmap-des-sprints).
 
-| Tâche | Statut |
-|---|---|
-| US-001 Inscription (email, téléphone, mot de passe) | ✅ Terminé |
-| US-002 Connexion utilisateur | ✅ Terminé |
-| US-003 Réinitialisation du mot de passe | ✅ Terminé |
-| US-004 Modification du profil | ✅ Terminé |
-
-### Sprint 2 — Création de livraison ✅
+### Sprint 9 — Stabilisation & déploiement 🔄
 
 | Tâche | Statut |
 |---|---|
-| Backend : `DeliveryController` (index, store, show, cancel) | ✅ Terminé |
-| Backend : `PriceCalculator` (Document 1500 / Small 2500 / Medium 4000 / Large 6500 FCFA, ×2 Express) | ✅ Terminé |
-| Backend : validation `StoreDeliveryRequest` + création Payment + StatusHistory | ✅ Terminé |
-| Backend : routes `/deliveries` protégées par Sanctum | ✅ Terminé |
-| Backend : factory `DeliveryFactory` + 17 tests PHPUnit (50 assertions au vert) | ✅ Terminé |
-| Frontend : dashboard utilisateur avec KPI cards et données réelles | ✅ Terminé |
-| Frontend : wizard création livraison en 5 étapes (expéditeur → destinataire → colis → récap → paiement) | ✅ Terminé |
-| Frontend : page Historique avec recherche et `StatusBadge` | ✅ Terminé |
-| Frontend : sidebar navigation (layout dashboard refactorisé) | ✅ Terminé |
-
-### Sprint 3 — Géolocalisation ✅
-
-| Tâche | Statut |
-|---|---|
-| Backend : `GeocodingController` — proxy Nominatim (`GET /geo/geocode`) + Haversine (`POST /geo/distance`) | ✅ Terminé |
-| Backend : migration coordonnées nullable + champ `distance` dans `StoreDeliveryRequest` & `DeliveryController` | ✅ Terminé |
-| Frontend : `MapPicker` (Leaflet + OSM, clic sur carte + recherche géocodée, centré sur Cotonou) | ✅ Terminé |
-| Frontend : `RouteMap` (polyline entre les deux points + distance estimée dans le récap) | ✅ Terminé |
-| Frontend : wizard nouvelle livraison — étapes 0 & 1 avec carte interactive, distance dans étapes 3 & 4 | ✅ Terminé |
-
-### Sprint 4 — Paiement ✅
-
-| Tâche | Statut |
-|---|---|
-| US-013bis Choix du service Standard/Express à l'étape paiement avec tarifs calculés | ✅ Terminé |
-| US-013 Paiement Mobile Money (MTN MoMo, Moov Money) — numéro de téléphone + simulation | ✅ Terminé |
-| US-014 Paiement par carte bancaire — formulaire sécurisé + simulation | ✅ Terminé |
-| US-015 Paiement physique (à la livraison / en agence) — statut `AwaitingValidation` | ✅ Terminé |
-| US-016 Génération de reçu — écran de confirmation avec référence de transaction | ✅ Terminé |
-| Backend : `PaymentController@pay` — `POST /deliveries/{id}/pay` avec validation par méthode | ✅ Terminé |
-| Backend : 12 tests PHPUnit PaymentTest (44 assertions au vert) | ✅ Terminé |
-| Frontend : wizard → redirect vers `/deliveries/{id}/payment` après création | ✅ Terminé |
-| Frontend : page de paiement `/deliveries/[id]/payment` — formulaire adaptatif par méthode | ✅ Terminé |
-| Frontend : écran de reçu inline après paiement (confirmé ou en attente de validation) | ✅ Terminé |
-
-### Sprint 5 — Gestion livreurs & statuts ✅
-
-| Tâche | Statut |
-|---|---|
-| US-017 à US-022 — Cycle de vie des statuts (Confirmed → Assigned → PickingUp → InDelivery → Delivered \| Cancelled) | ✅ Terminé |
-| US-023 — Connexion livreur avec redirect automatique vers portail `/driver/` | ✅ Terminé |
-| US-024 — Liste des missions disponibles (statut Confirmed, sans driver) | ✅ Terminé |
-| US-025 — Acceptation d'une mission (Confirmed → Assigned, affectation driver_id) | ✅ Terminé |
-| US-026 — Refus d'une mission (masquage local, pas de changement de statut) | ✅ Terminé |
-| US-027 — Mise à jour du statut de livraison par le livreur (boutons d'avancement) | ✅ Terminé |
-| US-028 — Historique des missions du livreur | ✅ Terminé |
-| Backend : `DriverController` (5 endpoints : missions dispo, mes missions, accepter, refuser, statut) | ✅ Terminé |
-| Backend : validation des transitions de statut (ordre strict) | ✅ Terminé |
-| Frontend : portail livreur `/driver/` avec layout dédié (Missions, En cours, Historique) | ✅ Terminé |
-| Frontend : `apiPatch` ajouté à la lib API | ✅ Terminé |
-| Frontend : textes secondaires passés de rose à gris-noir (text-gray-700) sur toute l'app | ✅ Terminé |
-
-### Sprint 6 — Suivi client & notifications ✅
-
-| Tâche | Statut |
-|---|---|
-| US-029 — Suivi d’une commande par statut avec chronologie complète | ✅ Terminé |
-| US-031 — Historique client avec recherche, filtre par statut et accès au détail | ✅ Terminé |
-| US-032 — Notification de validation de commande | ✅ Terminé |
-| US-033 — Notification d’affectation d’un livreur | ✅ Terminé |
-| US-034 — Notification de récupération du colis | ✅ Terminé |
-| US-035 — Notification de livraison terminée | ✅ Terminé |
-| Backend : journal de notifications idempotent (in-app, email et SMS) | ✅ Terminé |
-| Backend : emails et SMS asynchrones via les files Laravel | ✅ Terminé |
-| Backend : API notifications (liste, compteur, lecture unitaire/globale) | ✅ Terminé |
-| Frontend : page `/deliveries/[id]` avec statut, timeline, trajet, colis, paiement et livreur | ✅ Terminé |
-| Frontend : actualisation automatique du suivi toutes les 30 secondes | ✅ Terminé |
-| Frontend : centre de notifications accessible depuis la cloche | ✅ Terminé |
-| Tests : 67 tests PHPUnit, 241 assertions, lint et build Next.js au vert | ✅ Terminé |
-
-**Sprint 6 terminé. Sprint 7 — Administration (back-office) terminé le 2026-06-22.**
-
-### Sprint 7 — Administration (back-office) ✅
-
-| Tâche | Statut |
-|---|---|
-| US-036 — Dashboard admin (KPI : revenus, livraisons, clients, livreurs, taux de complétion) | ✅ Terminé |
-| US-037 — Gestion livreurs (liste, toggle actif/inactif) | ✅ Terminé |
-| US-038 — Gestion commandes (liste, filtres, changement statut, validation paiement physique) | ✅ Terminé |
-| US-039 — Gestion paiements (validation manuelle cash/agency) | ✅ Terminé |
-| US-040 — Dashboard d'activité (top clients, évolution, taux de complétion) | ✅ Terminé |
-| Backend : `EnsureAdmin` middleware + `AdminController` (11 endpoints) | ✅ Terminé |
-| Frontend : layout admin avec sidebar + 5 pages (`/admin`, `/admin/users`, `/admin/deliveries`, `/admin/drivers`, `/admin/reports`) | ✅ Terminé |
-
-**Sprint 7 terminé. Sprint 8 — Rider App démarré le 2026-06-22 (branche `sprint8`).**
-
-### Sprint 8 — Rider App 🔄
-
-| Tâche | Statut |
-|---|---|
-| Backend : migrations `driver_applications` + `driver_documents` | ✅ Terminé |
-| Backend : enums `VehicleType`, `DriverApplicationStatus`, `DocumentType` | ✅ Terminé |
-| Backend : modèles `DriverApplication` + `DriverDocument` | ✅ Terminé |
-| Backend : `RiderApplicationController` (4 endpoints publics + 3 admin) | ✅ Terminé |
-| Backend : `RiderApplicationStatusMail` + template Blade | ✅ Terminé |
-| Frontend admin : page `/admin/riders` — validation dossiers (approbation/rejet/complément) | ✅ Terminé |
-| Rider app `rider/` : scaffolding Next.js PWA mobile-first | ✅ Terminé |
-| Rider app : page d'accueil R01 | ✅ Terminé |
-| Rider app : tunnel candidature R02–R08 (7 étapes) | ✅ Terminé |
-| Rider app : page suivi candidature R10 | ✅ Terminé |
-| Rider app : page complément R12 | ✅ Terminé |
-| Rider app : page connexion | ✅ Terminé |
+| Monorepo pnpm workspaces — `packages/ui/` (cn, ThemeToggle, StatusBadge) | ✅ Terminé |
+| Monorepo pnpm workspaces — `packages/api-client/` (apiGet, apiPost, apiPatch…) | ✅ Terminé |
+| Mise à jour des apps frontend/admin/driver pour consommer les packages partagés | ✅ Terminé |
+| Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur » | ✅ Terminé |
+| TypeScript au vert sur les 3 apps (tsc --noEmit) | ✅ Terminé |
 
 ---
 
@@ -133,23 +29,28 @@ Dernière mise à jour : 2026-06-22
 |---|---|---|---|
 | `frontend/` | Next.js — app client | speedservice.bj | 3000 |
 | `admin/` | Next.js — back-office admin | admin.speedservice.bj | 3001 |
-| `rider/` | Next.js — app rider (Sprint 8) | rider.speedservice.bj | 3002 |
+| `driver/` | Next.js — app livreur PWA | driver.speedservice.bj | 3002 |
 | `backend/` | Laravel 12 — API partagée | api.speedservice.bj | 8000 |
+| `packages/ui/` | Composants partagés (`@speedservice/ui`) | — | — |
+| `packages/api-client/` | Client HTTP partagé (`@speedservice/api-client`) | — | — |
 
 ### Démarrage en développement
 
 ```bash
+# Installer toutes les dépendances (monorepo pnpm)
+pnpm install
+
 # Client
-cd frontend && npm run dev       # port 3000
+pnpm --filter speedservice-frontend dev       # port 3000
 
-# Back-office admin (Sprint 7)
-cd admin && npm run dev          # port 3001
+# Back-office admin
+pnpm --filter speedservice-admin dev          # port 3001
 
-# Rider (Sprint 8)
-cd rider && npm run dev          # port 3002
+# App livreur
+pnpm --filter speedservice-driver dev         # port 3002
 
 # Backend API
-cd backend && php artisan serve  # port 8000
+cd backend && php artisan serve               # port 8000
 
 # Stack complète via Docker
 docker compose up -d
@@ -158,10 +59,12 @@ docker compose up -d
 ## Structure du dépôt
 
 - `frontend/`: application Next.js 16 — espace client (speedservice.bj)
-- `admin/`: application Next.js — back-office admin (admin.speedservice.bj) — Sprint 7
-- `rider/`: application Next.js 16 PWA mobile-first — espace livreur (rider.speedservice.bj) — Sprint 8
+- `admin/`: application Next.js — back-office admin (admin.speedservice.bj)
+- `driver/`: application Next.js 16 PWA mobile-first — espace livreur (driver.speedservice.bj)
+- `packages/ui/`: composants partagés `@speedservice/ui` (cn, ThemeToggle, StatusBadge)
+- `packages/api-client/`: client HTTP partagé `@speedservice/api-client`
 - `backend/`: API Laravel 12 partagée
-- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, backend)
+- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, driver, backend)
 - `.github/workflows/ci.yml`: pipeline CI/CD automatisée
 
 ## Git
@@ -202,5 +105,5 @@ Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter 
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
 | Sprint 7 | Administration (back-office) — app séparée `admin/` (admin.speedservice.bj) | ✅ Terminé (2026-06-22) |
-| Sprint 8 | Rider App — Tunnel inscription + rider.speedservice.bj | ✅ Terminé (2026-06-23) |
-| Sprint 9 | Stabilisation & déploiement | ⏳ À venir |
+| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj | ✅ Terminé (2026-06-23) |
+| Sprint 9 | Stabilisation & déploiement | 🔄 En cours (démarré 2026-06-24) |

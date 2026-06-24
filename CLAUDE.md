@@ -85,33 +85,30 @@ User --< Address
 | Sprint 4 | Paiement ✅ |
 | Sprint 5 | Gestion livreurs & statuts ✅ |
 | Sprint 6 | Suivi client & notifications ✅ |
-| Sprint 7 | Administration (back-office) — 🔄 en cours (démarré 2026-06-22) |
-| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj |
-| Sprint 9 | Stabilisation & déploiement |
+| Sprint 7 | Administration (back-office) ✅ |
+| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj ✅ |
+| Sprint 9 | Stabilisation & déploiement — 🔄 en cours (démarré 2026-06-24) |
 
 ### Architecture multi-app (MVP)
 ```
-frontend/   → Next.js — app client (speedservice.bj)
-driver/     → Next.js — app livreur (driver.speedservice.bj) — Sprint 8
-backend/    → Laravel 12 — API partagée (api.speedservice.bj)
+frontend/          → Next.js — app client (speedservice.bj)
+admin/             → Next.js — back-office admin (admin.speedservice.bj)
+driver/            → Next.js — app livreur PWA (driver.speedservice.bj)
+backend/           → Laravel 12 — API partagée (api.speedservice.bj)
+packages/ui/       → @speedservice/ui (cn, ThemeToggle, StatusBadge)
+packages/api-client/ → @speedservice/api-client (apiGet, apiPost, apiPatch…)
 ```
-- L'espace driver (`/driver/*`) dans `frontend/` est provisoire. Il sera migré dans `driver/` au Sprint 8.
-- Le backend est partagé : les endpoints `/driver/*` servent les deux apps.
-- CORS configuré pour `speedservice.bj` et `driver.speedservice.bj`.
+- Monorepo pnpm workspaces — installer avec `pnpm install` à la racine.
+- Le backend est partagé : les endpoints `/driver/*` servent les apps frontend et driver.
+- CORS configuré pour `speedservice.bj`, `driver.speedservice.bj` et `admin.speedservice.bj`.
 
 ### Terminologie canonique
 - **UI (labels, titres)** → "Livreur" / "Livreurs" (français, côté utilisateur)
 - **Code interne (modèles, controllers, enums, routes)** → `Driver` (terme anglais unique)
 - Aucune occurrence de "Rider" ou "Courier" dans le code — tout est `Driver`
 
-### Chantiers Sprint 9
-- **Monorepo pnpm workspaces** : extraire `packages/ui/` (status-badge, theme-toggle, card, utils) et `packages/api-client/` partagés entre `frontend/`, `driver/` et `admin/`. Actuellement ces fichiers sont copiés manuellement dans chaque app.
-- **Refactor terminologie** : renommer `rider/` → `driver/`, `RiderApplicationController` → `DriverApplicationController`, routes `/rider/apply/*` → `/driver/apply/*`, pages admin `riders/` et `couriers/` → `drivers/`. Labels UI : remplacer tout "Driver"/"Rider" visible par "Livreur".
-
-### avncement
-met à jours l'état d'avencement dans readme.md et claud.md
-
-Dernier état : Sprint 6 terminé le 2026-06-22 (suivi client par statut, historique, notifications in-app/email/SMS). Prochain chantier : Sprint 7 — Administration.
+### Avancement
+Dernier état : Sprint 9 démarré le 2026-06-24 — monorepo pnpm workspaces mis en place, `@speedservice/ui` et `@speedservice/api-client` extraits, TypeScript au vert sur les 3 apps.
 
 ### orchestration (synchronisation CLAUDE - GPT CODEX)
 Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
