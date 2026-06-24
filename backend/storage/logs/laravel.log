@@ -1252,3 +1252,50 @@ Content-Transfer-Encoding: quoted-printable
 </body>
 </html>
   
+[2026-06-24 21:36:00] local.DEBUG: From: Speed Service <noreply@speedservice.bj>
+To: testdriver@speedservice.bj
+Subject: =?utf-8?Q?F=C3=A9licitations?= ! Votre candidature est
+ =?utf-8?Q?approuv=C3=A9e_=E2=80=94?= SpeedService
+MIME-Version: 1.0
+Date: Wed, 24 Jun 2026 21:36:00 +0100
+Message-ID: <fdaeff29c4dea1aad5034c1915fcc6c1@speedservice.bj>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #FAF7FB; margin: 0; padding: 0; }
+        .container { max-width: 580px; margin: 40px auto; background: #fff; border-radius: 8px; overflow: hidden; }
+        .header { background: #861D6D; padding: 32px; text-align: center; color: #fff; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .body { padding: 32px; color: #1D1D1F; line-height: 1.6; }
+        .body p { margin: 0 0 16px; }
+        .status-box { background: #FAF7FB; border-left: 4px solid #861D6D; padding: 16px; margin: 24px 0; border-radius: 4px; }
+        .footer { padding: 16px 32px; font-size: 12px; color: #888; text-align: center; }
+        .btn { display: inline-block; background: #861D6D; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>SpeedService — Livreur</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour Test,</p>
+
+                    <p>Félicitations ! Votre candidature a été <strong>approuvée</strong>.</p>
+            <p>Votre compte livreur a été créé. Cliquez sur le bouton ci-dessous pour choisir votre mot de passe et accéder à votre espace.</p>
+                            <a class="btn" href="http://localhost:3002/set-password?token=24f327f8de8ea48bfe518021b992d2f861fc39bf7bb2a98c6957e775a2686f6d&amp;email=testdriver%40speedservice.bj">Créer mon mot de passe</a>
+                <p style="margin-top:16px; font-size:13px; color:#666;">Ce lien est valable 60 minutes. Si vous ne l'utilisez pas dans ce délai, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+            
+        
+        <p>Pour toute question, contactez-nous à <a href="mailto:support@speedservice.bj">support@speedservice.bj</a>.</p>
+    </div>
+    <div class="footer">SpeedService · Bénin · <a href="https://speedservice.bj">speedservice.bj</a></div>
+</div>
+</body>
+</html>
+  
