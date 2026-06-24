@@ -112,3 +112,6 @@ Dernier état : Sprint 9 démarré le 2026-06-24 — monorepo pnpm workspaces mi
 
 ### orchestration (synchronisation CLAUDE - GPT CODEX)
 Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
+
+### multi agents
+utiliser les agent worcktree spécialisé existant pour améliorer la productivité

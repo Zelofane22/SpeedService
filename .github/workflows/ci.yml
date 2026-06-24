@@ -11,28 +11,27 @@ jobs:
     name: Frontend CI
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install frontend dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run frontend lint
-        run: npm run lint
+        run: pnpm --filter speedservice-frontend lint
 
       - name: Build frontend
-        run: npm run build
+        run: pnpm --filter speedservice-frontend build
 
   backend:
     name: Backend CI
