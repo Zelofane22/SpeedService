@@ -5,57 +5,55 @@ import { useRouter } from 'next/navigation'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
 
-export default function LoginPage() {
+export default function ChangePasswordPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
+
+    if (password !== passwordConfirmation) {
+      setError('Les mots de passe ne correspondent pas.')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
+      const token = localStorage.getItem('auth_token') ?? ''
+
+      const response = await fetch(`${API_URL}/profile/change-password`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          current_password: currentPassword,
+          password,
+          password_confirmation: passwordConfirmation,
+        }),
       })
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
         setError(
           (data as { message?: string }).message ??
-            'Identifiants incorrects. Veuillez réessayer.'
+            'Une erreur est survenue. Veuillez réessayer.'
         )
         return
       }
 
-      const data = (await response.json()) as {
-        token?: string
-        access_token?: string
-        user?: { name: string; email: string; must_change_password?: boolean }
-      }
-      const token = data.token ?? data.access_token ?? ''
+      // Clear the forced-change flag
+      document.cookie = 'must_change_password=; path=/; max-age=0'
 
-      document.cookie = `auth_token=${token}; path=/`
-      localStorage.setItem('auth_token', token)
-
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user))
-      }
-
-      if (data.user?.must_change_password) {
-        document.cookie = 'must_change_password=1; path=/'
-        router.push('/change-password')
-      } else {
-        router.push('/')
-      }
+      router.push('/')
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.')
     } finally {
@@ -66,7 +64,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-sm w-full bg-card rounded-2xl border border-border shadow-xl p-8">
-        {/* Logo */}
         <div className="text-center">
           <span className="text-2xl font-extrabold text-primary">SpeedService</span>
           <div className="mt-2">
@@ -76,39 +73,54 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Heading */}
-        <h1 className="text-xl font-bold mt-6 mb-1">Connexion</h1>
+        <h1 className="text-xl font-bold mt-6 mb-1">Changez votre mot de passe</h1>
         <p className="text-sm text-muted-foreground mb-6">
-          Réservé aux administrateurs
+          Pour des raisons de sécurité, vous devez définir un nouveau mot de passe avant de continuer.
         </p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1.5">
-              Adresse e-mail
+            <label htmlFor="current_password" className="block text-sm font-medium mb-1.5">
+              Mot de passe actuel
             </label>
             <input
-              id="email"
-              type="email"
+              id="current_password"
+              type="password"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@speedservice.bj"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="••••••••"
               className="w-full px-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-              Mot de passe
+              Nouveau mot de passe
             </label>
             <input
               id="password"
               type="password"
               required
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password_confirmation" className="block text-sm font-medium mb-1.5">
+              Confirmer le nouveau mot de passe
+            </label>
+            <input
+              id="password_confirmation"
+              type="password"
+              required
+              minLength={8}
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
               placeholder="••••••••"
               className="w-full px-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
@@ -125,7 +137,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-primary text-white rounded-xl py-3 font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed mt-2"
           >
-            {loading ? 'Connexion en cours...' : 'Se connecter'}
+            {loading ? 'Enregistrement...' : 'Définir le nouveau mot de passe'}
           </button>
         </form>
       </div>

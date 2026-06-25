@@ -38,4 +38,28 @@ class ProfileController extends Controller
 
         return response()->json($user);
     }
+
+    public function changePassword(\Illuminate\Http\Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password'      => ['required', 'string'],
+            'password'              => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Le mot de passe actuel est incorrect.',
+                'errors'  => ['current_password' => ['Le mot de passe actuel est incorrect.']],
+            ], 422);
+        }
+
+        $user->password             = $request->password;
+        $user->must_change_password = false;
+        $user->save();
+
+        return response()->json(['message' => 'Mot de passe mis à jour avec succès.']);
+    }
 }

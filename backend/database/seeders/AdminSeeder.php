@@ -14,11 +14,12 @@ class AdminSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'admin@speedservice.bj'],
             [
-                'name'               => 'Admin SpeedService',
-                'phone'              => '+22900000000',
-                'password'           => Hash::make('AdminPassword123!'),
-                'role'               => UserRole::Admin,
-                'email_verified_at'  => now(),
+                'name'                 => 'Admin SpeedService',
+                'phone'                => '+22900000000',
+                'password'             => Hash::make('AdminPassword123!'),
+                'role'                 => UserRole::Admin,
+                'email_verified_at'    => now(),
+                'must_change_password' => true,
             ]
         );
     }

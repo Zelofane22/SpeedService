@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::patch('/profile/change-password', [ProfileController::class, 'changePassword']);
 
     Route::get('/deliveries', [DeliveryController::class, 'index']);
     Route::post('/deliveries', [DeliveryController::class, 'store']);

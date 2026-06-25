@@ -83,7 +83,7 @@ docker compose exec backend php artisan db:seed --force
 |---|---|
 | `http://localhost:8000/api/status` | API (health check) |
 | `http://localhost:3000` | App client |
-| `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!`) |
+| `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!` — voir ci-dessous) |
 | `http://localhost:3002` | App livreur |
 
 **Commandes utiles :**
@@ -93,6 +93,52 @@ docker compose logs -f backend     # logs en temps réel
 docker compose ps                  # état des conteneurs
 docker compose down -v             # stopper + supprimer les volumes
 ```
+
+---
+
+## Sécurité & Secrets
+
+### Mot de passe admin (première connexion)
+
+Le seeder crée le compte admin avec un mot de passe temporaire (`AdminPassword123!`).
+**Lors de la première connexion**, l'interface oblige l'administrateur à définir un nouveau mot de passe avant d'accéder au back-office.
+
+> Ce comportement est géré par le flag `must_change_password` sur le modèle `User`.
+> Si vous ré-initialisez la base de données, le flag est remis à `true` automatiquement par le seeder.
+
+### Mot de passe de la base de données
+
+Le fichier `backend/.env.example` contient des valeurs placeholder. **Ne jamais utiliser ces valeurs en production.**
+
+**À faire avant le premier déploiement :**
+
+```bash
+# Générer un mot de passe fort (exemple)
+openssl rand -base64 32
+
+# Renseigner dans backend/.env
+DB_PASSWORD=<mot_de_passe_généré>
+
+# ou passer par un .env à la racine lu par Docker Compose
+```
+
+**Rotation du mot de passe de base de données :**
+
+```bash
+# 1. Changer le mot de passe dans PostgreSQL
+docker compose exec db psql -U speedservice -c "ALTER USER speedservice PASSWORD 'nouveau_mdp';"
+
+# 2. Mettre à jour DB_PASSWORD dans backend/.env
+
+# 3. Redémarrer le backend pour prendre en compte le nouveau mot de passe
+docker compose restart backend
+```
+
+Effectuer une rotation dans les cas suivants :
+- Avant chaque mise en production initiale
+- Si le `.env` de prod a été exposé (git, logs, partage)
+- Si un membre de l'équipe avec accès aux secrets quitte le projet
+- Périodiquement (tous les 6–12 mois en production)
 
 ---
 

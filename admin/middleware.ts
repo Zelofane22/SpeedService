@@ -3,7 +3,11 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
-  const isLoginPage = request.nextUrl.pathname === '/login'
+  const mustChangePassword = request.cookies.get('must_change_password')?.value === '1'
+  const { pathname } = request.nextUrl
+
+  const isLoginPage = pathname === '/login'
+  const isChangePasswordPage = pathname === '/change-password'
 
   if (!token && !isLoginPage) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -11,6 +15,10 @@ export function middleware(request: NextRequest) {
   if (token && isLoginPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }
+  if (token && mustChangePassword && !isChangePasswordPage) {
+    return NextResponse.redirect(new URL('/change-password', request.url))
+  }
+
   return NextResponse.next()
 }
 
