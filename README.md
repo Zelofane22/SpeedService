@@ -1,15 +1,13 @@
 # Speed Service
 
-Plateforme de livraison de colis au Bénin — application web full-stack (Next.js 16 + Laravel 12).
+Plateforme de livraison de colis au Bénin — application web full-stack (Next.js + Laravel 12).
 
 ---
 
 ## Avancement du projet
 
 **Sprint en cours : Sprint 9 — Stabilisation & déploiement**
-Dernière mise à jour : 2026-06-24
-
-Les sprints validés sont récapitulés dans la [roadmap](#roadmap-des-sprints).
+Dernière mise à jour : 2026-06-25
 
 ### Sprint 9 — Stabilisation & déploiement 🔄
 
@@ -20,12 +18,14 @@ Les sprints validés sont récapitulés dans la [roadmap](#roadmap-des-sprints).
 | Mise à jour des apps frontend/admin/driver pour consommer les packages partagés | ✅ Terminé |
 | Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur » | ✅ Terminé |
 | TypeScript au vert sur les 3 apps (tsc --noEmit) | ✅ Terminé |
+| Durcissement production — branche `preprod` | ✅ Terminé |
+| Déploiement local preprod en conteneurs Docker | ✅ Validé (2026-06-25) |
 
 ---
 
 ## Architecture multi-app
 
-| Répertoire | Description | URL | Port |
+| Répertoire | Description | URL prod | Port local |
 |---|---|---|---|
 | `frontend/` | Next.js — app client | speedservice.bj | 3000 |
 | `admin/` | Next.js — back-office admin | admin.speedservice.bj | 3001 |
@@ -34,64 +34,124 @@ Les sprints validés sont récapitulés dans la [roadmap](#roadmap-des-sprints).
 | `packages/ui/` | Composants partagés (`@speedservice/ui`) | — | — |
 | `packages/api-client/` | Client HTTP partagé (`@speedservice/api-client`) | — | — |
 
-### Démarrage en développement
+---
+
+## Démarrage
+
+### Développement (sans Docker)
 
 ```bash
 # Installer toutes les dépendances (monorepo pnpm)
 pnpm install
 
-# Client
-pnpm --filter speedservice-frontend dev       # port 3000
+# App client
+pnpm --filter speedservice-frontend dev       # http://localhost:3000
 
 # Back-office admin
-pnpm --filter speedservice-admin dev          # port 3001
+pnpm --filter speedservice-admin dev          # http://localhost:3001
 
 # App livreur
-pnpm --filter speedservice-driver dev         # port 3002
+pnpm --filter speedservice-driver dev         # http://localhost:3002
 
 # Backend API
-cd backend && php artisan serve               # port 8000
-
-# Stack complète via Docker
-docker compose up -d
+cd backend && php artisan serve               # http://localhost:8000
 ```
+
+### Preprod / Production (Docker)
+
+```bash
+# 1. Créer le fichier de secrets à partir du template
+cp backend/.env.example backend/.env
+# → Remplir APP_KEY, DB_PASSWORD, POSTGRES_PASSWORD, MAIL_*, SMS_*
+
+# 2. Générer la clé Laravel
+docker compose run --rm backend php artisan key:generate
+
+# 3. Builder les images
+docker compose build
+
+# 4. Démarrer la stack
+docker compose up -d
+
+# 5. Seeder l'admin (première fois uniquement)
+docker compose exec backend php artisan db:seed --force
+```
+
+**Services accessibles :**
+
+| URL | Service |
+|---|---|
+| `http://localhost:8000/api/status` | API (health check) |
+| `http://localhost:3000` | App client |
+| `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!`) |
+| `http://localhost:3002` | App livreur |
+
+**Commandes utiles :**
+
+```bash
+docker compose logs -f backend     # logs en temps réel
+docker compose ps                  # état des conteneurs
+docker compose down -v             # stopper + supprimer les volumes
+```
+
+---
+
+## Stack technique
+
+| Couche | Technologie |
+|---|---|
+| Frontend (3 apps) | Next.js, React 19, TypeScript, Tailwind CSS 3, pnpm workspaces |
+| Backend | Laravel 12, PHP 8.4, PostgreSQL 16, Redis 7 |
+| Auth | Laravel Sanctum (token-based) |
+| Serveur web | Nginx + PHP-FPM + Supervisord (single container) |
+| CI/CD | GitHub Actions |
+
+---
 
 ## Structure du dépôt
 
-- `frontend/`: application Next.js 16 — espace client (speedservice.bj)
-- `admin/`: application Next.js — back-office admin (admin.speedservice.bj)
-- `driver/`: application Next.js 16 PWA mobile-first — espace livreur (driver.speedservice.bj)
-- `packages/ui/`: composants partagés `@speedservice/ui` (cn, ThemeToggle, StatusBadge)
-- `packages/api-client/`: client HTTP partagé `@speedservice/api-client`
-- `backend/`: API Laravel 12 partagée
-- `docker-compose.yml`: configuration de services Docker (PostgreSQL, Redis, frontend, admin, driver, backend)
-- `.github/workflows/ci.yml`: pipeline CI/CD automatisée
+```
+frontend/          → App client (speedservice.bj)
+admin/             → Back-office admin (admin.speedservice.bj)
+driver/            → App livreur PWA (driver.speedservice.bj)
+backend/           → API Laravel 12
+packages/ui/       → @speedservice/ui (composants partagés)
+packages/api-client/ → @speedservice/api-client (client HTTP)
+docker-compose.yml → Stack complète (preprod & prod)
+.github/workflows/ → CI/CD GitHub Actions
+AIorchestration.md → Coordination Claude Code ↔ GPT Codex
+```
+
+---
 
 ## Git
 
-Deux branches principales :
+| Branche | Rôle |
+|---|---|
+| `main` | Version stable — merge depuis `develop` ou `hotfix/*` |
+| `develop` | Développement courant |
+| `preprod` | Branche de validation avant mise en production |
 
-- `develop` : développement courant (commits des sprints)
-- `main` : version stable — merge depuis `develop` en fin de sprint, ou `hotfix/*` pour les urgences
+**Conventions de commits :**
 
-Conventions de commits :
+```
+feat(scope):  nouvelle fonctionnalité
+fix(scope):   correction de bug
+chore(scope): tâche d'infrastructure
+docs(scope):  documentation
+test(scope):  tests
+```
 
-- `feat(scope): description` — nouvelle fonctionnalité
-- `fix(scope): description` — correction de bug
-- `chore(scope): description` — tâche d'infrastructure
-- `docs(scope): description` — documentation
-- `test(scope): description` — ajout ou mise à jour de tests
+---
 
 ## CI/CD
-La chaîne CI/CD repose sur GitHub Actions, Docker et Docker Compose.
-La pipeline CI automatise :
 
-- lint et build frontend
-- validation composer / tests backend
-- validation Docker Compose
+GitHub Actions automatise à chaque push :
+- Lint et build des 3 frontends
+- Tests PHPUnit + validation Composer
+- Validation Docker Compose
 
-## orchestration (synchronisation CLAUDE - GPT CODEX)
-Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
+---
 
 ## Roadmap des sprints
 
@@ -104,6 +164,6 @@ Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter 
 | Sprint 4 | Paiement | ✅ Terminé (2026-06-22) |
 | Sprint 5 | Gestion livreurs & statuts | ✅ Terminé (2026-06-22) |
 | Sprint 6 | Suivi client & notifications | ✅ Terminé (2026-06-22) |
-| Sprint 7 | Administration (back-office) — app séparée `admin/` (admin.speedservice.bj) | ✅ Terminé (2026-06-22) |
-| Sprint 8 | Driver App — Tunnel inscription + driver.speedservice.bj | ✅ Terminé (2026-06-23) |
-| Sprint 9 | Stabilisation & déploiement | 🔄 En cours (démarré 2026-06-24) |
+| Sprint 7 | Administration — back-office `admin/` | ✅ Terminé (2026-06-22) |
+| Sprint 8 | Driver App — tunnel inscription + `driver/` | ✅ Terminé (2026-06-23) |
+| Sprint 9 | Stabilisation & déploiement | 🔄 En cours (2026-06-24) |
