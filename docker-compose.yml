@@ -1,5 +1,3 @@
-version: '3.9'
-
 # docker-compose utilisable en preprod locale ET en production.
 # Prérequis : backend/.env créé à partir de backend/.env.example.
 # Build  : docker compose build --no-cache
