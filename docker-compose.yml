@@ -1,85 +1,77 @@
 version: '3.9'
 
+# Production docker-compose.
+# Secrets : copier backend/.env.example → backend/.env et remplir les valeurs.
+# Build : docker compose build --no-cache
+# Démarrage : docker compose up -d
+
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./frontend:/app
-    depends_on:
-      - backend
 
-  admin:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    ports:
-      - 3001:3001
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    depends_on:
-      - backend
-    restart: unless-stopped
-
-  driver:
-    build:
-      context: ./driver
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    ports:
-      - 3002:3002
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
-    depends_on:
-      - backend
-    restart: unless-stopped
-
+  # ─── Backend (nginx + php-fpm via supervisord) ─────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_DATABASE=speedservice
-      - DB_USERNAME=speedservice
-      - DB_PASSWORD=password
-      - QUEUE_CONNECTION=sync
-      - REDIS_HOST=redis
+      - "8000:80"
+    env_file:
+      - ./backend/.env
     volumes:
-      - ./backend:/var/www/html
+      - backend_storage:/var/www/html/storage/app
     depends_on:
       - db
       - redis
+    restart: unless-stopped
 
+  # ─── App client (speedservice.bj) ──────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  # ─── Back-office admin (admin.speedservice.bj) ─────────────────────────────
+  admin:
+    build:
+      context: .
+      dockerfile: admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  # ─── App livreur PWA (driver.speedservice.bj) ──────────────────────────────
+  driver:
+    build:
+      context: .
+      dockerfile: driver/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
+  # ─── Base de données ────────────────────────────────────────────────────────
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
-      POSTGRES_DB: speedservice
-      POSTGRES_USER: speedservice
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_DATABASE:-speedservice}
+      POSTGRES_USER: ${DB_USERNAME:-speedservice}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
+  # ─── Cache / Queue ──────────────────────────────────────────────────────────
   redis:
-    image: redis:latest
-    ports:
-      - 6379:6379
+    image: redis:7-alpine
+    restart: unless-stopped
 
 volumes:
   db_data:
+  backend_storage:

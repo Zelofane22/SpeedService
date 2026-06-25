@@ -1,10 +1,15 @@
 #!/bin/sh
 set -e
 
-# Install composer dependencies if vendor is missing (volume mount overrides image)
+# Install deps if vendor missing (dev/CI fallback)
 if [ ! -f "vendor/autoload.php" ]; then
-    echo "Installing Composer dependencies..."
-    composer install --no-interaction --prefer-dist --optimize-autoloader
+    composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 fi
 
-exec php artisan serve --host=0.0.0.0 --port=8000
+php artisan migrate --force
+php artisan storage:link --force 2>/dev/null || true
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
