@@ -1,9 +1,10 @@
 version: '3.9'
 
-# Production docker-compose.
-# Secrets : copier backend/.env.example → backend/.env et remplir les valeurs.
-# Build : docker compose build --no-cache
-# Démarrage : docker compose up -d
+# docker-compose utilisable en preprod locale ET en production.
+# Prérequis : backend/.env créé à partir de backend/.env.example.
+# Build  : docker compose build --no-cache
+# Start  : docker compose up -d
+# Logs   : docker compose logs -f backend
 
 services:
 
@@ -29,7 +30,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -40,7 +41,7 @@ services:
       context: .
       dockerfile: admin/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
     ports:
       - "3001:3001"
     restart: unless-stopped
@@ -51,18 +52,17 @@ services:
       context: .
       dockerfile: driver/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.speedservice.bj/api}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
     ports:
       - "3002:3002"
     restart: unless-stopped
 
   # ─── Base de données ────────────────────────────────────────────────────────
+  # Lit POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD depuis backend/.env
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${DB_DATABASE:-speedservice}
-      POSTGRES_USER: ${DB_USERNAME:-speedservice}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - ./backend/.env
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: unless-stopped
