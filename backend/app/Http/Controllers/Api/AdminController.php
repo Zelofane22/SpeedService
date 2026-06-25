@@ -66,15 +66,15 @@ class AdminController extends Controller
                 'this_month_xof' => (float) $revenueThisMonth,
             ],
             'pending_validations' => $pendingValidations,
-        ]);
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 
     // ── Users ─────────────────────────────────────────────────────────────────
 
     public function listUsers(Request $request): JsonResponse
     {
-        $query = User::withCount(['deliveriesAsClient as deliveries_count'])
-            ->select(['id', 'name', 'email', 'role', 'created_at']);
+        $query = User::select(['id', 'name', 'email', 'role', 'created_at'])
+            ->withCount(['deliveriesAsClient as deliveries_count']);
 
         if ($request->filled('role')) {
             $role = UserRole::tryFrom($request->input('role'));
@@ -227,10 +227,10 @@ class AdminController extends Controller
     public function listDrivers(Request $request): JsonResponse
     {
         $query = User::where('role', UserRole::Driver)
+            ->select(['id', 'name', 'email', 'created_at'])
             ->withCount([
                 'deliveriesAsDriver as deliveries_completed' => fn ($q) => $q->where('status', DeliveryStatus::Delivered),
-            ])
-            ->select(['id', 'name', 'email', 'created_at']);
+            ]);
 
         // The users table has no `is_active` column, so we filter/expose a virtual value.
         // For forward compatibility we include it in the response as always true for now.
@@ -343,7 +343,7 @@ class AdminController extends Controller
             'revenue_by_month'        => $revenueByMonth,
             'deliveries_by_month'     => $deliveriesByMonth,
             'top_clients'             => $topClients,
-            'delivery_completion_rate' => $completionRate,
-        ]);
+            'delivery_completion_rate' => (float) $completionRate,
+        ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 }

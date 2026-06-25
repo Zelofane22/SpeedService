@@ -26,7 +26,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ---
 
-### Sprint 9 — Stabilisation & déploiement — 🔄 En cours (branche `sprint9`)
+### Sprint 9 — Stabilisation & déploiement — 🔄 En cours (branche `develop`)
 
 **Tâches terminées :**
 - ✅ Monorepo pnpm workspaces configuré (`pnpm-workspace.yaml` + root `package.json`)
@@ -38,14 +38,14 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - ✅ TypeScript au vert sur les 3 apps (tsc --noEmit)
 - ✅ README + CLAUDE.md mis à jour
 
-**Fichiers touchés — sprint 9 :**
-- `packages/` — nouveau répertoire partagé
-- `pnpm-workspace.yaml`, root `package.json`, `pnpm-lock.yaml`
-- `frontend/lib/utils.ts`, `frontend/lib/api.ts`
-- `frontend/components/theme-toggle.tsx`, `frontend/components/status-badge.tsx`
-- `admin/lib/utils.ts`, `admin/components/theme-toggle.tsx`, `admin/components/status-badge.tsx`
-- `driver/lib/utils.ts`
-- `frontend/package.json`, `admin/package.json`, `driver/package.json`
+**Stabilisation pipeline CI — 2026-06-25 :**
+- ✅ `frontend/app/page.tsx` — apostrophe `&apos;` (lint)
+- ✅ `backend/phpunit.xml.dist` — créé avec `APP_KEY` + SQLite in-memory
+- ✅ `backend/tests/` — `TestCase.php`, `Feature/`, `Unit/` créés
+- ✅ `.gitignore` — `!backend/.env.example`
+- ✅ `.github/workflows/ci.yml` — setup `.env` + `key:generate`
+- ✅ `frontend/app/(dashboard)/deliveries/[id]/page.tsx` — `react-hooks/set-state-in-effect` résolu
+- ✅ `AdminController` — `select()` avant `withCount()` + `JSON_PRESERVE_ZERO_FRACTION` (4 tests)
 
 ---
 
