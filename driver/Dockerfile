@@ -11,6 +11,8 @@ RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-workspace.yaml ./
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY --from=deps /app/driver/node_modules ./driver/node_modules
@@ -24,9 +26,10 @@ FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/driver/.next/standalone ./
-COPY --from=builder /app/driver/.next/static ./.next/static
-COPY --from=builder /app/driver/public* ./public/
+COPY --from=builder /app/driver/.next/static ./driver/.next/static
+COPY --from=builder /app/driver/public* ./driver/public/
 EXPOSE 3002
 ENV PORT=3002
 ENV HOSTNAME=0.0.0.0
+WORKDIR /app/driver
 CMD ["node", "server.js"]
