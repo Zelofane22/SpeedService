@@ -8,11 +8,13 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
+use App\Mail\AdminPaymentConfirmedMail;
 use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -88,9 +90,24 @@ class PaymentController extends Controller
             }
         });
 
+        $adminEmail = config('mail.admin_notification_email');
+
         if ($isElectronic) {
             try {
                 $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderConfirmed);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        if ($adminEmail) {
+            try {
+                Mail::to($adminEmail)->queue(
+                    new AdminPaymentConfirmedMail(
+                        $delivery->fresh(['client', 'payment']),
+                        requiresValidation: ! $isElectronic,
+                    ),
+                );
             } catch (\Throwable $e) {
                 report($e);
             }

@@ -24,4 +24,6 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'noreply@speedservice.bj'),
         'name' => env('MAIL_FROM_NAME', 'Speed Service'),
     ],
+
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL', 'admin@speedservice.bj'),
 ];

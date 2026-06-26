@@ -12,9 +12,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDeliveryRequest;
 use App\Models\Delivery;
 use App\Models\Payment;
+use App\Mail\AdminNewOrderMail;
 use App\Services\PriceCalculator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class DeliveryController extends Controller
@@ -67,6 +69,15 @@ class DeliveryController extends Controller
             'method'      => PaymentMethod::from($request->payment_method),
             'status'      => PaymentStatus::Pending,
         ]);
+
+        $adminEmail = config('mail.admin_notification_email');
+        if ($adminEmail) {
+            try {
+                Mail::to($adminEmail)->queue(new AdminNewOrderMail($delivery->load('client', 'payment')));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return response()->json($delivery->load('payment', 'statusHistories'), 201);
     }

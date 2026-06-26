@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# Railway injects PORT; default to 80 for local Docker
+PORT=${PORT:-80}
+sed -i "s/\${PORT}/$PORT/" /etc/nginx/sites-available/default
+
 # Install deps if vendor missing (dev/CI fallback)
 if [ ! -f "vendor/autoload.php" ]; then
     composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
