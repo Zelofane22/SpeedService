@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "installCommand": "pnpm install",
-  "buildCommand": "pnpm --filter speedservice-admin build",
-  "outputDirectory": "admin/.next"
+  "installCommand": "cd .. && pnpm install",
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next"
 }
