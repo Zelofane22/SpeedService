@@ -1027,6 +1027,7 @@ Après validation du MVP :
 * Livraison de repas
 * Livraison de courses
 * Livraison pharmaceutique
+* Création de commande directement par l'admin en cas de dépot de colis en agence
 * Application Android
 * Application iOS
 * Programme de fidélité
@@ -1037,21 +1038,4 @@ Après validation du MVP :
 * Optimisation des tournées
 * Portefeuille électronique
 * Notifications WhatsApp
-
----
-
-## 9. Synthèse d'avancement
-
-| Sprint | Périmètre | État |
-|---|---|---|
-| 0 | Infrastructure & setup | ✅ Terminé |
-| 1 | Authentification | ✅ Terminé |
-| 2 | Création de livraison | ✅ Terminé |
-| 3 | Géolocalisation | ✅ Terminé |
-| 4 | Paiement simulé | ✅ Terminé |
-| 5 | Livreurs & statuts | ✅ Terminé, frontend rider provisoire |
-| 6 | Suivi client & notifications | ✅ Terminé |
-| 7 | Administration | 🔄 En cours |
-| 8 | Rider autonome et candidatures | ⏳ À venir |
-| 9 | Stabilisation & déploiement | ⏳ À venir |
  
