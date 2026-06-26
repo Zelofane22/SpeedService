@@ -227,11 +227,19 @@ class AdminControllerTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data'         => [['id', 'reference', 'status', 'price', 'created_at', 'client']],
+                'data'         => [[
+                    'id', 'reference', 'status', 'price', 'pickup_address',
+                    'delivery_address', 'from_address', 'to_address',
+                    'amount_xof', 'created_at', 'client',
+                ]],
                 'current_page',
                 'total',
                 'per_page',
             ]);
+
+        $this->assertSame('Cadjèhoun, Cotonou', $response->json('data.0.from_address'));
+        $this->assertSame('Akpakpa, Cotonou', $response->json('data.0.to_address'));
+        $this->assertSame(2500, (int) $response->json('data.0.amount_xof'));
 
         // Default page size is 20
         $this->assertCount(20, $response->json('data'));
@@ -364,6 +372,73 @@ class AdminControllerTest extends TestCase
             ->postJson("/api/admin/deliveries/{$delivery->id}/validate-payment")
             ->assertUnprocessable()
             ->assertJsonPath('message', 'Cette livraison n\'est pas en attente de validation.');
+    }
+
+    // ── Payments listing ─────────────────────────────────────────────────────
+
+    public function test_admin_can_list_payments_paginated(): void
+    {
+        $delivery = Delivery::factory()->create([
+            'client_id' => $this->client->id,
+            'status'    => DeliveryStatus::Confirmed,
+        ]);
+
+        Payment::create([
+            'delivery_id'             => $delivery->id,
+            'amount'                  => 2500,
+            'method'                  => PaymentMethod::MtnMomo,
+            'status'                  => PaymentStatus::Succeeded,
+            'transaction_reference'   => 'TXN-TESTADMIN',
+        ]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/payments');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [[
+                    'id', 'delivery_id', 'reference', 'delivery_reference',
+                    'client_name', 'method', 'amount_xof', 'date', 'status',
+                ]],
+                'current_page',
+                'total',
+                'per_page',
+            ])
+            ->assertJsonPath('data.0.reference', 'TXN-TESTADMIN')
+            ->assertJsonPath('data.0.delivery_id', $delivery->id)
+            ->assertJsonPath('data.0.delivery_reference', $delivery->reference)
+            ->assertJsonPath('data.0.client_name', $this->client->name)
+            ->assertJsonPath('data.0.method', 'mtn_momo')
+            ->assertJsonPath('data.0.status', 'success');
+    }
+
+    public function test_admin_can_filter_payments_by_ui_status(): void
+    {
+        $successfulDelivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        $pendingDelivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+
+        Payment::create([
+            'delivery_id' => $successfulDelivery->id,
+            'amount'      => 2500,
+            'method'      => PaymentMethod::MtnMomo,
+            'status'      => PaymentStatus::Succeeded,
+        ]);
+
+        Payment::create([
+            'delivery_id' => $pendingDelivery->id,
+            'amount'      => 3500,
+            'method'      => PaymentMethod::CashOnDelivery,
+            'status'      => PaymentStatus::Pending,
+        ]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/payments?status=success');
+
+        $response->assertOk();
+
+        $this->assertCount(1, $response->json('data'));
+        $this->assertSame('success', $response->json('data.0.status'));
+        $this->assertSame($successfulDelivery->id, $response->json('data.0.delivery_id'));
     }
 
     // ── Drivers listing ───────────────────────────────────────────────────────

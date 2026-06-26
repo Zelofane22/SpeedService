@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
 import StatusBadge from '@/components/status-badge'
 import Card from '@/components/card'
 import SearchInput from '@/components/search-input'
@@ -51,7 +50,6 @@ const TABLE_HEADERS = [
   'Livreur',
   'Statut',
   'Montant',
-  'Actions',
 ]
 
 // ---------------------------------------------------------------------------
@@ -202,15 +200,6 @@ export default function OrdersPage() {
                     {/* Montant */}
                     <td className="px-5 py-4 text-sm font-semibold whitespace-nowrap">
                       {formatXOF(d.amount_xof ?? 0)}
-                    </td>
-                    {/* Actions */}
-                    <td className="px-5 py-4">
-                      <button className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors">
-                        <MoreHorizontal
-                          size={15}
-                          className="text-muted-foreground"
-                        />
-                      </button>
                     </td>
                   </tr>
                 ))

@@ -85,7 +85,7 @@ export function updateDeliveryStatus(id: string, status: string): Promise<AdminD
 
 export function validatePayment(deliveryId: string): Promise<void> {
   return apiFetch<void>(`/admin/deliveries/${deliveryId}/validate-payment`, {
-    method: 'PATCH',
+    method: 'POST',
   })
 }
 

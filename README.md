@@ -82,9 +82,9 @@ docker compose exec backend php artisan db:seed --force
 | URL | Service |
 |---|---|
 | `http://localhost:8000/api/status` | API (health check) |
-| `http://localhost:3000` | App client |
+| `http://localhost:3000` | App client (login : 'preprod@speedservice.bj' / 'Password123!'|
 | `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!` — voir ci-dessous) |
-| `http://localhost:3002` | App livreur |
+| `http://localhost:3002` | App livreur (login dev test : koffiagbeko@speedservice.bj / Driver123! |
 
 **Commandes utiles :**
 

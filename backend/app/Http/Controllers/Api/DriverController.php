@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
@@ -28,8 +30,19 @@ class DriverController extends Controller
     {
         if ($err = $this->ensureDriver()) return $err;
 
-        $missions = Delivery::where('status', DeliveryStatus::Confirmed)
-            ->whereNull('driver_id')
+        $missions = Delivery::whereNull('driver_id')
+            ->where(function ($q) {
+                $q->where('status', DeliveryStatus::Confirmed)
+                  ->orWhere(function ($q2) {
+                      // Cash-on-delivery and agency orders pending admin validation
+                      // are immediately visible to drivers since payment is collected on delivery
+                      $q2->where('status', DeliveryStatus::AwaitingValidation)
+                         ->whereHas('payment', fn ($p) => $p->whereIn('method', [
+                             PaymentMethod::CashOnDelivery->value,
+                             PaymentMethod::Agency->value,
+                         ]));
+                  });
+            })
             ->with('client:id,name,phone')
             ->latest()
             ->get();
@@ -42,19 +55,75 @@ class DriverController extends Controller
         if ($err = $this->ensureDriver()) return $err;
 
         $missions = Delivery::where('driver_id', Auth::id())
-            ->with(['client:id,name,phone', 'statusHistories' => fn ($q) => $q->orderBy('created_at')])
+            ->with([
+                'client:id,name,phone',
+                'payment:id,delivery_id,method,status',
+                'statusHistories' => fn ($q) => $q->orderBy('created_at'),
+            ])
             ->latest()
             ->get();
 
         return response()->json($missions);
     }
 
+    public function confirmPayment(string $id): JsonResponse
+    {
+        if ($err = $this->ensureDriver()) return $err;
+
+        $delivery = Delivery::where('driver_id', Auth::id())
+            ->where('status', DeliveryStatus::PickingUp)
+            ->with('payment')
+            ->findOrFail($id);
+
+        $cashMethods = [PaymentMethod::CashOnDelivery->value, PaymentMethod::Agency->value];
+
+        if (!$delivery->payment || !in_array($delivery->payment->method->value, $cashMethods)) {
+            return response()->json(['message' => 'Confirmation de paiement non applicable pour ce mode de paiement.'], 422);
+        }
+
+        if ($delivery->payment->status === PaymentStatus::Succeeded) {
+            return response()->json(['message' => 'Paiement déjà confirmé.'], 422);
+        }
+
+        $delivery->payment->update([
+            'status'       => PaymentStatus::Succeeded,
+            'validated_by' => Auth::id(),
+            'validated_at' => now(),
+        ]);
+
+        $delivery->update(['status' => DeliveryStatus::InDelivery]);
+        $delivery->statusHistories()->create([
+            'status' => DeliveryStatus::InDelivery,
+            'note'   => 'Paiement encaissé et confirmé par le livreur.',
+        ]);
+
+        try {
+            $this->notifications->send(
+                $delivery->fresh(['client', 'driver']),
+                DeliveryNotificationEvent::PackagePickedUp,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return response()->json($delivery->load('client:id,name,phone', 'payment', 'statusHistories'));
+    }
+
     public function acceptMission(string $id): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
 
-        $delivery = Delivery::where('status', DeliveryStatus::Confirmed)
-            ->whereNull('driver_id')
+        $delivery = Delivery::whereNull('driver_id')
+            ->where(function ($q) {
+                $q->where('status', DeliveryStatus::Confirmed)
+                  ->orWhere(function ($q2) {
+                      $q2->where('status', DeliveryStatus::AwaitingValidation)
+                         ->whereHas('payment', fn ($p) => $p->whereIn('method', [
+                             PaymentMethod::CashOnDelivery->value,
+                             PaymentMethod::Agency->value,
+                         ]));
+                  });
+            })
             ->findOrFail($id);
 
         $delivery->update([

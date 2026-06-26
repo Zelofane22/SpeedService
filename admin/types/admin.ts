@@ -44,6 +44,7 @@ export interface AdminDriver {
 
 export interface AdminPayment {
   id: string
+  delivery_id: string
   reference: string
   delivery_reference: string
   client_name: string

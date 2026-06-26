@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { apiGet, apiPatch } from '@/lib/api-client'
+import { apiGet, apiPatch, apiPost } from '@/lib/api-client'
+
+type Payment = {
+  id: string
+  method: string
+  status: string
+}
 
 type Mission = {
   id: string
@@ -19,6 +25,7 @@ type Mission = {
   sender_phone: string
   recipient_name: string
   recipient_phone: string
+  payment?: Payment
 }
 
 const ACTIVE = new Set(['assigned', 'picking_up', 'in_delivery'])
@@ -36,6 +43,12 @@ const NEXT_ACTION: Record<string, { label: string; next: string }> = {
   in_delivery: { label: 'Colis livré ✓', next: 'delivered' },
 }
 
+const CASH_METHODS = ['cash_on_delivery', 'agency']
+
+function isCashPayment(m: Mission) {
+  return m.payment && CASH_METHODS.includes(m.payment.method)
+}
+
 function fmtPrice(v: string | number) {
   return Number(v).toLocaleString('fr-FR') + ' FCFA'
 }
@@ -44,12 +57,99 @@ function short(addr: string) {
   return addr.split(',')[0]?.trim() ?? addr
 }
 
+// ─── Payment confirmation modal ───────────────────────────────────────────────
+
+function PaymentConfirmModal({
+  mission,
+  onConfirm,
+  onCancel,
+  confirming,
+}: {
+  mission: Mission
+  onConfirm: () => void
+  onCancel: () => void
+  confirming: boolean
+}) {
+  const [typed, setTyped] = useState('')
+  const KEYWORD = 'PAIEMENTRECU'
+  const valid = typed === KEYWORD
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
+
+      {/* Sheet */}
+      <div className="relative w-full max-w-md bg-white rounded-t-3xl px-6 pt-6 pb-10 shadow-xl">
+        {/* Handle */}
+        <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-6" />
+
+        {/* Icon */}
+        <div className="w-14 h-14 rounded-2xl bg-[#861D6D]/10 flex items-center justify-center mx-auto mb-4">
+          <span className="text-2xl">💵</span>
+        </div>
+
+        <h2 className="text-lg font-bold text-[#1D1D1F] text-center mb-1">
+          Confirmer la réception du paiement
+        </h2>
+        <p className="text-sm text-gray-500 text-center mb-1">
+          Mission <span className="font-mono font-semibold text-[#861D6D]">{mission.reference}</span>
+        </p>
+        <p className="text-base font-bold text-[#1D1D1F] text-center mb-5">
+          {fmtPrice(mission.price)}
+        </p>
+
+        <p className="text-sm text-gray-600 mb-2">
+          Tapez <span className="font-bold text-[#861D6D]">{KEYWORD}</span> pour confirmer que vous avez bien encaissé le paiement :
+        </p>
+
+        <input
+          type="text"
+          value={typed}
+          onChange={(e) => setTyped(e.target.value.toUpperCase())}
+          placeholder={KEYWORD}
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-mono font-semibold tracking-widest text-center focus:outline-none focus:border-[#861D6D] transition-colors mb-4"
+          autoCapitalize="characters"
+          autoComplete="off"
+          spellCheck={false}
+        />
+
+        {typed.length > 0 && !valid && (
+          <p className="text-xs text-red-500 text-center -mt-2 mb-3">
+            Mot-clé incorrect — tapez exactement : {KEYWORD}
+          </p>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold active:scale-95 transition-transform"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={!valid || confirming}
+            className="flex-1 py-3 rounded-xl bg-[#861D6D] text-white text-sm font-semibold shadow-lg shadow-[#861D6D]/25 disabled:opacity-40 active:scale-95 transition-transform"
+          >
+            {confirming ? 'Validation…' : 'Valider ✓'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function ActiveMissionPage() {
   const router = useRouter()
-  const [missions, setMissions] = useState<Mission[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [updating, setUpdating] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [missions, setMissions]       = useState<Mission[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [updating, setUpdating]       = useState<string | null>(null)
+  const [error, setError]             = useState<string | null>(null)
+  const [paymentModal, setPaymentModal] = useState<Mission | null>(null)
+  const [confirming, setConfirming]   = useState(false)
 
   useEffect(() => {
     apiGet<Mission[]>('/driver/missions')
@@ -61,20 +161,47 @@ export default function ActiveMissionPage() {
   async function advance(m: Mission) {
     const action = NEXT_ACTION[m.status]
     if (!action) return
+
+    // For cash/agency missions at pickup step, require payment confirmation
+    if (m.status === 'picking_up' && isCashPayment(m)) {
+      setPaymentModal(m)
+      return
+    }
+
     setUpdating(m.id)
     setError(null)
     try {
       const updated = await apiPatch<Mission>(`/driver/missions/${m.id}/status`, { status: action.next })
-      if (ACTIVE.has(updated.status)) {
-        setMissions((ms) => ms.map((x) => x.id === m.id ? updated : x))
-      } else {
-        setMissions((ms) => ms.filter((x) => x.id !== m.id))
-        if (action.next === 'delivered') router.push('/history')
-      }
+      applyUpdate(m.id, updated)
     } catch (e: unknown) {
       setError((e as Error).message ?? 'Erreur de mise à jour.')
     } finally {
       setUpdating(null)
+    }
+  }
+
+  async function handlePaymentConfirm() {
+    if (!paymentModal) return
+    setConfirming(true)
+    setError(null)
+    try {
+      const updated = await apiPost<Mission>(`/driver/missions/${paymentModal.id}/confirm-payment`, {})
+      setPaymentModal(null)
+      applyUpdate(paymentModal.id, updated)
+    } catch (e: unknown) {
+      setError((e as Error).message ?? 'Erreur de confirmation du paiement.')
+      setPaymentModal(null)
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  function applyUpdate(id: string, updated: Mission) {
+    if (ACTIVE.has(updated.status)) {
+      setMissions((ms) => ms.map((x) => x.id === id ? updated : x))
+    } else {
+      setMissions((ms) => ms.filter((x) => x.id !== id))
+      if (updated.status === 'delivered') router.push('/history')
     }
   }
 
@@ -102,87 +229,111 @@ export default function ActiveMissionPage() {
   }
 
   return (
-    <div className="px-4 pt-4 flex flex-col gap-4">
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+    <>
+      {paymentModal && (
+        <PaymentConfirmModal
+          mission={paymentModal}
+          onConfirm={handlePaymentConfirm}
+          onCancel={() => setPaymentModal(null)}
+          confirming={confirming}
+        />
       )}
 
-      {missions.map((m) => {
-        const action = NEXT_ACTION[m.status]
-        const current = statusIdx(m.status)
-        return (
-          <div key={m.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            {/* Header */}
-            <div className="bg-[#861D6D] px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-white/70">Mission</p>
-                <p className="text-sm font-bold text-white font-mono">{m.reference}</p>
-              </div>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium bg-white/20 text-white`}>
-                {m.delivery_type === 'express' ? 'Express' : 'Standard'}
-              </span>
-            </div>
+      <div className="px-4 pt-4 flex flex-col gap-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+        )}
 
-            {/* Progress steps */}
-            <div className="flex items-center px-4 py-3 gap-1">
-              {STEPS.map((step, i) => {
-                const done    = i < current
-                const active  = i === current
-                const future  = i > current
-                return (
-                  <div key={step.status} className="flex items-center flex-1 last:flex-none">
-                    <div className={`flex flex-col items-center gap-1 ${future ? 'opacity-40' : ''}`}>
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${done ? 'bg-green-500 text-white' : active ? 'bg-[#861D6D] text-white ring-4 ring-[#861D6D]/20' : 'bg-gray-100 text-gray-400'}`}>
-                        {done ? '✓' : i + 1}
+        {missions.map((m) => {
+          const action  = NEXT_ACTION[m.status]
+          const current = statusIdx(m.status)
+          const needsPayment = m.status === 'picking_up' && isCashPayment(m)
+
+          return (
+            <div key={m.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="bg-[#861D6D] px-4 py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-white/70">Mission</p>
+                  <p className="text-sm font-bold text-white font-mono">{m.reference}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {needsPayment && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 font-bold">
+                      💵 Paiement cash
+                    </span>
+                  )}
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-white/20 text-white">
+                    {m.delivery_type === 'express' ? 'Express' : 'Standard'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress steps */}
+              <div className="flex items-center px-4 py-3 gap-1">
+                {STEPS.map((step, i) => {
+                  const done   = i < current
+                  const active = i === current
+                  const future = i > current
+                  return (
+                    <div key={step.status} className="flex items-center flex-1 last:flex-none">
+                      <div className={`flex flex-col items-center gap-1 ${future ? 'opacity-40' : ''}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${done ? 'bg-green-500 text-white' : active ? 'bg-[#861D6D] text-white ring-4 ring-[#861D6D]/20' : 'bg-gray-100 text-gray-400'}`}>
+                          {done ? '✓' : i + 1}
+                        </div>
+                        <p className="text-[10px] text-gray-500 text-center leading-tight w-12">{step.label}</p>
                       </div>
-                      <p className="text-[10px] text-gray-500 text-center leading-tight w-12">{step.label}</p>
+                      {i < STEPS.length - 1 && (
+                        <div className={`flex-1 h-0.5 mx-1 mb-4 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
+                      )}
                     </div>
-                    {i < STEPS.length - 1 && (
-                      <div className={`flex-1 h-0.5 mx-1 mb-4 ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
-                    )}
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
+
+              {/* Addresses */}
+              <div className="px-4 pb-4 space-y-2">
+                <div className="bg-[#FAF7FB] rounded-xl p-3">
+                  <p className="text-xs text-gray-400 mb-0.5">Enlèvement · {m.sender_name}</p>
+                  <p className="text-sm font-medium text-[#1D1D1F]">{short(m.pickup_address)}</p>
+                  <a href={`tel:${m.sender_phone}`} className="text-xs text-[#861D6D] mt-1 block">
+                    📞 {m.sender_phone}
+                  </a>
+                </div>
+
+                <div className="flex justify-center text-gray-400 text-xs">↓</div>
+
+                <div className="bg-[#FAF7FB] rounded-xl p-3">
+                  <p className="text-xs text-gray-400 mb-0.5">Livraison · {m.recipient_name}</p>
+                  <p className="text-sm font-medium text-[#1D1D1F]">{short(m.delivery_address)}</p>
+                  <a href={`tel:${m.recipient_phone}`} className="text-xs text-[#861D6D] mt-1 block">
+                    📞 {m.recipient_phone}
+                  </a>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-gray-500 px-1 mt-2">
+                  <span>{m.distance ? `${Number(m.distance).toFixed(1)} km` : '—'}</span>
+                  <span className="font-bold text-[#861D6D] text-sm">{fmtPrice(m.price)}</span>
+                </div>
+
+                {action && (
+                  <button
+                    onClick={() => advance(m)}
+                    disabled={updating === m.id}
+                    className={`w-full py-4 rounded-xl font-semibold text-sm mt-2 disabled:opacity-60 active:scale-95 transition-transform ${needsPayment ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25' : 'bg-[#861D6D] text-white shadow-lg shadow-[#861D6D]/25'}`}
+                  >
+                    {updating === m.id
+                      ? 'Mise à jour…'
+                      : needsPayment
+                        ? '💵 Encaisser le paiement & Départ'
+                        : action.label}
+                  </button>
+                )}
+              </div>
             </div>
-
-            {/* Addresses */}
-            <div className="px-4 pb-4 space-y-2">
-              <div className="bg-[#FAF7FB] rounded-xl p-3">
-                <p className="text-xs text-gray-400 mb-0.5">Enlèvement · {m.sender_name}</p>
-                <p className="text-sm font-medium text-[#1D1D1F]">{short(m.pickup_address)}</p>
-                <a href={`tel:${m.sender_phone}`} className="text-xs text-[#861D6D] mt-1 block">
-                  📞 {m.sender_phone}
-                </a>
-              </div>
-
-              <div className="flex justify-center text-gray-400 text-xs">↓</div>
-
-              <div className="bg-[#FAF7FB] rounded-xl p-3">
-                <p className="text-xs text-gray-400 mb-0.5">Livraison · {m.recipient_name}</p>
-                <p className="text-sm font-medium text-[#1D1D1F]">{short(m.delivery_address)}</p>
-                <a href={`tel:${m.recipient_phone}`} className="text-xs text-[#861D6D] mt-1 block">
-                  📞 {m.recipient_phone}
-                </a>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-gray-500 px-1 mt-2">
-                <span>{m.distance ? `${Number(m.distance).toFixed(1)} km` : '—'}</span>
-                <span className="font-bold text-[#861D6D] text-sm">{fmtPrice(m.price)}</span>
-              </div>
-
-              {action && (
-                <button
-                  onClick={() => advance(m)}
-                  disabled={updating === m.id}
-                  className="w-full bg-[#861D6D] text-white py-4 rounded-xl font-semibold text-sm mt-2 disabled:opacity-60 active:scale-95 transition-transform"
-                >
-                  {updating === m.id ? 'Mise à jour…' : action.label}
-                </button>
-              )}
-            </div>
-          </div>
-        )
-      })}
-    </div>
+          )
+        })}
+      </div>
+    </>
   )
 }

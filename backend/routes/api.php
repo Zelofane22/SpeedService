@@ -66,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/missions/{id}/accept', [DriverController::class, 'acceptMission']);
         Route::post('/missions/{id}/decline', [DriverController::class, 'declineMission']);
         Route::patch('/missions/{id}/status', [DriverController::class, 'updateStatus']);
+        Route::post('/missions/{id}/confirm-payment', [DriverController::class, 'confirmPayment']);
     });
 
     // Admin routes
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/deliveries/{id}', [AdminController::class, 'showDelivery']);
         Route::patch('/deliveries/{id}/status', [AdminController::class, 'updateDeliveryStatus']);
         Route::post('/deliveries/{id}/validate-payment', [AdminController::class, 'validatePayment']);
+        Route::get('/payments', [AdminController::class, 'listPayments']);
         Route::get('/drivers', [AdminController::class, 'listDrivers']);
         Route::patch('/drivers/{id}/toggle-active', [AdminController::class, 'toggleDriverStatus']);
         Route::get('/reports', [AdminController::class, 'reports']);

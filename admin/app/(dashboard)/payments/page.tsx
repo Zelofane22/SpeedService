@@ -122,10 +122,11 @@ export default function PaymentsPage() {
     load(value)
   }
 
-  async function handleValidatePayment(paymentId: string) {
+  async function handleValidatePayment(payment: AdminPayment) {
+    const paymentId = payment.id
     setValidatingId(paymentId)
     try {
-      await validatePayment(paymentId)
+      await validatePayment(payment.delivery_id)
       load(statusFilter)
     } catch (err) {
       console.error('Erreur validation paiement', err)
@@ -282,7 +283,7 @@ export default function PaymentsPage() {
                       <td className="px-5 py-4">
                         {canValidate && (
                           <button
-                            onClick={() => handleValidatePayment(p.id)}
+                            onClick={() => handleValidatePayment(p)}
                             disabled={validatingId === p.id}
                             className="px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-xl hover:bg-green-600 active:scale-95 transition-all disabled:opacity-50"
                           >

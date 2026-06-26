@@ -131,7 +131,7 @@ class AdminController extends Controller
             'driver:id,name',
         ])->select([
             'id', 'reference', 'client_id', 'driver_id',
-            'status', 'price', 'created_at',
+            'status', 'price', 'pickup_address', 'delivery_address', 'created_at',
         ]);
 
         if ($request->filled('status')) {
@@ -158,6 +158,14 @@ class AdminController extends Controller
         }
 
         $deliveries = $query->latest()->paginate(20);
+
+        $deliveries->getCollection()->transform(function (Delivery $delivery) {
+            $delivery->from_address = $delivery->pickup_address;
+            $delivery->to_address = $delivery->delivery_address;
+            $delivery->amount_xof = (float) $delivery->price;
+
+            return $delivery;
+        });
 
         return response()->json($deliveries);
     }
@@ -220,6 +228,63 @@ class AdminController extends Controller
         }
 
         return response()->json($delivery->load(['payment', 'statusHistories']));
+    }
+
+    // ── Payments ─────────────────────────────────────────────────────────────
+
+    public function listPayments(Request $request): JsonResponse
+    {
+        $query = Payment::with([
+            'delivery:id,reference,client_id',
+            'delivery.client:id,name',
+        ])->select([
+            'id', 'delivery_id', 'amount', 'method', 'status',
+            'transaction_reference', 'created_at', 'validated_at',
+        ]);
+
+        if ($request->filled('status')) {
+            $status = match ($request->input('status')) {
+                'success', 'succeeded' => PaymentStatus::Succeeded,
+                'pending' => PaymentStatus::Pending,
+                'failed' => PaymentStatus::Failed,
+                default => null,
+            };
+
+            if ($status !== null) {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = '%' . $request->input('search') . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', $search)
+                    ->orWhere('transaction_reference', 'like', $search)
+                    ->orWhereHas('delivery', fn ($dq) => $dq->where('reference', 'like', $search))
+                    ->orWhereHas('delivery.client', fn ($cq) => $cq->where('name', 'like', $search));
+            });
+        }
+
+        $payments = $query->latest()->paginate(20);
+
+        $payments->getCollection()->transform(function (Payment $payment) {
+            return [
+                'id' => $payment->id,
+                'delivery_id' => $payment->delivery_id,
+                'reference' => $payment->transaction_reference
+                    ?? 'PAY-' . strtoupper(substr(str_replace('-', '', $payment->id), 0, 8)),
+                'delivery_reference' => $payment->delivery?->reference,
+                'client_name' => $payment->delivery?->client?->name,
+                'method' => $payment->method->value,
+                'amount_xof' => (float) $payment->amount,
+                'date' => ($payment->validated_at ?? $payment->created_at)?->toISOString(),
+                'status' => $payment->status === PaymentStatus::Succeeded
+                    ? 'success'
+                    : $payment->status->value,
+            ];
+        });
+
+        return response()->json($payments);
     }
 
     // ── Drivers ───────────────────────────────────────────────────────────────
