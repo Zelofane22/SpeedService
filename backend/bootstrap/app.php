@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         apiPrefix: 'api',
+        health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Token-based API uniquement — pas de mode SPA/cookie Sanctum
