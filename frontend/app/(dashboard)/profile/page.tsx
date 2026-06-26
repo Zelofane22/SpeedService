@@ -92,14 +92,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-2xl space-y-6 p-4 sm:space-y-8 sm:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-brand-foreground">Mon profil</h1>
+        <h1 className="text-xl font-bold text-brand-foreground sm:text-2xl">Mon profil</h1>
         <p className="text-sm text-gray-700 mt-1">Gérez vos informations personnelles et votre mot de passe.</p>
       </div>
 
       {/* Informations personnelles */}
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm shadow-primary/5 p-5 sm:p-8">
         <h2 className="text-lg font-bold text-brand-foreground mb-1">Informations personnelles</h2>
         <p className="text-sm text-gray-700 mb-6">Modifiez votre nom ou numéro de téléphone.</p>
 
@@ -154,7 +154,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Changement de mot de passe */}
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm shadow-primary/5 p-5 sm:p-8">
         <h2 className="text-lg font-bold text-brand-foreground mb-1">Changer le mot de passe</h2>
         <p className="text-sm text-gray-700 mb-6">Laissez vide si vous ne souhaitez pas changer de mot de passe.</p>
 

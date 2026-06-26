@@ -4,20 +4,20 @@ import { Card } from '@/components/card'
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-brand-background px-6 py-8 text-brand-foreground">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-        <section className="space-y-4 rounded-[2rem] border border-brand-border bg-white p-10 shadow-sm">
+    <main className="min-h-screen bg-brand-background px-4 py-6 text-brand-foreground sm:px-6 sm:py-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 sm:gap-8">
+        <section className="space-y-4 rounded-2xl border border-brand-border bg-white p-5 shadow-sm sm:p-10">
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-[0.24em] text-sky-600">SpeedService</p>
-            <h1 className="text-4xl font-semibold sm:text-5xl">Plateforme de livraison rapide</h1>
+            <h1 className="text-3xl font-semibold sm:text-5xl">Plateforme de livraison rapide</h1>
             <p className="max-w-2xl text-gray-700">
               Une interface moderne pour gérer les livraisons, la logistique et le suivi client.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button>Commencer</Button>
-            <Button variant="outline" size="lg">
+          <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+            <Button className="w-full sm:w-auto">Commencer</Button>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto">
               En savoir plus
             </Button>
           </div>
@@ -44,13 +44,13 @@ export default function HomePage() {
           </Card>
         </div>
 
-        <div className="rounded-[2rem] border border-brand-border bg-white p-8 shadow-sm">
+        <div className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-gray-700">Next Steps</p>
               <h2 className="text-2xl font-semibold">Configurer l’authentification</h2>
             </div>
-            <Button variant="secondary" className="inline-flex items-center gap-2">
+            <Button variant="secondary" className="inline-flex w-full items-center gap-2 sm:w-auto">
               Continuer <ArrowRight size={18} />
             </Button>
           </div>

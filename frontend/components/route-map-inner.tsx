@@ -37,7 +37,7 @@ export default function RouteMapInner({ pickup, delivery, distanceKm }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded-2xl overflow-hidden border border-brand-border" style={{ height: 240 }}>
+      <div className="h-60 overflow-hidden rounded-2xl border border-brand-border sm:h-[240px]">
         <MapContainer
           center={pickupPos}
           zoom={12}
@@ -57,7 +57,7 @@ export default function RouteMapInner({ pickup, delivery, distanceKm }: Props) {
           />
         </MapContainer>
       </div>
-      <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-2xl px-4 py-3 text-sm">
+      <div className="flex items-center justify-between gap-3 bg-primary/5 border border-primary/20 rounded-2xl px-4 py-3 text-sm">
         <span className="text-gray-700">Distance estimée</span>
         <span className="font-bold text-primary">{distanceKm.toFixed(1)} km</span>
       </div>

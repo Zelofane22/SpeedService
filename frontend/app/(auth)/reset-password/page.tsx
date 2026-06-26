@@ -120,7 +120,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="w-full max-w-md">
       {/* Logo */}
-      <div className="text-center mb-10">
+      <div className="text-center mb-8 sm:mb-10">
         <div className="flex justify-center mb-4">
           <Logo size="lg" />
         </div>
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm shadow-primary/5 p-5 sm:p-8">
         <h1 className="text-xl font-bold text-brand-foreground mb-6">
           Nouveau mot de passe
         </h1>

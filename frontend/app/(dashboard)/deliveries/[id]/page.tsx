@@ -164,29 +164,29 @@ export default function DeliveryTrackingPage() {
   return (
     <div className="p-4 sm:p-6 space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <Link href="/history" aria-label="Retour à l’historique" className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand-border bg-white text-gray-600 hover:text-primary">
             <ArrowLeft size={17} />
           </Link>
-          <div>
+          <div className="min-w-0">
             <p className="font-mono text-sm font-bold text-primary">{delivery.reference}</p>
             <p className="text-xs text-gray-500">Créée le {formatDate(delivery.created_at, true)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
           <StatusBadge status={delivery.status} />
           <button
             type="button"
             onClick={() => void handleRefresh()}
             disabled={refreshing}
-            className="flex items-center gap-2 rounded-xl border border-brand-border bg-white px-3 py-2 text-xs font-semibold text-gray-600 hover:border-primary/40 disabled:opacity-60"
+            className="flex shrink-0 items-center gap-2 rounded-xl border border-brand-border bg-white px-3 py-2 text-xs font-semibold text-gray-600 hover:border-primary/40 disabled:opacity-60"
           >
             <RefreshCw size={14} className={cn(refreshing && 'animate-spin')} /> Actualiser
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl bg-primary p-5 text-white shadow-lg shadow-primary/20">
+      <div className="rounded-2xl bg-primary p-4 text-white shadow-lg shadow-primary/20 sm:p-5">
         <div className="flex items-start gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
             {delivery.status === 'delivered' ? <Check size={22} /> : <Truck size={22} />}
@@ -200,7 +200,7 @@ export default function DeliveryTrackingPage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-        <section className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-brand-border bg-white p-4 shadow-sm sm:p-5">
           <div className="mb-5 flex items-center gap-2">
             <Clock3 size={18} className="text-primary" />
             <h2 className="font-bold text-brand-foreground">Suivi de la commande</h2>
@@ -239,7 +239,7 @@ export default function DeliveryTrackingPage() {
         </section>
 
         <div className="space-y-5">
-          <section className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-brand-border bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-center gap-2"><MapPin size={18} className="text-primary" /><h2 className="font-bold text-brand-foreground">Trajet</h2></div>
             <div className="space-y-4">
               <AddressBlock label="Enlèvement" name={delivery.sender_name} phone={delivery.sender_phone} address={delivery.pickup_address} />
@@ -250,14 +250,14 @@ export default function DeliveryTrackingPage() {
           </section>
 
           {delivery.driver && (
-            <section className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-brand-border bg-white p-4 shadow-sm sm:p-5">
               <div className="mb-3 flex items-center gap-2"><User size={18} className="text-primary" /><h2 className="font-bold text-brand-foreground">Votre livreur</h2></div>
               <p className="text-sm font-semibold text-brand-foreground">{delivery.driver.name}</p>
               <a href={`tel:${delivery.driver.phone}`} className="mt-1 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"><Phone size={12} /> {delivery.driver.phone}</a>
             </section>
           )}
 
-          <section className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-brand-border bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-center gap-2"><Package size={18} className="text-primary" /><h2 className="font-bold text-brand-foreground">Détails</h2></div>
             <dl className="space-y-2.5 text-sm">
               <Detail label="Type" value={PACKAGE_LABELS[delivery.package_type] ?? delivery.package_type} />
@@ -270,7 +270,7 @@ export default function DeliveryTrackingPage() {
           </section>
 
           {delivery.payment && (
-            <section className="rounded-2xl border border-brand-border bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-brand-border bg-white p-4 shadow-sm sm:p-5">
               <div className="mb-3 flex items-center gap-2"><CreditCard size={18} className="text-primary" /><h2 className="font-bold text-brand-foreground">Paiement</h2></div>
               <Detail label="Mode" value={PAYMENT_LABELS[delivery.payment.method] ?? delivery.payment.method} />
               <div className="mt-2"><Detail label="État" value={delivery.payment.status === 'succeeded' ? 'Payé' : 'En attente'} strong /></div>
@@ -286,10 +286,10 @@ function AddressBlock({ label, name, phone, address, destination = false }: { la
   return (
     <div className="flex gap-3">
       <span className={cn('mt-1 h-4 w-4 shrink-0 rounded-full border-4 border-white ring-2', destination ? 'bg-secondary ring-secondary/30' : 'bg-primary ring-primary/30')} />
-      <div>
+      <div className="min-w-0">
         <p className="text-xs text-gray-500">{label}</p>
         <p className="text-sm font-semibold text-brand-foreground">{name}</p>
-        <p className="mt-0.5 text-xs leading-5 text-gray-600">{address}</p>
+        <p className="mt-0.5 text-xs leading-5 text-gray-600 break-words">{address}</p>
         <a href={`tel:${phone}`} className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"><Phone size={11} /> {phone}</a>
       </div>
     </div>
@@ -300,7 +300,7 @@ function Detail({ label, value, strong = false }: { label: string; value: string
   return (
     <div className="flex items-start justify-between gap-4">
       <dt className="text-gray-500">{label}</dt>
-      <dd className={cn('text-right text-brand-foreground', strong && 'font-bold text-primary')}>{value}</dd>
+      <dd className={cn('text-right text-brand-foreground break-words', strong && 'font-bold text-primary')}>{value}</dd>
     </div>
   )
 }

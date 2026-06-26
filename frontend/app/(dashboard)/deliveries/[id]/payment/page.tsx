@@ -119,7 +119,7 @@ export default function PaymentPage() {
   // ── Loading ───────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 size={32} className="text-primary animate-spin" />
       </div>
     )
@@ -127,7 +127,7 @@ export default function PaymentPage() {
 
   if (fetchErr || !delivery) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
           <p className="text-sm text-red-600">{fetchErr ?? 'Livraison introuvable.'}</p>
@@ -150,9 +150,9 @@ export default function PaymentPage() {
     const isConfirmed = paid.status === 'confirmed'
 
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-[60vh]">
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-8 text-center">
+          <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 text-center sm:p-8">
             <div className={cn(
               'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6',
               isConfirmed ? 'bg-green-50' : 'bg-amber-50',
@@ -219,7 +219,7 @@ export default function PaymentPage() {
 
   // ── Payment form ──────────────────────────────────────────────────────────
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="p-4 sm:p-6 max-w-lg mx-auto">
 
       <button
         onClick={() => router.back()}
@@ -228,10 +228,10 @@ export default function PaymentPage() {
         <ArrowLeft size={16} /> Retour
       </button>
 
-      <h1 className="text-2xl font-bold text-brand-foreground mb-6">Finaliser le paiement</h1>
+      <h1 className="text-xl font-bold text-brand-foreground mb-5 sm:mb-6 sm:text-2xl">Finaliser le paiement</h1>
 
       {/* Delivery summary */}
-      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 mb-5">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-4 mb-5 sm:p-5">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Récapitulatif</h2>
 
         <div className="flex items-start gap-3 mb-3">
@@ -239,7 +239,7 @@ export default function PaymentPage() {
           <div className="text-sm">
             <p className="text-gray-700 text-xs mb-0.5">De</p>
             <p className="font-medium text-brand-foreground">{delivery.sender_name}</p>
-            <p className="text-gray-700">{delivery.pickup_address}</p>
+            <p className="text-gray-700 break-words">{delivery.pickup_address}</p>
           </div>
         </div>
 
@@ -248,14 +248,14 @@ export default function PaymentPage() {
           <div className="text-sm">
             <p className="text-gray-700 text-xs mb-0.5">À</p>
             <p className="font-medium text-brand-foreground">{delivery.recipient_name}</p>
-            <p className="text-gray-700">{delivery.delivery_address}</p>
+            <p className="text-gray-700 break-words">{delivery.delivery_address}</p>
           </div>
         </div>
 
-        <div className="border-t border-brand-border pt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="border-t border-brand-border pt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             <Package size={16} className="text-gray-700" />
-            <span className="text-sm text-gray-700">
+            <span className="truncate text-sm text-gray-700">
               {delivery.delivery_type === 'express' ? 'Express' : 'Standard'} — {delivery.reference}
             </span>
           </div>
@@ -264,7 +264,7 @@ export default function PaymentPage() {
       </div>
 
       {/* Payment method block */}
-      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 mb-5">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-4 mb-5 sm:p-5">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Mode de paiement</h2>
 
         <div className={cn(
@@ -341,9 +341,9 @@ function Row({
   valueClass?: string
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-start justify-between gap-4">
       <span className="text-xs text-gray-700 shrink-0">{label}</span>
-      <span className={cn('text-sm text-right', mono ? 'font-mono font-bold text-brand-foreground' : 'font-medium text-brand-foreground', valueClass)}>
+      <span className={cn('text-sm text-right break-words', mono ? 'font-mono font-bold text-brand-foreground' : 'font-medium text-brand-foreground', valueClass)}>
         {value}
       </span>
     </div>

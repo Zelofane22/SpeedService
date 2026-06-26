@@ -79,7 +79,7 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-md">
       {/* Logo */}
-      <div className="text-center mb-10">
+      <div className="text-center mb-8 sm:mb-10">
         <div className="flex justify-center mb-4">
           <Logo size="lg" />
         </div>
@@ -87,7 +87,7 @@ export default function LoginPage() {
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm shadow-primary/5 p-8">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm shadow-primary/5 p-5 sm:p-8">
         <h1 className="text-xl font-bold text-brand-foreground mb-6">Connexion</h1>
 
         {globalError && (
@@ -149,7 +149,7 @@ export default function LoginPage() {
       <div className="mt-6 border-t border-brand-border pt-6">
         <a
           href={process.env.NEXT_PUBLIC_DRIVER_URL ?? 'http://localhost:3002'}
-          className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-brand-foreground text-white text-sm font-semibold rounded-2xl hover:opacity-90 transition-all"
+          className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-brand-foreground text-white text-center text-sm font-semibold rounded-2xl hover:opacity-90 transition-all"
         >
           <Bike size={16} />
           Vous êtes livreur ? Accéder à l&apos;espace livreur

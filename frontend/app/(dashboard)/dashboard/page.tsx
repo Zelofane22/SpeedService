@@ -27,6 +27,11 @@ function formatPrice(raw: string | number) {
   return Number(raw).toLocaleString('fr-FR') + ' FCFA'
 }
 
+function shortAddress(addr: string) {
+  const parts = addr.split(',')
+  return parts[0]?.trim() ?? addr
+}
+
 export default function DashboardPage() {
   const { user } = useAuthUser()
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
@@ -56,16 +61,16 @@ export default function DashboardPage() {
   const recent = deliveries.slice(0, 4)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* Greeting */}
       <p className="text-sm text-gray-700">
         Bonjour, <span className="font-semibold text-brand-foreground">{user.name}</span> 👋
       </p>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpiCards.map((k) => (
-          <div key={k.label} className="bg-white rounded-2xl border border-brand-border shadow-sm p-5">
+          <div key={k.label} className="bg-white rounded-2xl border border-brand-border shadow-sm p-4 sm:p-5">
             <div className="mb-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${k.iconBg}`}>
                 <k.icon size={18} className={k.iconColor} />
@@ -74,7 +79,7 @@ export default function DashboardPage() {
             {loading ? (
               <div className="h-7 w-16 bg-brand-muted animate-pulse rounded-lg mb-1" />
             ) : (
-              <p className="text-2xl font-bold text-brand-foreground mb-1">{k.value}</p>
+              <p className="text-xl font-bold text-brand-foreground mb-1 break-words sm:text-2xl">{k.value}</p>
             )}
             <p className="text-xs text-gray-700">{k.label}</p>
             <p className="text-xs text-gray-700 font-medium mt-1">{k.change}</p>
@@ -84,7 +89,7 @@ export default function DashboardPage() {
 
       {/* Recent orders */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-brand-foreground">Commandes récentes</h2>
+        <h2 className="text-base font-bold text-brand-foreground sm:text-lg">Commandes récentes</h2>
         <Link href="/history" className="text-sm text-primary font-medium hover:underline flex items-center gap-1">
           Voir tout <ChevronRight size={14} />
         </Link>
@@ -112,7 +117,14 @@ export default function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full">
+          <>
+            <div className="divide-y divide-brand-border md:hidden">
+              {recent.map((d) => (
+                <RecentDeliveryCard key={d.id} delivery={d} />
+              ))}
+            </div>
+
+            <table className="hidden w-full md:table">
             <thead>
               <tr className="border-b border-brand-border bg-brand-muted/20">
                 {['Référence', 'Date', 'Statut', 'Prix', ''].map((h) => (
@@ -137,7 +149,8 @@ export default function DashboardPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </>
         )}
       </div>
 
@@ -145,11 +158,35 @@ export default function DashboardPage() {
       <div className="flex justify-center pt-2">
         <Link
           href="/new-delivery"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+          className="inline-flex w-full items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/25 sm:w-auto"
         >
           <PlusCircle size={18} /> Nouvelle livraison
         </Link>
       </div>
     </div>
+  )
+}
+
+function RecentDeliveryCard({ delivery }: { delivery: Delivery }) {
+  return (
+    <Link href={`/deliveries/${delivery.id}`} className="block p-4 transition-colors hover:bg-brand-muted/10">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-sm font-bold text-primary">{delivery.reference}</p>
+          <p className="mt-1 text-xs text-gray-700">{formatDate(delivery.created_at)}</p>
+        </div>
+        <StatusBadge status={delivery.status} />
+      </div>
+      <div className="mt-3 space-y-1 text-sm">
+        <p className="truncate text-gray-700">De {shortAddress(delivery.pickup_address)}</p>
+        <p className="truncate text-brand-foreground">Vers {shortAddress(delivery.delivery_address)}</p>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-brand-foreground">{formatPrice(delivery.price)}</p>
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+          <Eye size={12} /> Détail
+        </span>
+      </div>
+    </Link>
   )
 }

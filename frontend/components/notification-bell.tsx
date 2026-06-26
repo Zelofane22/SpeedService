@@ -89,7 +89,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-brand-border bg-white shadow-2xl">
+        <div className="fixed left-4 right-4 top-20 z-50 overflow-hidden rounded-2xl border border-brand-border bg-white shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(24rem,calc(100vw-2rem))]">
           <div className="flex items-center justify-between border-b border-brand-border px-4 py-3">
             <div>
               <p className="text-sm font-bold text-brand-foreground">Notifications</p>
@@ -107,7 +107,7 @@ export function NotificationBell() {
             </div>
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[calc(100vh-10rem)] overflow-y-auto sm:max-h-96">
             {loading ? (
               <div className="flex justify-center py-10"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
             ) : items.length === 0 ? (

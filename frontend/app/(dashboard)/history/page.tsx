@@ -60,25 +60,25 @@ export default function HistoryPage() {
   })
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-brand-foreground">Historique des livraisons</h2>
-        <div className="flex gap-2">
-          <div className="relative">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-lg font-bold text-brand-foreground sm:text-xl">Historique des livraisons</h2>
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] md:flex">
+          <div className="relative min-w-0">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Référence, adresse..."
-              className="pl-9 pr-4 py-2 bg-brand-input border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-700 w-56"
+              className="w-full pl-9 pr-4 py-2 bg-brand-input border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-700 sm:w-56"
             />
           </div>
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
             aria-label="Filtrer par statut"
-            className="px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-gray-700 hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"
+            className="w-full px-3 py-2 bg-brand-input border border-brand-border rounded-xl text-sm text-gray-700 hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors sm:w-auto"
           >
             <option value="all">Tous les statuts</option>
             <option value="awaiting_payment">Paiement en attente</option>
@@ -117,7 +117,14 @@ export default function HistoryPage() {
             )}
           </div>
         ) : (
-          <table className="w-full">
+          <>
+            <div className="divide-y divide-brand-border md:hidden">
+              {filtered.map((d) => (
+                <HistoryDeliveryCard key={d.id} delivery={d} />
+              ))}
+            </div>
+
+            <table className="hidden w-full md:table">
             <thead>
               <tr className="border-b border-brand-border bg-brand-muted/20">
                 {['Référence', 'Date', 'De → Vers', 'Statut', 'Prix', ''].map((h) => (
@@ -147,9 +154,34 @@ export default function HistoryPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </>
         )}
       </div>
     </div>
+  )
+}
+
+function HistoryDeliveryCard({ delivery }: { delivery: Delivery }) {
+  return (
+    <Link href={`/deliveries/${delivery.id}`} className="block p-4 transition-colors hover:bg-brand-muted/10">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-mono text-sm font-bold text-primary">{delivery.reference}</p>
+          <p className="mt-1 text-xs text-gray-700">{formatDate(delivery.created_at)}</p>
+        </div>
+        <StatusBadge status={delivery.status} />
+      </div>
+      <div className="mt-3 space-y-1 text-sm">
+        <p className="truncate text-gray-700">De {shortAddress(delivery.pickup_address)}</p>
+        <p className="truncate text-brand-foreground">Vers {shortAddress(delivery.delivery_address)}</p>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-brand-foreground">{formatPrice(delivery.price)}</p>
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+          <Eye size={12} /> Voir
+        </span>
+      </div>
+    </Link>
   )
 }

@@ -105,21 +105,26 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
     <div className="flex flex-col gap-2">
       {label && <p className="text-xs text-gray-700">{label}</p>}
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           ref={searchInputRef}
           type="text"
           defaultValue={value?.address ?? ''}
           onChange={() => setSearchErr(null)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              void handleSearch()
+            }
+          }}
           placeholder="Quartier, rue… puis appuyez sur Localiser"
-          className="flex-1 bg-brand-input border border-brand-border rounded-xl px-3 py-2 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          className="min-w-0 flex-1 bg-brand-input border border-brand-border rounded-xl px-3 py-2 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         />
         <button
           type="button"
           onClick={handleSearch}
           disabled={searching}
-          className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all shrink-0"
+          className="w-full px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all sm:w-auto sm:shrink-0"
         >
           {searching ? '…' : 'Localiser'}
         </button>
@@ -127,12 +132,12 @@ export default function MapPickerInner({ value, onChange, label }: Props) {
 
       {searchErr && <p className="text-xs text-red-500">{searchErr}</p>}
 
-      <div className="rounded-2xl overflow-hidden border border-brand-border" style={{ height: 220 }}>
+      <div className="h-60 overflow-hidden rounded-2xl border border-brand-border sm:h-[220px]">
         <MapContainer
           center={value ? [value.lat, value.lon] : DEFAULT_CENTER}
           zoom={DEFAULT_ZOOM}
           style={{ height: '100%', width: '100%' }}
-          scrollWheelZoom
+          scrollWheelZoom={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'

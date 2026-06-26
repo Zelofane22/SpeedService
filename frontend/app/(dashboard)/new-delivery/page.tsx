@@ -276,16 +276,20 @@ export default function NewDeliveryPage() {
 
   // ── Wizard ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       {/* Stepper */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
+        <div className="mb-3 flex items-center justify-between sm:hidden">
+          <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">Étape {step + 1}/{STEPS.length}</span>
+          <span className="text-sm font-bold text-primary">{STEPS[step]}</span>
+        </div>
         <div className="flex items-center justify-between">
           {STEPS.map((label, i) => (
             <div key={label} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center gap-1">
                 <div
                   className={cn(
-                    'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all',
+                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all sm:h-9 sm:w-9 sm:text-sm',
                     i < step   ? 'bg-primary text-white' :
                     i === step ? 'bg-primary text-white ring-4 ring-primary/20' :
                                  'bg-brand-muted text-gray-700',
@@ -298,7 +302,7 @@ export default function NewDeliveryPage() {
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={cn('flex-1 h-px mx-2 mt-[-20px]', i < step ? 'bg-primary' : 'bg-brand-border')} />
+                <div className={cn('flex-1 h-px mx-1 mt-[-18px] sm:mx-2 sm:mt-[-20px]', i < step ? 'bg-primary' : 'bg-brand-border')} />
               )}
             </div>
           ))}
@@ -306,12 +310,12 @@ export default function NewDeliveryPage() {
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-8">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-4 sm:p-8">
 
         {/* Step 0: Sender + Pickup map */}
         {step === 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-brand-foreground mb-6">Informations expéditeur</h2>
+            <h2 className="text-lg font-bold text-brand-foreground mb-4 sm:mb-6 sm:text-xl">Informations expéditeur</h2>
             <FieldInput label="Nom complet" name="sender_name" value={form.sender_name} onChange={(v) => set('sender_name', v)} placeholder="Koffi Mensah" icon={User} required />
             <FieldInput label="Téléphone" name="sender_phone" value={form.sender_phone} onChange={(v) => set('sender_phone', v)} placeholder="+229 97 00 00 00" type="tel" icon={Phone} required />
             <div className="flex flex-col gap-1.5">
@@ -330,7 +334,7 @@ export default function NewDeliveryPage() {
         {/* Step 1: Recipient + Delivery map */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-brand-foreground mb-6">Informations destinataire</h2>
+            <h2 className="text-lg font-bold text-brand-foreground mb-4 sm:mb-6 sm:text-xl">Informations destinataire</h2>
             <FieldInput label="Nom du destinataire" name="recipient_name" value={form.recipient_name} onChange={(v) => set('recipient_name', v)} placeholder="Aïcha Bah" icon={User} required />
             <FieldInput label="Téléphone" name="recipient_phone" value={form.recipient_phone} onChange={(v) => set('recipient_phone', v)} placeholder="+229 97 11 11 11" type="tel" icon={Phone} required />
             <div className="flex flex-col gap-1.5">
@@ -349,7 +353,7 @@ export default function NewDeliveryPage() {
         {/* Step 2: Package */}
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-brand-foreground mb-6">Détails du colis</h2>
+            <h2 className="text-lg font-bold text-brand-foreground mb-4 sm:mb-6 sm:text-xl">Détails du colis</h2>
             <FieldSelect
               label="Type de colis" name="package_type" value={form.package_type}
               onChange={(v) => set('package_type', v)} options={PACKAGE_TYPES} required
@@ -374,7 +378,7 @@ export default function NewDeliveryPage() {
         {/* Step 3: Recap + Route map */}
         {step === 3 && (
           <div className="space-y-5">
-            <h2 className="text-xl font-bold text-brand-foreground mb-6">Récapitulatif</h2>
+            <h2 className="text-lg font-bold text-brand-foreground mb-4 sm:mb-6 sm:text-xl">Récapitulatif</h2>
 
             {/* Route map */}
             {form.pickup_point && form.delivery_point && distance !== null && (
@@ -385,7 +389,7 @@ export default function NewDeliveryPage() {
               />
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {[
                 { l: 'Expéditeur',          v: form.sender_name },
                 { l: 'Tél. expéditeur',     v: form.sender_phone },
@@ -398,13 +402,13 @@ export default function NewDeliveryPage() {
               ].map(({ l, v }) => (
                 <div key={l} className="bg-brand-muted/30 rounded-2xl p-4">
                   <p className="text-xs text-gray-700 mb-1">{l}</p>
-                  <p className="text-sm font-semibold text-brand-foreground">{v}</p>
+                  <p className="text-sm font-semibold text-brand-foreground break-words">{v}</p>
                 </div>
               ))}
             </div>
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
               <p className="text-xs text-gray-700 mb-3">Le service (Standard / Express) sera sélectionné à l&apos;étape suivante.</p>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-gray-700">Tarif Standard estimé</span>
                 <span className="font-medium">{fmtPrice(BASE_PRICES[form.package_type] ?? 2500)}</span>
               </div>
@@ -415,7 +419,7 @@ export default function NewDeliveryPage() {
         {/* Step 4: Service + Payment */}
         {step === 4 && (
           <div className="space-y-5">
-            <h2 className="text-xl font-bold text-brand-foreground">Choisir le service</h2>
+            <h2 className="text-lg font-bold text-brand-foreground sm:text-xl">Choisir le service</h2>
             <div className="space-y-3">
               {([
                 { id: 'standard', label: 'Livraison Standard', delay: '24-48 heures', Icon: Clock },
@@ -425,24 +429,24 @@ export default function NewDeliveryPage() {
                   key={id}
                   onClick={() => set('delivery_type', id)}
                   className={cn(
-                    'flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all',
+                    'flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all sm:gap-4',
                     form.delivery_type === id ? 'border-primary bg-primary/5' : 'border-brand-border hover:border-primary/40',
                   )}
                 >
-                  <input type="radio" name="delivery_type" checked={form.delivery_type === id} onChange={() => set('delivery_type', id)} className="accent-primary" />
+                  <input type="radio" name="delivery_type" checked={form.delivery_type === id} onChange={() => set('delivery_type', id)} className="mt-3 accent-primary" />
                   <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', form.delivery_type === id ? 'bg-primary' : 'bg-brand-muted')}>
                     <Icon size={18} className={form.delivery_type === id ? 'text-white' : 'text-gray-700'} />
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-brand-foreground">{label}</p>
                     <p className="text-xs text-gray-700">{delay}</p>
                   </div>
-                  <p className="text-sm font-bold text-primary">{fmtPrice(calcPrice(form.package_type, id))}</p>
+                  <p className="shrink-0 text-sm font-bold text-primary">{fmtPrice(calcPrice(form.package_type, id))}</p>
                 </label>
               ))}
             </div>
 
-            <h2 className="text-xl font-bold text-brand-foreground pt-2">Mode de paiement</h2>
+            <h2 className="text-lg font-bold text-brand-foreground pt-2 sm:text-xl">Mode de paiement</h2>
             <div className="space-y-3">
               {PAYMENT_METHODS.map((m) => {
                 const disabled = Boolean(m.disabled)
@@ -454,7 +458,7 @@ export default function NewDeliveryPage() {
                     }}
                     aria-disabled={disabled}
                     className={cn(
-                      'flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all',
+                      'flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all sm:gap-4',
                       disabled && 'cursor-not-allowed opacity-60',
                       form.payment_method === m.value ? 'border-primary bg-primary/5' : 'border-brand-border',
                       !disabled && form.payment_method !== m.value && 'hover:border-primary/40',
@@ -468,7 +472,7 @@ export default function NewDeliveryPage() {
                       onChange={() => {
                         if (!disabled) set('payment_method', m.value)
                       }}
-                      className="accent-primary"
+                      className="mt-3 accent-primary"
                     />
                     <div className="w-10 h-10 rounded-xl bg-brand-muted flex items-center justify-center shrink-0">
                       <CreditCard size={18} className="text-primary" />
@@ -488,17 +492,17 @@ export default function NewDeliveryPage() {
             </div>
 
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
-              <div className="flex justify-between items-center text-sm mb-2">
+              <div className="flex justify-between gap-3 text-sm mb-2">
                 <span className="text-gray-700">Service</span>
                 <span className="font-medium">{form.delivery_type === 'express' ? 'Express' : 'Standard'}</span>
               </div>
               {distance !== null && (
-                <div className="flex justify-between items-center text-sm mb-2">
+                <div className="flex justify-between gap-3 text-sm mb-2">
                   <span className="text-gray-700">Distance estimée</span>
                   <span className="font-medium">{distance.toFixed(1)} km</span>
                 </div>
               )}
-              <div className="border-t border-primary/15 pt-3 flex justify-between items-center">
+              <div className="border-t border-primary/15 pt-3 flex items-center justify-between gap-3">
                 <span className="font-bold text-brand-foreground">Total</span>
                 <span className="text-xl font-extrabold text-primary">{fmtPrice(price)}</span>
               </div>
@@ -515,7 +519,7 @@ export default function NewDeliveryPage() {
       )}
 
       {/* Navigation */}
-      <div className="flex gap-3 mt-6">
+      <div className="flex flex-col gap-3 mt-6 sm:flex-row">
         {step > 0 && (
           <button
             onClick={back}
