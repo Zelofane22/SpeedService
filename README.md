@@ -7,7 +7,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 ## Avancement du projet
 
 **Sprint en cours : Sprint 9 — Stabilisation & déploiement**
-Dernière mise à jour : 2026-06-25
+Dernière mise à jour : 2026-06-26
 
 ### Sprint 9 — Stabilisation & déploiement 🔄
 
@@ -20,6 +20,8 @@ Dernière mise à jour : 2026-06-25
 | TypeScript au vert sur les 3 apps (tsc --noEmit) | ✅ Terminé |
 | Durcissement production — branche `preprod` | ✅ Terminé |
 | Déploiement local preprod en conteneurs Docker | ✅ Validé (2026-06-25) |
+| Config déploiement cloud — Vercel (3 apps) + Railway (backend + PG + Redis) | ✅ Terminé (2026-06-26) |
+| Déploiement effectif sur Vercel + Railway | ⏳ À faire |
 
 ---
 
@@ -33,6 +35,22 @@ Dernière mise à jour : 2026-06-25
 | `backend/` | Laravel 12 — API partagée | api.speedservice.bj | 8000 |
 | `packages/ui/` | Composants partagés (`@speedservice/ui`) | — | — |
 | `packages/api-client/` | Client HTTP partagé (`@speedservice/api-client`) | — | — |
+
+---
+
+## Déploiement cloud
+
+**Cible : Vercel + Railway** — guide complet dans [DEPLOY.md](DEPLOY.md).
+
+| Service | Plateforme | URL cible |
+|---|---|---|
+| App client | Vercel | speedservice.bj |
+| Back-office admin | Vercel | admin.speedservice.bj |
+| App livreur PWA | Vercel | driver.speedservice.bj |
+| API Laravel + PG + Redis | Railway | api.speedservice.bj |
+
+> Les 3 apps Next.js sont configurées dans `frontend/vercel.json`, `admin/vercel.json`, `driver/vercel.json`.
+> Le backend est configuré dans `backend/railway.toml` avec le template `backend/.env.railway.example`.
 
 ---
 
@@ -150,22 +168,27 @@ Effectuer une rotation dans les cas suivants :
 | Backend | Laravel 12, PHP 8.4, PostgreSQL 16, Redis 7 |
 | Auth | Laravel Sanctum (token-based) |
 | Serveur web | Nginx + PHP-FPM + Supervisord (single container) |
-| CI/CD | GitHub Actions |
+| Hébergement frontends | Vercel |
+| Hébergement backend | Railway (Docker) |
+| CI/CD | GitHub Actions + Vercel/Railway auto-deploy sur `main` |
 
 ---
 
 ## Structure du dépôt
 
 ```
-frontend/          → App client (speedservice.bj)
-admin/             → Back-office admin (admin.speedservice.bj)
-driver/            → App livreur PWA (driver.speedservice.bj)
-backend/           → API Laravel 12
-packages/ui/       → @speedservice/ui (composants partagés)
-packages/api-client/ → @speedservice/api-client (client HTTP)
-docker-compose.yml → Stack complète (preprod & prod)
-.github/workflows/ → CI/CD GitHub Actions
-AIorchestration.md → Coordination Claude Code ↔ GPT Codex
+frontend/               → App client (speedservice.bj)
+admin/                  → Back-office admin (admin.speedservice.bj)
+driver/                 → App livreur PWA (driver.speedservice.bj)
+backend/                → API Laravel 12
+  ├── railway.toml      → Config déploiement Railway
+  └── .env.railway.example → Template variables d'env prod
+packages/ui/            → @speedservice/ui (composants partagés)
+packages/api-client/    → @speedservice/api-client (client HTTP)
+docker-compose.yml      → Stack complète (preprod & prod local)
+DEPLOY.md               → Guide déploiement Vercel + Railway
+.github/workflows/      → CI/CD GitHub Actions
+AIorchestration.md      → Coordination Claude Code ↔ GPT Codex
 ```
 
 ---
@@ -196,6 +219,10 @@ GitHub Actions automatise à chaque push :
 - Lint et build des 3 frontends
 - Tests PHPUnit + validation Composer
 - Validation Docker Compose
+
+**Auto-deploy en production :**
+- Push sur `main` → Vercel redéploie les 3 apps Next.js automatiquement
+- Push sur `main` → Railway reconstruit et redéploie le backend (migrations incluses)
 
 ---
 
