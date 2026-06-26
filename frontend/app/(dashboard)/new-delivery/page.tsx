@@ -32,6 +32,9 @@ type Form = {
   payment_method: string
 }
 
+const CASH_ON_DELIVERY_METHOD = 'cash_on_delivery'
+const UNAVAILABLE_PAYMENT_DESC = 'Indisponible pour le moment'
+
 // ─── Haversine distance (km) ──────────────────────────────────────────────────
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -152,11 +155,11 @@ const CATEGORIES = [
 ]
 
 const PAYMENT_METHODS = [
-  { value: 'mtn_momo',         label: 'MTN MoMo',               desc: 'Paiement mobile rapide' },
-  { value: 'moov_money',       label: 'Moov Money',             desc: 'Paiement mobile sécurisé' },
-  { value: 'card',             label: 'Carte bancaire',         desc: 'Visa, Mastercard' },
   { value: 'cash_on_delivery', label: 'Paiement à la livraison', desc: 'En espèces à la réception' },
-  { value: 'agency',           label: 'Paiement en agence',     desc: 'Espèces dans une agence partenaire' },
+  { value: 'mtn_momo',         label: 'MTN MoMo',               desc: UNAVAILABLE_PAYMENT_DESC, disabled: true },
+  { value: 'moov_money',       label: 'Moov Money',             desc: UNAVAILABLE_PAYMENT_DESC, disabled: true },
+  { value: 'card',             label: 'Carte bancaire',         desc: UNAVAILABLE_PAYMENT_DESC, disabled: true },
+  { value: 'agency',           label: 'Paiement en agence',     desc: UNAVAILABLE_PAYMENT_DESC, disabled: true },
 ]
 
 const PACKAGE_LABELS: Record<string, string> = {
@@ -181,7 +184,7 @@ export default function NewDeliveryPage() {
     recipient_name: '', recipient_phone: '', delivery_address: '', delivery_point: null,
     package_type: 'small', content_category: 'other',
     package_description: '', package_weight: '',
-    delivery_type: 'standard', payment_method: 'mtn_momo',
+    delivery_type: 'standard', payment_method: CASH_ON_DELIVERY_METHOD,
   })
 
   function set<K extends keyof Form>(field: K, value: Form[K]) {
@@ -235,6 +238,11 @@ export default function NewDeliveryPage() {
   async function submit() {
     setLoading(true)
     setError(null)
+    if (form.payment_method !== CASH_ON_DELIVERY_METHOD) {
+      setLoading(false)
+      setError('Seul le paiement à la livraison est disponible pour le moment.')
+      return
+    }
     try {
       const data = await apiPost<CreatedDelivery>('/deliveries', {
         sender_name:          form.sender_name,
@@ -253,7 +261,7 @@ export default function NewDeliveryPage() {
         package_description:  form.package_description || null,
         package_weight:       form.package_weight ? parseFloat(form.package_weight) : null,
         delivery_type:        form.delivery_type,
-        payment_method:       form.payment_method,
+        payment_method:       CASH_ON_DELIVERY_METHOD,
       }, true)
       router.push(`/deliveries/${data.id}/payment`)
     } catch (e: unknown) {
@@ -436,25 +444,47 @@ export default function NewDeliveryPage() {
 
             <h2 className="text-xl font-bold text-brand-foreground pt-2">Mode de paiement</h2>
             <div className="space-y-3">
-              {PAYMENT_METHODS.map((m) => (
-                <label
-                  key={m.value}
-                  onClick={() => set('payment_method', m.value)}
-                  className={cn(
-                    'flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all',
-                    form.payment_method === m.value ? 'border-primary bg-primary/5' : 'border-brand-border hover:border-primary/40',
-                  )}
-                >
-                  <input type="radio" name="payment_method" checked={form.payment_method === m.value} onChange={() => set('payment_method', m.value)} className="accent-primary" />
-                  <div className="w-10 h-10 rounded-xl bg-brand-muted flex items-center justify-center shrink-0">
-                    <CreditCard size={18} className="text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-brand-foreground">{m.label}</p>
-                    <p className="text-xs text-gray-700">{m.desc}</p>
-                  </div>
-                </label>
-              ))}
+              {PAYMENT_METHODS.map((m) => {
+                const disabled = Boolean(m.disabled)
+                return (
+                  <label
+                    key={m.value}
+                    onClick={() => {
+                      if (!disabled) set('payment_method', m.value)
+                    }}
+                    aria-disabled={disabled}
+                    className={cn(
+                      'flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all',
+                      disabled && 'cursor-not-allowed opacity-60',
+                      form.payment_method === m.value ? 'border-primary bg-primary/5' : 'border-brand-border',
+                      !disabled && form.payment_method !== m.value && 'hover:border-primary/40',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      checked={form.payment_method === m.value}
+                      disabled={disabled}
+                      onChange={() => {
+                        if (!disabled) set('payment_method', m.value)
+                      }}
+                      className="accent-primary"
+                    />
+                    <div className="w-10 h-10 rounded-xl bg-brand-muted flex items-center justify-center shrink-0">
+                      <CreditCard size={18} className="text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-brand-foreground">{m.label}</p>
+                      <p className="text-xs text-gray-700">{m.desc}</p>
+                    </div>
+                    {disabled && (
+                      <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                        Bientôt disponible
+                      </span>
+                    )}
+                  </label>
+                )
+              })}
             </div>
 
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   CheckCircle, CreditCard, Smartphone, Building2,
-  Package, MapPin, ArrowLeft, Loader2, ShieldCheck,
+  Package, MapPin, ArrowLeft, Loader2,
   Clock, AlertCircle,
 } from 'lucide-react'
 import { apiGet, apiPost } from '@/lib/api'
@@ -52,6 +52,9 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
   agency:           'Paiement en agence',
 }
 
+const AVAILABLE_PAYMENT_METHOD: PaymentMethod = 'cash_on_delivery'
+const UNAVAILABLE_PAYMENT_MESSAGE = 'Ce mode de paiement n’est pas encore disponible. Seul le paiement à la livraison est actif pour le moment.'
+
 function fmtPrice(n: number) {
   return Number(n).toLocaleString('fr-FR') + ' FCFA'
 }
@@ -60,33 +63,6 @@ function MethodIcon({ method }: { method: PaymentMethod }) {
   if (method === 'mtn_momo' || method === 'moov_money') return <Smartphone size={20} className="text-primary" />
   if (method === 'card') return <CreditCard size={20} className="text-primary" />
   return <Building2 size={20} className="text-primary" />
-}
-
-// ─── Field ────────────────────────────────────────────────────────────────────
-
-function Field({
-  label, value, onChange, placeholder, type = 'text', maxLength,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  placeholder?: string
-  type?: string
-  maxLength?: number
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-brand-foreground">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        className="w-full bg-brand-input border border-brand-border rounded-2xl px-4 py-3 text-sm placeholder:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-      />
-    </div>
-  )
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -102,14 +78,6 @@ export default function PaymentPage() {
   const [paying,   setPaying]   = useState(false)
   const [fetchErr, setFetchErr] = useState<string | null>(null)
   const [payErr,   setPayErr]   = useState<string | null>(null)
-
-  // Mobile Money
-  const [phone, setPhone] = useState('')
-  // Card
-  const [cardNumber,     setCardNumber]     = useState('')
-  const [expiry,         setExpiry]         = useState('')
-  const [cvv,            setCvv]            = useState('')
-  const [cardholderName, setCardholderName] = useState('')
 
   useEffect(() => {
     apiGet<Delivery>(`/deliveries/${id}`)
@@ -130,21 +98,14 @@ export default function PaymentPage() {
     setPayErr(null)
 
     const method = delivery.payment.method
-    let body: Record<string, string> = {}
-
-    if (method === 'mtn_momo' || method === 'moov_money') {
-      body = { phone }
-    } else if (method === 'card') {
-      body = {
-        card_number:     cardNumber.replace(/\s/g, ''),
-        expiry,
-        cvv,
-        cardholder_name: cardholderName,
-      }
+    if (method !== AVAILABLE_PAYMENT_METHOD) {
+      setPaying(false)
+      setPayErr(UNAVAILABLE_PAYMENT_MESSAGE)
+      return
     }
 
     try {
-      const result = await apiPost<Delivery>(`/deliveries/${id}/pay`, body, true)
+      const result = await apiPost<Delivery>(`/deliveries/${id}/pay`, {}, true)
       setPaid(result)
     } catch (e: unknown) {
       const err = e as Error & { errors?: Record<string, string[]> }
@@ -182,7 +143,7 @@ export default function PaymentPage() {
   }
 
   const method = delivery.payment.method
-  const isManual = method === 'cash_on_delivery' || method === 'agency'
+  const isPaymentUnavailable = method !== AVAILABLE_PAYMENT_METHOD
 
   // ── Receipt (success) ─────────────────────────────────────────────────────
   if (paid) {
@@ -306,11 +267,19 @@ export default function PaymentPage() {
       <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5 mb-5">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Mode de paiement</h2>
 
-        <div className="flex items-center gap-3 p-4 bg-primary/5 border-2 border-primary rounded-2xl mb-5">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <div className={cn(
+          'flex items-center gap-3 p-4 border-2 rounded-2xl mb-5',
+          isPaymentUnavailable
+            ? 'bg-gray-50 border-gray-200 opacity-75'
+            : 'bg-primary/5 border-primary',
+        )}>
+          <div className={cn(
+            'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
+            isPaymentUnavailable ? 'bg-gray-100' : 'bg-primary/10',
+          )}>
             <MethodIcon method={method} />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-brand-foreground">{METHOD_LABELS[method]}</p>
             {method === 'mtn_momo' && <p className="text-xs text-gray-700">Paiement mobile MTN</p>}
             {method === 'moov_money' && <p className="text-xs text-gray-700">Paiement mobile Moov</p>}
@@ -318,78 +287,20 @@ export default function PaymentPage() {
             {method === 'cash_on_delivery' && <p className="text-xs text-gray-700">En espèces à la réception</p>}
             {method === 'agency' && <p className="text-xs text-gray-700">Dans une agence partenaire</p>}
           </div>
+          {isPaymentUnavailable && (
+            <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+              Bientôt disponible
+            </span>
+          )}
         </div>
 
-        {/* Mobile Money form */}
-        {(method === 'mtn_momo' || method === 'moov_money') && (
-          <div className="space-y-4">
-            <p className="text-sm text-gray-700">
-              Entrez votre numéro {method === 'mtn_momo' ? 'MTN' : 'Moov'} pour recevoir la demande de paiement.
-            </p>
-            <Field
-              label="Numéro de téléphone"
-              value={phone}
-              onChange={setPhone}
-              placeholder={method === 'mtn_momo' ? '96 XX XX XX' : '97 XX XX XX'}
-              type="tel"
-            />
+        {isPaymentUnavailable ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            {UNAVAILABLE_PAYMENT_MESSAGE}
           </div>
-        )}
-
-        {/* Card form */}
-        {method === 'card' && (
-          <div className="space-y-4">
-            <Field
-              label="Numéro de carte"
-              value={cardNumber}
-              onChange={(v) => setCardNumber(v.replace(/\D/g, '').slice(0, 16))}
-              placeholder="4111 1111 1111 1111"
-              maxLength={16}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Field
-                label="Date d'expiration"
-                value={expiry}
-                onChange={(v) => {
-                  const cleaned = v.replace(/\D/g, '').slice(0, 4)
-                  setExpiry(cleaned.length > 2 ? cleaned.slice(0, 2) + '/' + cleaned.slice(2) : cleaned)
-                }}
-                placeholder="MM/AA"
-                maxLength={5}
-              />
-              <Field
-                label="CVV"
-                value={cvv}
-                onChange={(v) => setCvv(v.replace(/\D/g, '').slice(0, 4))}
-                placeholder="123"
-                maxLength={4}
-              />
-            </div>
-            <Field
-              label="Nom du titulaire"
-              value={cardholderName}
-              onChange={setCardholderName}
-              placeholder="KOFFI MENSAH"
-            />
-            <div className="flex items-center gap-2 text-xs text-gray-700 mt-1">
-              <ShieldCheck size={14} className="text-green-500" />
-              Paiement sécurisé — vos données sont chiffrées
-            </div>
-          </div>
-        )}
-
-        {/* Cash / Agency */}
-        {isManual && (
-          <div className={cn(
-            'rounded-2xl p-4 text-sm',
-            method === 'cash_on_delivery'
-              ? 'bg-amber-50 border border-amber-200 text-amber-800'
-              : 'bg-blue-50 border border-blue-200 text-blue-800',
-          )}>
-            {method === 'cash_on_delivery'
-              ? 'Le livreur récupèrera le montant en espèces lors de la livraison. Votre commande passera en attente de validation.'
-              : 'Votre commande sera placée en attente. Rendez-vous dans une agence Speed Service avec votre référence de commande pour effectuer le paiement.'
-            }
+        ) : (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Le livreur récupèrera le montant en espèces lors de la livraison. Votre commande passera en attente de validation.
           </div>
         )}
       </div>
@@ -405,14 +316,14 @@ export default function PaymentPage() {
       {/* CTA */}
       <button
         onClick={handlePay}
-        disabled={paying}
+        disabled={paying || isPaymentUnavailable}
         className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white text-sm font-semibold rounded-2xl hover:opacity-90 disabled:opacity-60 transition-all shadow-lg shadow-primary/25"
       >
         {paying
           ? <><Loader2 size={16} className="animate-spin" /> Traitement en cours…</>
-          : isManual
-            ? 'Confirmer la commande'
-            : `Payer ${fmtPrice(delivery.payment.amount)}`
+          : isPaymentUnavailable
+            ? 'Mode de paiement indisponible'
+            : 'Confirmer la commande'
         }
       </button>
     </div>
