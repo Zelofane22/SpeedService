@@ -2,5 +2,5 @@
   "framework": "nextjs",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter speedservice-frontend build",
-  "outputDirectory": "frontend/.next"
+  "outputDirectory": ".next"
 }
