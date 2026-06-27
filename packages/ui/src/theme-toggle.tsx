@@ -5,78 +5,79 @@ import { Moon, Sun } from 'lucide-react'
 import { cn } from './utils'
 
 const STORAGE_KEY = 'speedservice-theme'
+type ThemeMode = 'light' | 'dark'
 
-function applyTheme(isDark: boolean) {
+function isThemeMode(value: string | null): value is ThemeMode {
+  return value === 'light' || value === 'dark'
+}
+
+function applyTheme(mode: ThemeMode) {
+  const isDark = mode === 'dark'
   document.documentElement.classList.toggle('dark', isDark)
   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
 }
 
-function hasSavedTheme(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) !== null
-  } catch {
-    return false
-  }
-}
-
 export function ThemeToggle({ className }: { className?: string }) {
-  const [isDark, setIsDark] = useState(false)
+  const [theme, setTheme] = useState<ThemeMode>('light')
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
     const syncFromDocument = () => {
-      setIsDark(document.documentElement.classList.contains('dark'))
-    }
-
-    const handleSystemTheme = (event: MediaQueryListEvent) => {
-      if (hasSavedTheme()) return
-      applyTheme(event.matches)
-      setIsDark(event.matches)
+      setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
     }
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return
-      const nextIsDark = event.newValue ? event.newValue === 'dark' : mediaQuery.matches
-      applyTheme(nextIsDark)
-      setIsDark(nextIsDark)
+      const nextTheme = isThemeMode(event.newValue) ? event.newValue : 'light'
+      applyTheme(nextTheme)
+      setTheme(nextTheme)
     }
 
     syncFromDocument()
-    mediaQuery.addEventListener('change', handleSystemTheme)
     window.addEventListener('storage', handleStorage)
 
     return () => {
-      mediaQuery.removeEventListener('change', handleSystemTheme)
       window.removeEventListener('storage', handleStorage)
     }
   }, [])
 
-  function toggleTheme() {
-    const nextIsDark = !document.documentElement.classList.contains('dark')
-    applyTheme(nextIsDark)
+  function selectTheme(nextTheme: ThemeMode) {
+    applyTheme(nextTheme)
     try {
-      localStorage.setItem(STORAGE_KEY, nextIsDark ? 'dark' : 'light')
+      localStorage.setItem(STORAGE_KEY, nextTheme)
     } catch {
       // Le thème reste actif pour la session si le stockage est indisponible.
     }
-    setIsDark(nextIsDark)
+    setTheme(nextTheme)
   }
 
+  const options: Array<{ value: ThemeMode; label: string; icon: typeof Sun }> = [
+    { value: 'light', label: 'Clair', icon: Sun },
+    { value: 'dark', label: 'Sombre', icon: Moon },
+  ]
+
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Activer le thème clair' : 'Activer le thème sombre'}
-      aria-pressed={isDark}
-      title={isDark ? 'Passer au thème clair' : 'Passer au thème sombre'}
-      className={cn(
-        'fixed bottom-4 right-4 z-[100] inline-flex min-h-11 items-center gap-2 rounded-2xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        className
-      )}
-    >
-      {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
-      <span>Thème</span>
-    </button>
+    <div className={cn('grid grid-cols-2 gap-2', className)} role="group" aria-label="Choix de l'apparence">
+      {options.map(({ value, label, icon: Icon }) => {
+        const isSelected = theme === value
+
+        return (
+          <button
+            key={value}
+            type="button"
+            onClick={() => selectTheme(value)}
+            aria-pressed={isSelected}
+            className={cn(
+              'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#861D6D]/40',
+              isSelected
+                ? 'border-[#861D6D] bg-[#861D6D] text-white shadow-lg shadow-[#861D6D]/20'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-[#861D6D]/40 hover:bg-gray-50 dark:border-[#4e3b4a] dark:bg-[#221922] dark:text-[#faf6f9] dark:hover:bg-[#342734]'
+            )}
+          >
+            <Icon size={17} aria-hidden="true" />
+            <span>{label}</span>
+          </button>
+        )
+      })}
+    </div>
   )
 }

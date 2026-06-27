@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { ThemeToggle } from '@/components/theme-toggle'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -16,8 +15,12 @@ const themeScript = `
     try {
       savedTheme = localStorage.getItem('speedservice-theme');
     } catch (_) {}
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    var isDark = savedTheme === 'dark';
+    if (savedTheme !== 'dark' && savedTheme !== 'light') {
+      try {
+        localStorage.setItem('speedservice-theme', 'light');
+      } catch (_) {}
+    }
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
   })();
@@ -35,7 +38,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-background text-foreground`}>
         {children}
-        <ThemeToggle />
       </body>
     </html>
   )

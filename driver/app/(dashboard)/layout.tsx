@@ -9,6 +9,7 @@ const NAV = [
   { href: '/missions',  label: 'Missions',   icon: '🛵' },
   { href: '/active',    label: 'En cours',   icon: '📍' },
   { href: '/history',   label: 'Historique', icon: '📋' },
+  { href: '/settings',  label: 'Paramètres', icon: '⚙️' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -40,14 +41,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAF7FB]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7FB] [.dark_&]:bg-[#101114]">
         <div className="w-8 h-8 border-4 border-[#861D6D] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7FB] flex flex-col">
+    <div className="min-h-screen bg-[#FAF7FB] text-[#1D1D1F] flex flex-col [.dark_&]:bg-[#101114] [.dark_&]:text-gray-100">
       {/* Top bar */}
       <header className="bg-[#861D6D] text-white px-5 py-4 flex items-center justify-between sticky top-0 z-10">
         <div>
@@ -65,17 +66,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-10 flex">
+      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-10 flex [.dark_&]:bg-[#181A20] [.dark_&]:border-gray-800">
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${active ? 'text-[#861D6D]' : 'text-gray-400'}`}
+              aria-current={active ? 'page' : undefined}
+              className={`relative flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${active ? 'text-[#861D6D]' : 'text-gray-400 [.dark_&]:text-gray-500'}`}
             >
               <span className="text-xl leading-none">{icon}</span>
-              <span className={`text-xs font-medium ${active ? 'text-[#861D6D]' : 'text-gray-400'}`}>{label}</span>
+              <span className={`text-xs font-medium ${active ? 'text-[#861D6D]' : 'text-gray-400 [.dark_&]:text-gray-500'}`}>{label}</span>
               {active && <span className="absolute bottom-0 w-8 h-0.5 bg-[#861D6D] rounded-full" />}
             </Link>
           )
