@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+import { getApiBaseUrl } from '@speedservice/api-client'
+
+const BASE = getApiBaseUrl()
 
 export async function applyDriver(data: Record<string, string>) {
   const res = await fetch(`${BASE}/driver/apply`, {

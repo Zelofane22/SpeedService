@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getApiBaseUrl } from '@speedservice/api-client'
 
 type DriverApplication = {
   id: string
@@ -18,7 +19,7 @@ type DriverApplication = {
   documents: Array<{ document_type: string; validation_status: string }>
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const BASE_URL = getApiBaseUrl()
 
 function authHeaders(): Record<string, string> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
