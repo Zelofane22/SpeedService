@@ -5,8 +5,9 @@ import type {
   AdminDriver,
   AdminPayment,
 } from '@/types/admin'
+import { getApiBaseUrl } from '@speedservice/api-client'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const BASE_URL = getApiBaseUrl()
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import { getApiBaseUrl } from '@speedservice/api-client'
 import 'leaflet/dist/leaflet.css'
 
 // Leaflet's default icons break in bundlers — point to CDN assets instead
@@ -17,7 +18,7 @@ const DEFAULT_ICON = L.icon({
 })
 L.Marker.prototype.options.icon = DEFAULT_ICON
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const BASE_URL = getApiBaseUrl()
 
 // Cotonou, Bénin
 const DEFAULT_CENTER: [number, number] = [6.3676, 2.4252]
