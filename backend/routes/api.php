@@ -12,9 +12,8 @@ use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/status', function () {
-    return response()->json(['status' => 'ok']);
-});
+Route::get('/status', [\App\Http\Controllers\Api\StatusController::class, 'check']);
+
 
 // Geo (public — no sensitive data)
 Route::prefix('geo')->group(function () {
