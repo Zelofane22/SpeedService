@@ -10,6 +10,7 @@ import {
   Truck,
   CreditCard,
   ClipboardList,
+  Settings,
   LogOut,
   User,
 } from 'lucide-react'
@@ -29,6 +30,7 @@ const navLinks: NavLink[] = [
   { href: '/drivers', icon: Truck, label: 'Livreurs', exact: false },
   { href: '/payments', icon: CreditCard, label: 'Paiements', exact: false },
   { href: '/driver-applications', icon: ClipboardList, label: 'Candidatures', exact: false },
+  { href: '/settings', icon: Settings, label: 'Paramètres', exact: false },
 ]
 
 interface UserInfo {

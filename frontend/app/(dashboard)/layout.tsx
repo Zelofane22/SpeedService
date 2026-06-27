@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, PlusCircle, History, User, LogOut } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, History, User, LogOut, Settings } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { apiPost, apiGet } from '@/lib/api'
 import { AuthContext, type AuthUser } from '@/lib/auth-context'
@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/new-delivery', icon: PlusCircle, label: 'Nouvelle livraison', mobileLabel: 'Créer' },
   { href: '/history', icon: History, label: 'Historique', mobileLabel: 'Historique' },
   { href: '/profile', icon: User, label: 'Mon profil', mobileLabel: 'Profil' },
+  { href: '/settings', icon: Settings, label: 'Paramètres', mobileLabel: 'Réglages' },
 ]
 
 const pageTitles: Record<string, string> = {
@@ -21,6 +22,7 @@ const pageTitles: Record<string, string> = {
   '/new-delivery': 'Nouvelle livraison',
   '/history': 'Historique',
   '/profile': 'Mon profil',
+  '/settings': 'Paramètres',
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -113,7 +115,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-border bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(29,29,31,0.08)] backdrop-blur lg:hidden">
-          <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
+          <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
             {navLinks.map(({ href, icon: Icon, mobileLabel }) => {
               const isActive = isNavActive(href)
               return (

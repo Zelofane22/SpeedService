@@ -4,17 +4,21 @@ export const metadata = {
 }
 
 import './globals.css'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 const themeScript = `
   (function () {
+    var savedTheme = null;
     try {
-      var savedTheme = localStorage.getItem('speedservice-theme');
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      var isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-      document.documentElement.classList.toggle('dark', isDark);
-      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      savedTheme = localStorage.getItem('speedservice-theme');
     } catch (_) {}
+    var isDark = savedTheme === 'dark';
+    if (savedTheme !== 'dark' && savedTheme !== 'light') {
+      try {
+        localStorage.setItem('speedservice-theme', 'light');
+      } catch (_) {}
+    }
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
   })();
 `
 
@@ -30,7 +34,6 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-        <ThemeToggle />
       </body>
     </html>
   )
