@@ -149,7 +149,7 @@ export default function PaymentsPage() {
     .reduce((sum, p) => sum + (p.amount_xof ?? 0), 0)
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="text-2xl font-bold text-foreground">
@@ -162,25 +162,25 @@ export default function PaymentsPage() {
       </div>
 
       {/* Mini stat cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 flex sm:block items-center justify-between sm:text-center gap-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide sm:mb-1">
             Total collecté
           </p>
           <p className="text-xl font-extrabold text-green-600">
             {formatXOF(totalCollected)}
           </p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 flex sm:block items-center justify-between sm:text-center gap-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide sm:mb-1">
             En attente
           </p>
           <p className="text-xl font-extrabold text-amber-600">
             {formatXOF(totalPending)}
           </p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 flex sm:block items-center justify-between sm:text-center gap-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide sm:mb-1">
             Échoués
           </p>
           <p className="text-xl font-extrabold text-red-500">
@@ -190,7 +190,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* Status filter tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
@@ -216,7 +216,8 @@ export default function PaymentsPage() {
         </div>
       ) : (
         <Card className="overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px]">
             <thead>
               <tr className="bg-muted/20 border-b border-border">
                 {TABLE_HEADERS.map((h) => (
@@ -299,6 +300,7 @@ export default function PaymentsPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
     </div>

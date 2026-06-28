@@ -115,7 +115,7 @@ export default function CouriersPage() {
   ).length
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="text-2xl font-bold text-foreground">
@@ -128,24 +128,24 @@ export default function CouriersPage() {
       </div>
 
       {/* Mini stat cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 text-center">
+          <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 leading-tight">
             Total livreurs
           </p>
-          <p className="text-3xl font-extrabold text-primary">{totalCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-primary">{totalCount}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 text-center">
+          <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 leading-tight">
             En ligne
           </p>
-          <p className="text-3xl font-extrabold text-green-600">{onlineCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-green-600">{onlineCount}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5 text-center">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 text-center">
+          <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 leading-tight">
             En mission
           </p>
-          <p className="text-3xl font-extrabold text-amber-600">
+          <p className="text-2xl sm:text-3xl font-extrabold text-amber-600">
             {onMissionCount}
           </p>
         </div>
@@ -167,7 +167,8 @@ export default function CouriersPage() {
         </div>
       ) : (
         <Card className="overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px]">
             <thead>
               <tr className="bg-muted/20 border-b border-border">
                 {TABLE_HEADERS.map((h) => (
@@ -254,6 +255,7 @@ export default function CouriersPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
     </div>

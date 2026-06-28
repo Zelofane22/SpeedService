@@ -96,7 +96,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
       <h1 className="text-2xl font-bold text-foreground">
         Gestion des commandes
@@ -138,7 +138,8 @@ export default function OrdersPage() {
         </div>
       ) : (
         <Card className="overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr className="bg-muted/20 border-b border-border">
                 {TABLE_HEADERS.map((h) => (
@@ -206,6 +207,7 @@ export default function OrdersPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
     </div>

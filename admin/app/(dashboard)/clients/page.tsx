@@ -72,13 +72,13 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-foreground shrink-0">
           Gestion des clients
         </h1>
-        <div className="w-full max-w-xs">
+        <div className="w-full sm:w-72">
           <SearchInput
             placeholder="Rechercher un client…"
             value={search}
@@ -96,7 +96,8 @@ export default function ClientsPage() {
         </div>
       ) : (
         <Card className="overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[680px]">
             <thead>
               <tr className="bg-muted/20 border-b border-border">
                 {TABLE_HEADERS.map((h) => (
@@ -181,6 +182,7 @@ export default function ClientsPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
     </div>
