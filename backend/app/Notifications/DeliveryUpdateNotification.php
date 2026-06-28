@@ -2,23 +2,18 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DeliveryUpdateNotification extends Notification implements ShouldQueue
+class DeliveryUpdateNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(
         public readonly string $deliveryId,
         public readonly string $reference,
         public readonly string $title,
         public readonly string $message,
-    ) {
-        $this->afterCommit();
-    }
+    ) {}
+
 
     public function via(object $notifiable): array
     {
