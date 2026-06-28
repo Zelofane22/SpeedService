@@ -10,6 +10,9 @@ if [ ! -f "vendor/autoload.php" ]; then
     composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 fi
 
+mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs
+chown -R www-data:www-data storage bootstrap/cache
+
 php artisan migrate --force
 php artisan storage:link --force 2>/dev/null || true
 php artisan config:cache
