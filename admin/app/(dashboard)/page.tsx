@@ -103,7 +103,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -249,7 +249,8 @@ export default function DashboardPage() {
             Voir tout
           </Link>
         </div>
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px]">
           <thead>
             <tr className="bg-muted/20 border-b border-border">
               {[
@@ -312,6 +313,7 @@ export default function DashboardPage() {
             )}
           </tbody>
         </table>
+        </div>
       </Card>
     </div>
   )

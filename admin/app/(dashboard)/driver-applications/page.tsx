@@ -103,7 +103,7 @@ export default function DriverApplicationsPage() {
   const loading = applications === null
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Candidatures livreurs</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Validation des dossiers d&apos;inscription</p>
@@ -133,7 +133,8 @@ export default function DriverApplicationsPage() {
         <div className="text-center py-12 text-muted-foreground">Aucune candidature</div>
       ) : (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
             <thead className="bg-muted/50 border-b border-border">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Candidat</th>
@@ -178,6 +179,7 @@ export default function DriverApplicationsPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
