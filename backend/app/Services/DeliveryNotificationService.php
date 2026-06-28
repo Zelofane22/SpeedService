@@ -48,12 +48,16 @@ class DeliveryNotificationService
         }
 
         if ($createdChannels[NotificationChannel::Email->value]) {
-            $client->notify(new DeliveryUpdateNotification(
-                $delivery->id,
-                $delivery->reference,
-                $title,
-                $message,
-            ));
+            try {
+                $client->notify(new DeliveryUpdateNotification(
+                    $delivery->id,
+                    $delivery->reference,
+                    $title,
+                    $message,
+                ));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         if ($createdChannels[NotificationChannel::Sms->value]) {
