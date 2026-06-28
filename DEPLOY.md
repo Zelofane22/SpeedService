@@ -59,7 +59,7 @@ Créer **3 projets Vercel séparés** pointant sur le même repo GitHub.
 
 **Variables d'env :**
 ```
-NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app
+NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app/api
 ```
 
 ### Projet 2 — Admin (admin.speedservice.bj)
@@ -74,7 +74,7 @@ NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app
 
 **Variables d'env :**
 ```
-NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app
+NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app/api
 ```
 
 ### Projet 3 — Driver PWA (driver.speedservice.bj)
@@ -89,8 +89,12 @@ NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app
 
 **Variables d'env :**
 ```
-NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app
+NEXT_PUBLIC_API_URL=https://VOTRE_PROJET.railway.app/api
 ```
+
+> Exemple Railway : si l'URL publique du backend est
+> `https://speedservice-production.up.railway.app`, alors la variable Vercel doit
+> être `NEXT_PUBLIC_API_URL=https://speedservice-production.up.railway.app/api`.
 
 ---
 
