@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,8 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
+    public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
     // ── Stats ─────────────────────────────────────────────────────────────────
 
     public function stats(): JsonResponse
@@ -199,6 +203,18 @@ class AdminController extends Controller
             'note'   => $request->input('note', 'Statut mis à jour par un administrateur.'),
         ]);
 
+        $event = match ($newStatus) {
+            DeliveryStatus::Confirmed   => DeliveryNotificationEvent::OrderConfirmed,
+            DeliveryStatus::Assigned    => DeliveryNotificationEvent::DriverAssigned,
+            DeliveryStatus::InDelivery  => DeliveryNotificationEvent::PackagePickedUp,
+            DeliveryStatus::Delivered   => DeliveryNotificationEvent::PackageDelivered,
+            default                     => null,
+        };
+
+        if ($event !== null) {
+            $this->notifications->send($delivery->fresh(['client', 'driver']), $event);
+        }
+
         return response()->json($delivery->load('statusHistories'));
     }
 
@@ -226,6 +242,8 @@ class AdminController extends Controller
                 'validated_at' => now(),
             ]);
         }
+
+        $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderConfirmed);
 
         return response()->json($delivery->load(['payment', 'statusHistories']));
     }
