@@ -6,10 +6,10 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 
 ## Avancement du projet
 
-**Sprint en cours : Sprint 9 — Stabilisation & déploiement**
-Dernière mise à jour : 2026-06-26
+**Sprint 9 — Stabilisation & déploiement**
+Dernière mise à jour : 2026-06-28
 
-### Sprint 9 — Stabilisation & déploiement 🔄
+### Sprint 9 — Stabilisation & déploiement ✅
 
 | Tâche | Statut |
 |---|---|
@@ -18,10 +18,10 @@ Dernière mise à jour : 2026-06-26
 | Mise à jour des apps frontend/admin/driver pour consommer les packages partagés | ✅ Terminé |
 | Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur » | ✅ Terminé |
 | TypeScript au vert sur les 3 apps (tsc --noEmit) | ✅ Terminé |
-| Durcissement production — branche `preprod` | ✅ Terminé |
-| Déploiement local preprod en conteneurs Docker | ✅ Validé (2026-06-25) |
+| Durcissement production — branche `prod` | ✅ Terminé |
+| Déploiement local en conteneurs Docker | ✅ Validé (2026-06-25) |
 | Config déploiement cloud — Vercel (3 apps) + Railway (backend + PG + Redis) | ✅ Terminé (2026-06-26) |
-| Déploiement effectif sur Vercel + Railway | ⏳ À faire |
+| Déploiement effectif sur Vercel + Railway | ✅ Terminé (2026-06-28) |
 
 ---
 
@@ -75,7 +75,7 @@ pnpm --filter speedservice-driver dev         # http://localhost:3002
 cd backend && php artisan serve               # http://localhost:8000
 ```
 
-### Preprod / Production (Docker)
+### Production / Local Docker
 
 ```bash
 # 1. Créer le fichier de secrets à partir du template
@@ -100,7 +100,7 @@ docker compose exec backend php artisan db:seed --force
 | URL | Service |
 |---|---|
 | `http://localhost:8000/api/status` | API (health check) |
-| `http://localhost:3000` | App client (login : 'preprod@speedservice.bj' / 'Password123!'|
+| `http://localhost:3000` | App client (login : 'preprod@speedservice.bj' / 'Password123!' ) |
 | `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!` — voir ci-dessous) |
 | `http://localhost:3002` | App livreur (login dev test : koffiagbeko@speedservice.bj / Driver123! |
 
@@ -185,7 +185,7 @@ backend/                → API Laravel 12
   └── .env.railway.example → Template variables d'env prod
 packages/ui/            → @speedservice/ui (composants partagés)
 packages/api-client/    → @speedservice/api-client (client HTTP)
-docker-compose.yml      → Stack complète (preprod & prod local)
+docker-compose.yml      → Stack complète (prod & local)
 DEPLOY.md               → Guide déploiement Vercel + Railway
 .github/workflows/      → CI/CD GitHub Actions
 AIorchestration.md      → Coordination Claude Code ↔ GPT Codex
@@ -197,9 +197,9 @@ AIorchestration.md      → Coordination Claude Code ↔ GPT Codex
 
 | Branche | Rôle |
 |---|---|
-| `main` | Version stable — merge depuis `develop` ou `hotfix/*` |
+| `prod` | Version stable — merge depuis `develop` ou `hotfix/*` |
 | `develop` | Développement courant |
-| `preprod` | Branche de validation avant mise en production |
+| `hotfix/*` | Correctifs critiques |
 
 **Conventions de commits :**
 
@@ -221,8 +221,8 @@ GitHub Actions automatise à chaque push :
 - Validation Docker Compose
 
 **Auto-deploy en production :**
-- Push sur `main` → Vercel redéploie les 3 apps Next.js automatiquement
-- Push sur `main` → Railway reconstruit et redéploie le backend (migrations incluses)
+- Push sur `prod` → Vercel redéploie les 3 apps Next.js automatiquement
+- Push sur `prod` → Railway reconstruit et redéploie le backend (migrations incluses)
 
 ---
 
