@@ -89,5 +89,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{id}', [DriverApplicationController::class, 'adminShow']);
             Route::patch('/{id}/review', [DriverApplicationController::class, 'adminReview']);
         });
+
+        // Driver document download
+        Route::get('/drivers/documents/{documentId}/download', [DriverApplicationController::class, 'downloadDocument']);
     });
 });

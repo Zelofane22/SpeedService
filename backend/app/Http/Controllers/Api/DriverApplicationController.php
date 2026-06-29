@@ -162,7 +162,33 @@ class DriverApplicationController extends Controller
     public function adminShow(string $id): JsonResponse
     {
         $application = DriverApplication::with(['documents', 'reviewer'])->findOrFail($id);
-        return response()->json($application);
+
+        $data = $application->toArray();
+        $data['documents'] = $application->documents->map(fn ($d) => [
+            'id'                => $d->id,
+            'document_type'     => $d->document_type,
+            'original_name'     => $d->original_name,
+            'mime_type'         => $d->mime_type,
+            'validation_status' => $d->validation_status,
+            'rejection_note'    => $d->rejection_note,
+        ]);
+
+        return response()->json($data);
+    }
+
+    public function downloadDocument(string $documentId): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse
+    {
+        $document = DriverDocument::findOrFail($documentId);
+
+        if (!Storage::disk('local')->exists($document->file_path)) {
+            return response()->json(['message' => 'Fichier introuvable.'], 404);
+        }
+
+        return Storage::disk('local')->download(
+            $document->file_path,
+            $document->original_name,
+            ['Content-Type' => $document->mime_type ?? 'application/octet-stream']
+        );
     }
 
     public function adminReview(Request $request, string $id): JsonResponse
