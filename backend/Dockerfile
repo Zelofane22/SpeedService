@@ -17,6 +17,12 @@ RUN { \
     echo 'opcache.fast_shutdown=1'; \
 } > /usr/local/etc/php/conf.d/opcache.ini
 
+# Upload limits for driver document uploads (up to 5 MB per file, multiple files)
+RUN { \
+    echo 'upload_max_filesize=10M'; \
+    echo 'post_max_size=25M'; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
 
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
