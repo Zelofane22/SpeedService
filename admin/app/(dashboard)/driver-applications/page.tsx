@@ -3,6 +3,15 @@
 import { useState, useEffect } from 'react'
 import { getApiBaseUrl } from '@speedservice/api-client'
 
+type DriverDocument = {
+  id: string
+  document_type: string
+  original_name: string
+  mime_type: string | null
+  validation_status: string
+  rejection_note?: string | null
+}
+
 type DriverApplication = {
   id: string
   first_name: string
@@ -16,7 +25,7 @@ type DriverApplication = {
   reviewed_at: string | null
   rejection_reason?: string
   complement_request?: string
-  documents: Array<{ document_type: string; validation_status: string }>
+  documents: DriverDocument[]
 }
 
 const BASE_URL = getApiBaseUrl()
@@ -210,16 +219,45 @@ export default function DriverApplicationsPage() {
               {/* Documents */}
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Documents</p>
-                <div className="flex flex-col gap-1">
-                  {selected.documents.map((d, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">{d.document_type}</span>
-                      <span className={
-                        d.validation_status === 'approved' ? 'text-green-600' :
-                        d.validation_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
-                      }>
-                        {d.validation_status}
-                      </span>
+                <div className="flex flex-col gap-2">
+                  {selected.documents.map((d) => (
+                    <div key={d.id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-xs">
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground truncate">{d.document_type}</p>
+                        <p className="text-muted-foreground truncate">{d.original_name}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={
+                          d.validation_status === 'approved' ? 'text-green-600' :
+                          d.validation_status === 'rejected' ? 'text-red-600' : 'text-amber-600'
+                        }>
+                          {d.validation_status}
+                        </span>
+                        <a
+                          href={`${BASE_URL}/admin/drivers/documents/${d.id}/download`}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+                            fetch(`${BASE_URL}/admin/drivers/documents/${d.id}/download`, {
+                              headers: { Authorization: `Bearer ${token}` },
+                            })
+                              .then((r) => r.blob())
+                              .then((blob) => {
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = d.original_name
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              })
+                          }}
+                          className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+                        >
+                          ↓ Voir
+                        </a>
+                      </div>
                     </div>
                   ))}
                   {selected.documents.length === 0 && (
