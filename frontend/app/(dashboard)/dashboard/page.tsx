@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, Truck, CheckCircle, Wallet, PlusCircle, ChevronRight, Eye } from 'lucide-react'
+import { Package, Truck, CheckCircle, PlusCircle, ChevronRight, Eye } from 'lucide-react'
 import { useAuthUser } from '@/lib/auth-context'
 import { StatusBadge } from '@/components/status-badge'
 import { apiGet } from '@/lib/api'
@@ -47,15 +47,11 @@ export default function DashboardPage() {
   const total     = deliveries.length
   const active    = deliveries.filter((d) => ACTIVE_STATUSES.has(d.status)).length
   const delivered = deliveries.filter((d) => d.status === 'delivered').length
-  const totalSpent = deliveries
-    .filter((d) => d.status !== 'cancelled')
-    .reduce((sum, d) => sum + Number(d.price), 0)
 
   const kpiCards = [
     { label: 'Total livraisons', value: String(total),     change: `${total} au total`,    icon: Package,     iconBg: 'bg-primary/10', iconColor: 'text-primary' },
     { label: 'En cours',         value: String(active),    change: `${active} actives`,     icon: Truck,       iconBg: 'bg-amber-50',   iconColor: 'text-amber-600' },
     { label: 'Livrées',          value: String(delivered), change: `${delivered} livrées`,  icon: CheckCircle, iconBg: 'bg-green-50',   iconColor: 'text-green-600' },
-    { label: 'Dépenses',         value: totalSpent > 0 ? formatPrice(totalSpent) : '0 FCFA', change: 'Total dépensé', icon: Wallet, iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
   ]
 
   const recent = deliveries.slice(0, 4)
@@ -68,7 +64,7 @@ export default function DashboardPage() {
       </p>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         {kpiCards.map((k) => (
           <div key={k.label} className="bg-white rounded-2xl border border-brand-border shadow-sm p-4 sm:p-5">
             <div className="mb-3">

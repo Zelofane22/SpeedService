@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiGet, apiPatch, apiPost } from '@/lib/api-client'
 
@@ -140,6 +140,101 @@ function PaymentConfirmModal({
   )
 }
 
+// ─── Payment success overlay ──────────────────────────────────────────────────
+
+type Phase = 'idle' | 'circle' | 'check' | 'content'
+
+function PaymentSuccessOverlay({
+  mission,
+  onDone,
+}: {
+  mission: Mission
+  onDone: () => void
+}) {
+  const [phase, setPhase] = useState<Phase>('idle')
+
+  const done = useCallback(onDone, [onDone])
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase('circle'), 80)
+    const t2 = setTimeout(() => setPhase('check'), 480)
+    const t3 = setTimeout(() => setPhase('content'), 900)
+    const t4 = setTimeout(done, 3200)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4) }
+  }, [done])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-[#FAF7FB] flex flex-col items-center justify-center px-6 text-center gap-6">
+      <style>{`
+        @keyframes ps-scale-in {
+          0%   { transform: scale(0); opacity: 0; }
+          65%  { transform: scale(1.18); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes ps-draw-check {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes ps-fade-up {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes ps-pulse-ring {
+          0%   { transform: scale(0.85); opacity: 0.5; }
+          100% { transform: scale(1.5);  opacity: 0; }
+        }
+        .ps-circle-in   { animation: ps-scale-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .ps-check       { stroke-dasharray: 80; stroke-dashoffset: 80; animation: ps-draw-check 0.38s ease-out 0.08s forwards; }
+        .ps-fade-up     { opacity: 0; animation: ps-fade-up 0.45s ease-out forwards; }
+        .ps-pulse       { animation: ps-pulse-ring 1.4s ease-out 0.2s infinite; }
+      `}</style>
+
+      {/* Animated checkmark */}
+      <div className="relative flex items-center justify-center w-24 h-24">
+        {phase !== 'idle' && (
+          <div className="absolute inset-0 rounded-full bg-green-300 ps-pulse" />
+        )}
+        {phase !== 'idle' && (
+          <div className="relative w-20 h-20 bg-green-100 rounded-full flex items-center justify-center ps-circle-in">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden>
+              {(phase === 'check' || phase === 'content') && (
+                <polyline
+                  points="9,23 18,32 35,13"
+                  stroke="#16a34a"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="ps-check"
+                />
+              )}
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {phase === 'content' && (
+        <>
+          <div className="ps-fade-up" style={{ animationDelay: '0ms' }}>
+            <h1 className="text-2xl font-bold text-[#1D1D1F]">Paiement encaissé !</h1>
+            <p className="text-gray-600 mt-2 leading-relaxed">
+              <span className="font-bold text-[#1D1D1F]">{fmtPrice(mission.price)}</span> reçus
+              pour la mission{' '}
+              <span className="font-mono font-semibold text-[#861D6D]">{mission.reference}</span>.
+            </p>
+          </div>
+
+          <button
+            onClick={onDone}
+            className="w-full max-w-xs bg-[#861D6D] text-white py-4 rounded-xl font-semibold ps-fade-up"
+            style={{ animationDelay: '120ms' }}
+          >
+            Continuer vers la livraison →
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ActiveMissionPage() {
@@ -148,8 +243,9 @@ export default function ActiveMissionPage() {
   const [loading, setLoading]         = useState(true)
   const [updating, setUpdating]       = useState<string | null>(null)
   const [error, setError]             = useState<string | null>(null)
-  const [paymentModal, setPaymentModal] = useState<Mission | null>(null)
-  const [confirming, setConfirming]   = useState(false)
+  const [paymentModal, setPaymentModal]     = useState<Mission | null>(null)
+  const [confirming, setConfirming]         = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState<{ mission: Mission; updated: Mission } | null>(null)
 
   useEffect(() => {
     apiGet<Mission[]>('/driver/missions')
@@ -184,16 +280,24 @@ export default function ActiveMissionPage() {
     if (!paymentModal) return
     setConfirming(true)
     setError(null)
+    const mission = paymentModal
     try {
-      const updated = await apiPost<Mission>(`/driver/missions/${paymentModal.id}/confirm-payment`, {})
+      const updated = await apiPost<Mission>(`/driver/missions/${mission.id}/confirm-payment`, {})
       setPaymentModal(null)
-      applyUpdate(paymentModal.id, updated)
+      setPaymentSuccess({ mission, updated })
     } catch (e: unknown) {
       setError((e as Error).message ?? 'Erreur de confirmation du paiement.')
       setPaymentModal(null)
     } finally {
       setConfirming(false)
     }
+  }
+
+  function handlePaymentSuccessDone() {
+    if (!paymentSuccess) return
+    const { updated } = paymentSuccess
+    setPaymentSuccess(null)
+    applyUpdate(paymentSuccess.mission.id, updated)
   }
 
   function applyUpdate(id: string, updated: Mission) {
@@ -230,6 +334,13 @@ export default function ActiveMissionPage() {
 
   return (
     <>
+      {paymentSuccess && (
+        <PaymentSuccessOverlay
+          mission={paymentSuccess.mission}
+          onDone={handlePaymentSuccessDone}
+        />
+      )}
+
       {paymentModal && (
         <PaymentConfirmModal
           mission={paymentModal}

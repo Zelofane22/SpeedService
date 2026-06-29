@@ -1,8 +1,27 @@
 export interface AdminStats {
   users: { total: number; clients: number; drivers: number }
-  deliveries: { total: number; by_status: Record<string, number> }
-  revenue: { total_xof: number; this_month_xof: number }
+  deliveries: {
+    total: number
+    by_status: Record<string, number>
+    active_count: number
+    today: { total: number; delivered: number; cancelled: number }
+  }
+  revenue: {
+    total_xof: number
+    this_month_xof: number
+    today_xof: number
+    avg_basket_xof: number
+    by_method: Record<string, { total_xof: number; count: number }>
+  }
   pending_validations: number
+  completion_rate: number
+}
+
+export interface AdminReports {
+  revenue_by_month: Array<{ month: string; total_xof: number }>
+  deliveries_by_month: Array<{ month: string; count: number }>
+  top_clients: Array<{ name: string; email: string; count: number; total_xof: number }>
+  delivery_completion_rate: number
 }
 
 export interface AdminUser {

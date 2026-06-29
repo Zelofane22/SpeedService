@@ -36,6 +36,36 @@ class AdminController extends Controller
             ->groupBy('status')
             ->pluck('count', 'status');
 
+        $byStatus = [];
+        foreach (DeliveryStatus::cases() as $case) {
+            $byStatus[$case->value] = (int) ($deliveryCounts[$case->value] ?? 0);
+        }
+
+        // Active deliveries (in-flight: confirmed → in_delivery)
+        $activeStatuses = [
+            DeliveryStatus::Confirmed->value,
+            DeliveryStatus::Assigned->value,
+            DeliveryStatus::PickingUp->value,
+            DeliveryStatus::InDelivery->value,
+        ];
+        $activeCount = (int) array_sum(array_map(fn ($s) => $byStatus[$s] ?? 0, $activeStatuses));
+
+        // Today's operational stats
+        $todayDeliveries = (int) DB::table('deliveries')
+            ->whereDate('created_at', today())
+            ->count();
+
+        $todayDelivered = (int) DB::table('deliveries')
+            ->where('status', DeliveryStatus::Delivered->value)
+            ->whereDate('updated_at', today())
+            ->count();
+
+        $todayCancelled = (int) DB::table('deliveries')
+            ->where('status', DeliveryStatus::Cancelled->value)
+            ->whereDate('updated_at', today())
+            ->count();
+
+        // Revenue aggregates
         $revenueTotal = DB::table('payments')
             ->where('status', PaymentStatus::Succeeded->value)
             ->sum('amount');
@@ -46,14 +76,35 @@ class AdminController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('amount');
 
-        $pendingValidations = DB::table('deliveries')
-            ->where('status', DeliveryStatus::AwaitingValidation->value)
-            ->count();
+        $revenueToday = DB::table('payments')
+            ->where('status', PaymentStatus::Succeeded->value)
+            ->whereDate('created_at', today())
+            ->sum('amount');
 
-        $byStatus = [];
-        foreach (DeliveryStatus::cases() as $case) {
-            $byStatus[$case->value] = (int) ($deliveryCounts[$case->value] ?? 0);
-        }
+        $avgBasket = DB::table('payments')
+            ->where('status', PaymentStatus::Succeeded->value)
+            ->avg('amount') ?? 0;
+
+        // Revenue breakdown by payment method
+        $revenueByMethod = DB::table('payments')
+            ->where('status', PaymentStatus::Succeeded->value)
+            ->select('method', DB::raw('sum(amount) as total'), DB::raw('count(*) as count'))
+            ->groupBy('method')
+            ->get()
+            ->mapWithKeys(fn ($r) => [$r->method => [
+                'total_xof' => (float) $r->total,
+                'count'     => (int) $r->count,
+            ]]);
+
+        // Completion rate (excluding draft/awaiting_payment)
+        $totalEngaged = DB::table('deliveries')
+            ->whereNotIn('status', [DeliveryStatus::Draft->value, DeliveryStatus::AwaitingPayment->value])
+            ->count();
+        $completionRate = $totalEngaged > 0
+            ? round($byStatus[DeliveryStatus::Delivered->value] / $totalEngaged * 100, 1)
+            : 0.0;
+
+        $pendingValidations = $byStatus[DeliveryStatus::AwaitingValidation->value] ?? 0;
 
         return response()->json([
             'users' => [
@@ -62,14 +113,24 @@ class AdminController extends Controller
                 'drivers' => (int) ($userCounts[UserRole::Driver->value] ?? 0),
             ],
             'deliveries' => [
-                'total'     => (int) $deliveryCounts->sum(),
-                'by_status' => $byStatus,
+                'total'        => (int) $deliveryCounts->sum(),
+                'by_status'    => $byStatus,
+                'active_count' => $activeCount,
+                'today'        => [
+                    'total'     => $todayDeliveries,
+                    'delivered' => $todayDelivered,
+                    'cancelled' => $todayCancelled,
+                ],
             ],
             'revenue' => [
                 'total_xof'      => (float) $revenueTotal,
                 'this_month_xof' => (float) $revenueThisMonth,
+                'today_xof'      => (float) $revenueToday,
+                'avg_basket_xof' => (float) round($avgBasket, 2),
+                'by_method'      => $revenueByMethod,
             ],
             'pending_validations' => $pendingValidations,
+            'completion_rate'     => (float) $completionRate,
         ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 

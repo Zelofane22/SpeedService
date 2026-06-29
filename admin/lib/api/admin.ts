@@ -1,5 +1,6 @@
 import type {
   AdminStats,
+  AdminReports,
   AdminUser,
   AdminDelivery,
   AdminDriver,
@@ -48,6 +49,10 @@ function buildQuery(params?: Record<string, string | number | undefined>): strin
 
 export function getAdminStats(): Promise<AdminStats> {
   return apiFetch<AdminStats>('/admin/stats')
+}
+
+export function getAdminReports(): Promise<AdminReports> {
+  return apiFetch<AdminReports>('/admin/reports')
 }
 
 export function getAdminUsers(params?: {
