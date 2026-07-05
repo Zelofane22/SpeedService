@@ -32,6 +32,23 @@ class RegisterTest extends TestCase
         ]);
     }
 
+    public function test_user_can_register_without_email(): void
+    {
+        $payload = $this->validPayload;
+        unset($payload['email']);
+
+        $response = $this->postJson('/api/auth/register', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure(['user' => ['id', 'name', 'phone', 'role'], 'token']);
+
+        $this->assertDatabaseHas('users', [
+            'email' => null,
+            'phone' => '+22997000000',
+            'role'  => 'client',
+        ]);
+    }
+
     public function test_password_is_not_returned_in_response(): void
     {
         $response = $this->postJson('/api/auth/register', $this->validPayload);
@@ -76,7 +93,7 @@ class RegisterTest extends TestCase
         $response = $this->postJson('/api/auth/register', []);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['name', 'email', 'phone', 'password']);
+            ->assertJsonValidationErrors(['name', 'phone', 'password']);
     }
 
     public function test_registration_fails_with_password_too_short(): void

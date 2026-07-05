@@ -11,11 +11,20 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // Normalise le téléphone pour que l'unicité et la connexion par
+        // numéro ne dépendent pas des séparateurs saisis.
+        if ($this->filled('phone')) {
+            $this->merge(['phone' => preg_replace('/[\s.\-]/', '', $this->input('phone'))]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email'    => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'phone'    => ['required', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
@@ -25,7 +34,6 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name.required'      => 'Le nom est obligatoire.',
-            'email.required'     => 'L\'adresse email est obligatoire.',
             'email.email'        => 'L\'adresse email n\'est pas valide.',
             'email.unique'       => 'Cette adresse email est déjà utilisée.',
             'phone.required'     => 'Le numéro de téléphone est obligatoire.',

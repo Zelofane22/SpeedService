@@ -3,23 +3,23 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, Bike } from 'lucide-react'
+import { User, Lock, Bike } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { Input } from '@/components/input'
 import { Button } from '@/components/button'
 import { apiPost } from '@/lib/api'
 
-type FieldErrors = Partial<Record<'email' | 'password', string>>
+type FieldErrors = Partial<Record<'identifier' | 'password', string>>
 
 type LoginResponse = {
-  user: { id: string; name: string; email: string; phone: string; role: string }
+  user: { id: string; name: string; email: string | null; phone: string; role: string }
   token: string
 }
 
 export default function LoginPage() {
   const router = useRouter()
 
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ identifier: '', password: '' })
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [globalError, setGlobalError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -98,14 +98,14 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <Input
-            label="Adresse email"
-            type="email"
-            placeholder="koffi@gmail.com"
-            autoComplete="email"
-            icon={Mail}
-            value={form.email}
-            onChange={set('email')}
-            error={fieldErrors.email}
+            label="Email ou téléphone"
+            type="text"
+            placeholder="koffi@gmail.com ou +229 97 00 00 00"
+            autoComplete="username"
+            icon={User}
+            value={form.identifier}
+            onChange={set('identifier')}
+            error={fieldErrors.identifier}
             required
           />
 
