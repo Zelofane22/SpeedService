@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Mail, Lock, Package, Bike } from 'lucide-react'
+import { User, Lock, Package, Bike } from 'lucide-react'
 import { getApiBaseUrl } from '@speedservice/api-client'
 
 const API_URL = getApiBaseUrl()
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +21,7 @@ export default function LoginPage() {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       })
       if (!res.ok) throw new Error('Identifiants incorrects.')
       const { token } = await res.json()
@@ -76,16 +76,16 @@ export default function LoginPage() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-[#1D1D1F]">Adresse email</label>
+              <label className="text-sm font-medium text-[#1D1D1F]">Email ou téléphone</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#861D6D] w-4 h-4" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-[#861D6D] w-4 h-4" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-[#F9F0F8] rounded-xl pl-10 pr-4 py-3 text-sm text-[#1D1D1F] placeholder:text-[#C9A8C3] focus:outline-none focus:ring-2 focus:ring-[#861D6D]"
-                  placeholder="livreur@speedservice.bj"
+                  placeholder="livreur@speedservice.bj ou +229 97 00 00 00"
                 />
               </div>
             </div>

@@ -11,20 +11,27 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // Rétro-compatibilité : les anciens clients envoient `email` au lieu d'`identifier`.
+        if (! $this->filled('identifier') && $this->filled('email')) {
+            $this->merge(['identifier' => $this->input('email')]);
+        }
+    }
+
     public function rules(): array
     {
         return [
-            'email'    => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'identifier' => ['required', 'string'],
+            'password'   => ['required', 'string'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'email.required'    => 'L\'adresse email est obligatoire.',
-            'email.email'       => 'L\'adresse email n\'est pas valide.',
-            'password.required' => 'Le mot de passe est obligatoire.',
+            'identifier.required' => 'L\'adresse email ou le numéro de téléphone est obligatoire.',
+            'password.required'   => 'Le mot de passe est obligatoire.',
         ];
     }
 }

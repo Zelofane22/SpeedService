@@ -11,6 +11,7 @@ use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
@@ -35,14 +36,26 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $identifier = trim($request->identifier);
+
+        if (str_contains($identifier, '@')) {
+            $user = User::where('email', $identifier)->first();
+        } else {
+            // Les numéros existants peuvent être stockés avec des séparateurs :
+            // on compare les deux côtés sans espaces, tirets ni points.
+            $phone = preg_replace('/[\s.\-]/', '', $identifier);
+            $user  = User::whereRaw(
+                "replace(replace(replace(phone, ' ', ''), '-', ''), '.', '') = ?",
+                [$phone],
+            )->first();
+        }
+
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Identifiants incorrects.',
             ], 401);
         }
 
-        /** @var User $user */
-        $user  = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

@@ -12,7 +12,7 @@ import { apiPost } from '@/lib/api'
 type FieldErrors = Partial<Record<'name' | 'email' | 'phone' | 'password', string>>
 
 type RegisterResponse = {
-  user: { id: string; name: string; email: string; phone: string; role: string }
+  user: { id: string; name: string; email: string | null; phone: string; role: string }
   token: string
 }
 
@@ -45,7 +45,10 @@ export default function RegisterPage() {
     setGlobalError('')
 
     try {
-      const data = await apiPost<RegisterResponse>('/auth/register', form)
+      const data = await apiPost<RegisterResponse>('/auth/register', {
+        ...form,
+        email: form.email.trim() || undefined,
+      })
       // Persiste le token côté client (Sprint 2+ utilisera un store dédié)
       localStorage.setItem('auth_token', data.token)
       router.push('/dashboard')
@@ -104,7 +107,7 @@ export default function RegisterPage() {
           />
 
           <Input
-            label="Adresse email"
+            label="Adresse email (optionnel)"
             type="email"
             placeholder="koffi@gmail.com"
             autoComplete="email"
