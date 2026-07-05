@@ -112,7 +112,6 @@ export default function RegisterPage() {
             value={form.email}
             onChange={set('email')}
             error={fieldErrors.email}
-            required
           />
 
           <Input
