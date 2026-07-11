@@ -1,7 +1,11 @@
 {
   "name": "speedservice",
   "private": true,
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@10.34.3",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": "10.34.3"
+  },
   "scripts": {
     "dev:frontend": "pnpm --filter speedservice-frontend dev",
     "dev:admin": "pnpm --filter speedservice-admin dev",

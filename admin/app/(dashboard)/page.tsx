@@ -365,7 +365,7 @@ export default function DashboardPage() {
                   color: 'var(--foreground)',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                 }}
-                formatter={(v: number) => [v, 'Livraisons']}
+                formatter={(value) => [Number(value ?? 0), 'Livraisons']}
               />
               <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -406,7 +406,7 @@ export default function DashboardPage() {
                   color: 'var(--foreground)',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                 }}
-                formatter={(v: number) => [formatXOFLong(v), 'Revenus']}
+                formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
               />
               <Area
                 type="monotone"

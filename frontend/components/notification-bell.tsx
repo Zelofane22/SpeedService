@@ -122,7 +122,7 @@ export function NotificationBell() {
                 onClick={() => void openNotification(item)}
                 className={cn(
                   'w-full border-b border-brand-border px-4 py-3 text-left last:border-0 hover:bg-brand-muted/40 transition-colors',
-                  !item.read_at && 'bg-primary/[0.04]',
+                  !item.read_at && 'bg-primary/4',
                 )}
               >
                 <div className="flex gap-3">

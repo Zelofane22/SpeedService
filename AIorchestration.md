@@ -16,7 +16,9 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section Claude Code
 
-**Dernier état :** 2026-07-11
+**Dernier état :** 2026-07-12
+
+🔒 En cours : reprise (demandée par l'utilisateur) de la mise à niveau stable démarrée par Codex — validations frontend (tsc/lint/build des 3 apps via Docker), alignement Dockerfiles Node 24 + pnpm 10.34.3, puis Laravel et services de données. Fichiers touchés : `frontend/Dockerfile`, `admin/Dockerfile`, `driver/Dockerfile`, + validations sur l'arbre laissé par Codex.
 
 ### Améliorations admin inspirées d'ANIFOWOCHE — ✅ Terminé (2026-07-11, branche `develop`, non commité)
 
@@ -77,6 +79,12 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 ## Section GPT Codex
 
 **Dernier état :** 2026-07-11
+
+🔒 En cours : mise à niveau stable complète (manifestes et lockfiles npm/Composer, configurations Next/Tailwind/ESLint, Dockerfiles, `docker-compose.yml`, workflows CI et documentation de migration PostgreSQL).
+
+✅ Terminé : audit internet des versions stables (npm/Node.js, Packagist/PHP, Docker Hub, PostgreSQL, Redis et GitHub Actions). Aucun manifeste applicatif modifié : plusieurs mises à niveau sont des migrations majeures cassantes (Laravel 13, Tailwind 4, PostgreSQL 18, Redis 8, TypeScript 7, ESLint 10) et nécessitent une campagne dédiée avec tests et migration des données. Écarts et ordre recommandé communiqués à l'utilisateur.
+
+✅ Terminé : correction du déploiement Vercel — suppression des commandes d'installation qui forçaient pnpm 6 dans les trois `vercel.json`, et alignement du monorepo sur pnpm 10.34.3 compatible avec Vercel et le lockfile v9 (`package.json`). Validation JSON et `git diff --check` effectuée ; installation/build non exécutés car Node.js/pnpm sont absents de l'environnement Codex.
 
 ✅ Terminé : pipeline CI/CD renforcé (`.github/workflows/ci.yml`, `db-backup.yml`, `dependabot.yml`) avec validation des trois apps, tests Laravel sur PostgreSQL 16, audits, Gitleaks, sauvegarde Railway chiffrée et documentation d'exploitation mise à jour (`README.md`, `DEPLOY.md`, `docs/backups.md`).
 

@@ -46,7 +46,7 @@ function StatusContent() {
 
   useEffect(() => {
     if (applicationId) fetch(applicationId)
-  }, [applicationId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applicationId])
 
   const cfg = status ? (STATUS_CONFIG[status.status] ?? STATUS_CONFIG['pending']) : null
 

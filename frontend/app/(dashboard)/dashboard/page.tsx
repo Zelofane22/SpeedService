@@ -75,7 +75,7 @@ export default function DashboardPage() {
             {loading ? (
               <div className="h-7 w-16 bg-brand-muted animate-pulse rounded-lg mb-1" />
             ) : (
-              <p className="text-xl font-bold text-brand-foreground mb-1 break-words sm:text-2xl">{k.value}</p>
+              <p className="text-xl font-bold text-brand-foreground mb-1 wrap-break-word sm:text-2xl">{k.value}</p>
             )}
             <p className="text-xs text-gray-700">{k.label}</p>
             <p className="text-xs text-gray-700 font-medium mt-1">{k.change}</p>

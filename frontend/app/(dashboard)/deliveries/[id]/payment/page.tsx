@@ -239,7 +239,7 @@ export default function PaymentPage() {
           <div className="text-sm">
             <p className="text-gray-700 text-xs mb-0.5">De</p>
             <p className="font-medium text-brand-foreground">{delivery.sender_name}</p>
-            <p className="text-gray-700 break-words">{delivery.pickup_address}</p>
+            <p className="text-gray-700 wrap-break-word">{delivery.pickup_address}</p>
           </div>
         </div>
 
@@ -248,7 +248,7 @@ export default function PaymentPage() {
           <div className="text-sm">
             <p className="text-gray-700 text-xs mb-0.5">À</p>
             <p className="font-medium text-brand-foreground">{delivery.recipient_name}</p>
-            <p className="text-gray-700 break-words">{delivery.delivery_address}</p>
+            <p className="text-gray-700 wrap-break-word">{delivery.delivery_address}</p>
           </div>
         </div>
 
@@ -343,7 +343,7 @@ function Row({
   return (
     <div className="flex items-start justify-between gap-4">
       <span className="text-xs text-gray-700 shrink-0">{label}</span>
-      <span className={cn('text-sm text-right break-words', mono ? 'font-mono font-bold text-brand-foreground' : 'font-medium text-brand-foreground', valueClass)}>
+      <span className={cn('text-sm text-right wrap-break-word', mono ? 'font-mono font-bold text-brand-foreground' : 'font-medium text-brand-foreground', valueClass)}>
         {value}
       </span>
     </div>

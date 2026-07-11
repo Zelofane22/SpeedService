@@ -402,7 +402,7 @@ export default function NewDeliveryPage() {
               ].map(({ l, v }) => (
                 <div key={l} className="bg-brand-muted/30 rounded-2xl p-4">
                   <p className="text-xs text-gray-700 mb-1">{l}</p>
-                  <p className="text-sm font-semibold text-brand-foreground break-words">{v}</p>
+                  <p className="text-sm font-semibold text-brand-foreground wrap-break-word">{v}</p>
                 </div>
               ))}
             </div>

@@ -40,7 +40,7 @@ export default function HomePage() {
       </header>
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative bg-gradient-to-br from-primary via-[#9E2480] to-secondary min-h-[600px] flex items-center overflow-hidden">
+      <section className="relative bg-linear-to-br from-primary via-[#9E2480] to-secondary min-h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           {Array.from({ length: 20 }, (_, i) => (
             <div
@@ -149,13 +149,13 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ─────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-b from-brand-muted/30 to-brand-background py-20">
+      <section className="bg-linear-to-b from-brand-muted/30 to-brand-background py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="text-4xl font-bold mb-4 text-brand-foreground">Comment ça marche ?</h2>
           </div>
           <div className="grid md:grid-cols-4 gap-8 relative">
-            <div className="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
+            <div className="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-px bg-linear-to-r from-primary/20 via-primary/40 to-primary/20" />
             {[
               { n: '01', icon: PlusCircle, title: 'Créez votre commande', desc: 'Renseignez expéditeur, destinataire et détails du colis.' },
               { n: '02', icon: CreditCard, title: 'Payez en ligne', desc: 'Paiement sécurisé via MTN MoMo ou Moov Money.' },
@@ -213,7 +213,7 @@ export default function HomePage() {
 
       {/* ── CTA Banner ───────────────────────────────────────────────────── */}
       <section id="tarifs" className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="rounded-3xl bg-gradient-to-r from-primary to-secondary p-12 text-white text-center">
+        <div className="rounded-3xl bg-linear-to-r from-primary to-secondary p-12 text-white text-center">
           <h2 className="text-4xl font-bold mb-4">Prêt à envoyer votre premier colis ?</h2>
           <p className="text-white/80 mb-8 max-w-lg mx-auto">
             Rejoignez plus de 10 000 clients qui font confiance à Speed Service chaque mois.

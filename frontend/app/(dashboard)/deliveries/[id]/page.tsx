@@ -289,7 +289,7 @@ function AddressBlock({ label, name, phone, address, destination = false }: { la
       <div className="min-w-0">
         <p className="text-xs text-gray-500">{label}</p>
         <p className="text-sm font-semibold text-brand-foreground">{name}</p>
-        <p className="mt-0.5 text-xs leading-5 text-gray-600 break-words">{address}</p>
+        <p className="mt-0.5 text-xs leading-5 text-gray-600 wrap-break-word">{address}</p>
         <a href={`tel:${phone}`} className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"><Phone size={11} /> {phone}</a>
       </div>
     </div>
@@ -300,7 +300,7 @@ function Detail({ label, value, strong = false }: { label: string; value: string
   return (
     <div className="flex items-start justify-between gap-4">
       <dt className="text-gray-500">{label}</dt>
-      <dd className={cn('text-right text-brand-foreground break-words', strong && 'font-bold text-primary')}>{value}</dd>
+      <dd className={cn('text-right text-brand-foreground wrap-break-word', strong && 'font-bold text-primary')}>{value}</dd>
     </div>
   )
 }

@@ -4,9 +4,8 @@ export default [
   ...nextConfig,
   {
     rules: {
-      // Existing onboarding/data-loading effects intentionally update local state.
+      // Existing data-loading effects intentionally synchronize API state on mount.
       'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/use-memo': 'off',
     },
   },
 ];
