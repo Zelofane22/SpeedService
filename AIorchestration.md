@@ -33,7 +33,15 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - ✅ Sidebar : entrées Rapports/Alertes/Journal + badge compteur d'alertes
 - ✅ `/orders` et `/payments` lisent `?status=` (liens des alertes) — `next build` au vert
 
-**⚠️ Notes d'environnement local** (voir mémoire Claude) : `backend/.env` recréé depuis `.env.example` (l'ancien était perdu) — le mot de passe PostgreSQL ne correspond plus au volume `db` existant, le conteneur backend crashloop au démarrage ; les tests passent par SQLite in-memory avec les env forcées en `-e` (le `env_file` compose écrase phpunit.xml).
+**⚠️ Notes d'environnement local** (voir mémoire Claude) : `backend/.env` recréé depuis `.env.example` (l'ancien était perdu) ; les tests passent par SQLite in-memory avec les env forcées en `-e` (le `env_file` compose écrase phpunit.xml).
+
+### Correctifs stack Docker — ✅ Terminé (2026-07-11)
+
+- ✅ Mot de passe Postgres du volume `db` réaligné sur le `.env` recréé (`ALTER ROLE` via socket local, non destructif) — backend ne crashloop plus
+- ✅ `backend/.env` + `.env.example` : bloc `POSTGRES_DB/USER/PASSWORD` ajouté (le service `db` du compose les lit ; ils manquaient) + `APP_KEY` générée dans le `.env` local
+- ✅ Admin `Cannot find module 'next'` corrigé : `outputFileTracingRoot` (racine du monorepo) ajouté dans `admin/next.config.ts` + `WORKDIR /app/admin` dans `admin/Dockerfile` (aligné sur frontend/driver)
+- ✅ Bugs latents corrigés : `output: 'standalone'` + `outputFileTracingRoot` ajoutés à `frontend/next.config.mjs` et `driver/next.config.ts` (leurs Dockerfiles copient `.next/standalone` qui n'aurait pas existé au prochain rebuild)
+- ✅ Vérifié : 6 services up, `GET /api/status` → 200, admin `/login` → 200, migrations OK (dont `admin_action_logs`)
 
 ### Sprint 8 — Driver App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
 
