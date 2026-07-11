@@ -10,12 +10,16 @@ import {
   Truck,
   CreditCard,
   ClipboardList,
+  BarChart3,
+  Bell,
+  History,
   Settings,
   LogOut,
   User,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getAdminAlerts } from '@/lib/api/admin'
 
 interface NavLink {
   href: string
@@ -31,6 +35,9 @@ const navLinks: NavLink[] = [
   { href: '/drivers', icon: Truck, label: 'Livreurs', exact: false },
   { href: '/payments', icon: CreditCard, label: 'Paiements', exact: false },
   { href: '/driver-applications', icon: ClipboardList, label: 'Candidatures', exact: false },
+  { href: '/reports', icon: BarChart3, label: 'Rapports', exact: false },
+  { href: '/alerts', icon: Bell, label: 'Alertes', exact: false },
+  { href: '/activity', icon: History, label: 'Journal', exact: false },
   { href: '/settings', icon: Settings, label: 'Paramètres', exact: false },
 ]
 
@@ -48,6 +55,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = useState<UserInfo>({ name: '', email: '' })
+  const [alertCount, setAlertCount] = useState(0)
 
   useEffect(() => {
     try {
@@ -60,6 +68,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       // ignore parse errors
     }
   }, [])
+
+  // Recharge le compteur d'alertes à chaque navigation (les alertes évoluent
+  // au rythme des actions admin : validation de paiement, assignation…)
+  useEffect(() => {
+    getAdminAlerts()
+      .then((res) => setAlertCount(res.total ?? 0))
+      .catch(() => setAlertCount(0))
+  }, [pathname])
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
@@ -135,7 +151,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 onClick={onClose}
               >
                 <Icon size={16} />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {link.href === '/alerts' && alertCount > 0 && (
+                  <span
+                    className={cn(
+                      'min-w-5 h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center',
+                      active ? 'bg-white/20 text-white' : 'bg-red-500 text-white'
+                    )}
+                  >
+                    {alertCount > 99 ? '99+' : alertCount}
+                  </span>
+                )}
               </Link>
             )
           })}

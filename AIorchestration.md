@@ -16,7 +16,24 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section Claude Code
 
-**Dernier état :** 2026-06-24
+**Dernier état :** 2026-07-11
+
+### Améliorations admin inspirées d'ANIFOWOCHE — ✅ Terminé (2026-07-11, branche `develop`, non commité)
+
+**Backend :**
+- ✅ `AdminActionLog` (modèle + migration `2026_07_11_000000`) — journal d'audit des actions admin
+- ✅ `AdminController` : `stats()` enrichi de `trends` (variations vs période précédente), nouveaux endpoints `alerts()` (alertes dérivées des données) et `activityLog()` (paginé, filtrable par action), `reports()` enrichi (`top_drivers`, `deliveries_by_package_type`), logging des actions sensibles (rôle, statut forcé, validation paiement, activation livreur)
+- ✅ `DriverApplicationController::adminReview` loggé aussi
+- ✅ Routes : `GET /admin/alerts`, `GET /admin/activity-log`
+- ✅ 10 nouveaux tests — suite complète au vert (122 tests, 501 assertions, via Docker)
+
+**Admin (Next.js) :**
+- ✅ Dashboard : salutation personnalisée + variations ↗/↘ sur les KPI (CA jour/mois, nouveaux clients)
+- ✅ Nouvelles pages : `/alerts` (centre d'alertes), `/reports` (rapports), `/activity` (journal)
+- ✅ Sidebar : entrées Rapports/Alertes/Journal + badge compteur d'alertes
+- ✅ `/orders` et `/payments` lisent `?status=` (liens des alertes) — `next build` au vert
+
+**⚠️ Notes d'environnement local** (voir mémoire Claude) : `backend/.env` recréé depuis `.env.example` (l'ancien était perdu) — le mot de passe PostgreSQL ne correspond plus au volume `db` existant, le conteneur backend crashloop au démarrage ; les tests passent par SQLite in-memory avec les env forcées en `-e` (le `env_file` compose écrase phpunit.xml).
 
 ### Sprint 8 — Driver App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
 

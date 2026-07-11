@@ -113,8 +113,12 @@ export default function PaymentsPage() {
       .finally(() => setLoading(false))
   }
 
+  // Le filtre statut peut être pré-rempli via l'URL (?status=…),
+  // utilisé par les liens du centre d'alertes
   useEffect(() => {
-    load('')
+    const initialStatus = new URLSearchParams(window.location.search).get('status') ?? ''
+    setStatusFilter(initialStatus)
+    load(initialStatus)
   }, [])
 
   function handleStatusFilter(value: string) {

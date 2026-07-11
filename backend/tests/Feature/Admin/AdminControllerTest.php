@@ -7,9 +7,11 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Models\Delivery;
+use App\Models\DriverApplication;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AdminControllerTest extends TestCase
@@ -493,5 +495,233 @@ class AdminControllerTest extends TestCase
 
         $response->assertOk();
         $this->assertIsFloat($response->json('delivery_completion_rate'));
+    }
+
+    public function test_reports_include_top_drivers_and_package_types(): void
+    {
+        $delivery = Delivery::factory()->create([
+            'client_id' => $this->client->id,
+            'driver_id' => $this->driver->id,
+            'status'    => DeliveryStatus::Delivered,
+        ]);
+
+        Payment::create([
+            'delivery_id' => $delivery->id,
+            'amount'      => 4000,
+            'method'      => PaymentMethod::MtnMomo,
+            'status'      => PaymentStatus::Succeeded,
+        ]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/reports');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'top_drivers'                => [['name', 'email', 'count', 'total_xof']],
+                'deliveries_by_package_type' => [['package_type', 'count']],
+            ])
+            ->assertJsonPath('top_drivers.0.name', $this->driver->name)
+            ->assertJsonPath('top_drivers.0.count', 1)
+            ->assertJsonPath('top_drivers.0.total_xof', 4000.0);
+    }
+
+    // ── Trends ────────────────────────────────────────────────────────────────
+
+    public function test_stats_include_trends_structure(): void
+    {
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/stats');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'trends' => [
+                    'revenue_today_pct',
+                    'revenue_month_pct',
+                    'deliveries_month',
+                    'deliveries_month_pct',
+                    'new_clients_month',
+                    'new_clients_month_pct',
+                ],
+            ]);
+    }
+
+    public function test_stats_trends_compare_revenue_to_yesterday(): void
+    {
+        $todayDelivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        Payment::create([
+            'delivery_id' => $todayDelivery->id,
+            'amount'      => 5000,
+            'method'      => PaymentMethod::MtnMomo,
+            'status'      => PaymentStatus::Succeeded,
+        ]);
+
+        $yesterdayDelivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        $yesterdayPayment  = Payment::create([
+            'delivery_id' => $yesterdayDelivery->id,
+            'amount'      => 2500,
+            'method'      => PaymentMethod::MtnMomo,
+            'status'      => PaymentStatus::Succeeded,
+        ]);
+        DB::table('payments')
+            ->where('id', $yesterdayPayment->id)
+            ->update(['created_at' => now()->subDay()]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/stats');
+
+        $response->assertOk()
+            ->assertJsonPath('trends.revenue_today_pct', 100.0);
+    }
+
+    public function test_stats_trend_is_null_when_previous_period_is_empty(): void
+    {
+        $delivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        Payment::create([
+            'delivery_id' => $delivery->id,
+            'amount'      => 5000,
+            'method'      => PaymentMethod::MtnMomo,
+            'status'      => PaymentStatus::Succeeded,
+        ]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/stats');
+
+        $response->assertOk()
+            ->assertJsonPath('trends.revenue_today_pct', null);
+    }
+
+    // ── Alerts ────────────────────────────────────────────────────────────────
+
+    public function test_alerts_empty_when_nothing_to_report(): void
+    {
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/alerts');
+
+        $response->assertOk()
+            ->assertJsonPath('total', 0)
+            ->assertJsonCount(0, 'alerts');
+    }
+
+    public function test_alerts_report_pending_validations_failed_payments_and_applications(): void
+    {
+        Delivery::factory()->count(2)->create([
+            'client_id' => $this->client->id,
+            'status'    => DeliveryStatus::AwaitingValidation,
+        ]);
+
+        $delivery = Delivery::factory()->create(['client_id' => $this->client->id]);
+        Payment::create([
+            'delivery_id' => $delivery->id,
+            'amount'      => 3000,
+            'method'      => PaymentMethod::Card,
+            'status'      => PaymentStatus::Failed,
+        ]);
+
+        DriverApplication::factory()->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/alerts');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'alerts' => [['id', 'severity', 'kind', 'title', 'message', 'count', 'action']],
+                'total',
+            ])
+            ->assertJsonPath('total', 4);
+
+        $ids = array_column($response->json('alerts'), 'id');
+        $this->assertContains('pending-payment-validations', $ids);
+        $this->assertContains('failed-payments', $ids);
+        $this->assertContains('pending-driver-applications', $ids);
+    }
+
+    public function test_alerts_forbidden_for_client(): void
+    {
+        $this->actingAs($this->client, 'sanctum')
+            ->getJson('/api/admin/alerts')
+            ->assertForbidden();
+    }
+
+    // ── Activity log ──────────────────────────────────────────────────────────
+
+    public function test_admin_actions_are_logged(): void
+    {
+        $this->actingAs($this->admin, 'sanctum')
+            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->assertOk();
+
+        $this->assertDatabaseHas('admin_action_logs', [
+            'admin_id'     => $this->admin->id,
+            'action'       => 'user.role_updated',
+            'subject_type' => 'user',
+            'subject_id'   => $this->client->id,
+        ]);
+    }
+
+    public function test_payment_validation_is_logged(): void
+    {
+        $delivery = Delivery::factory()->create([
+            'client_id' => $this->client->id,
+            'status'    => DeliveryStatus::AwaitingValidation,
+        ]);
+
+        Payment::create([
+            'delivery_id' => $delivery->id,
+            'amount'      => 2500,
+            'method'      => PaymentMethod::CashOnDelivery,
+            'status'      => PaymentStatus::Pending,
+        ]);
+
+        $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/admin/deliveries/{$delivery->id}/validate-payment")
+            ->assertOk();
+
+        $this->assertDatabaseHas('admin_action_logs', [
+            'admin_id'    => $this->admin->id,
+            'action'      => 'payment.validated',
+            'subject_id'  => $delivery->id,
+        ]);
+    }
+
+    public function test_admin_can_list_activity_log(): void
+    {
+        $this->actingAs($this->admin, 'sanctum')
+            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->assertOk();
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/activity-log');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [['id', 'action', 'description', 'created_at', 'admin' => ['id', 'name']]],
+                'current_page',
+                'total',
+                'per_page',
+            ])
+            ->assertJsonPath('data.0.action', 'user.role_updated');
+    }
+
+    public function test_activity_log_can_be_filtered_by_action(): void
+    {
+        $this->actingAs($this->admin, 'sanctum')
+            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->assertOk();
+
+        $delivery = Delivery::factory()->create([
+            'client_id' => $this->client->id,
+            'status'    => DeliveryStatus::Confirmed,
+        ]);
+
+        $this->actingAs($this->admin, 'sanctum')
+            ->patchJson("/api/admin/deliveries/{$delivery->id}/status", ['status' => 'assigned'])
+            ->assertOk();
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/activity-log?action=user.role_updated');
+
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
+        $this->assertSame('user.role_updated', $response->json('data.0.action'));
     }
 }

@@ -76,9 +76,12 @@ export default function OrdersPage() {
       .finally(() => setLoading(false))
   }
 
-  // Initial load
+  // Initial load — le filtre statut peut être pré-rempli via l'URL (?status=…),
+  // utilisé par les liens du centre d'alertes
   useEffect(() => {
-    load('', '')
+    const initialStatus = new URLSearchParams(window.location.search).get('status') ?? ''
+    setStatusFilter(initialStatus)
+    load('', initialStatus)
   }, [])
 
   // Debounced search

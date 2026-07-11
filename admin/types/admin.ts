@@ -15,13 +15,48 @@ export interface AdminStats {
   }
   pending_validations: number
   completion_rate: number
+  trends: {
+    revenue_today_pct: number | null
+    revenue_month_pct: number | null
+    deliveries_month: number
+    deliveries_month_pct: number | null
+    new_clients_month: number
+    new_clients_month_pct: number | null
+  }
 }
 
 export interface AdminReports {
   revenue_by_month: Array<{ month: string; total_xof: number }>
   deliveries_by_month: Array<{ month: string; count: number }>
   top_clients: Array<{ name: string; email: string; count: number; total_xof: number }>
+  top_drivers: Array<{ name: string; email: string; count: number; total_xof: number }>
+  deliveries_by_package_type: Array<{ package_type: string; count: number }>
   delivery_completion_rate: number
+}
+
+export interface AdminAlert {
+  id: string
+  severity: 'error' | 'warning' | 'info'
+  kind: string
+  title: string
+  message: string
+  count: number
+  action: string
+}
+
+export interface AdminAlertsResponse {
+  alerts: AdminAlert[]
+  total: number
+}
+
+export interface AdminActivityLog {
+  id: string
+  action: string
+  subject_type: string | null
+  subject_id: string | null
+  description: string
+  created_at: string
+  admin: { id: string; name: string; email?: string } | null
 }
 
 export interface AdminUser {

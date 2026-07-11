@@ -5,6 +5,8 @@ import type {
   AdminDelivery,
   AdminDriver,
   AdminPayment,
+  AdminAlertsResponse,
+  AdminActivityLog,
 } from '@/types/admin'
 import { getApiBaseUrl } from '@speedservice/api-client'
 
@@ -53,6 +55,17 @@ export function getAdminStats(): Promise<AdminStats> {
 
 export function getAdminReports(): Promise<AdminReports> {
   return apiFetch<AdminReports>('/admin/reports')
+}
+
+export function getAdminAlerts(): Promise<AdminAlertsResponse> {
+  return apiFetch<AdminAlertsResponse>('/admin/alerts')
+}
+
+export function getAdminActivityLog(params?: {
+  page?: number
+  action?: string
+}): Promise<{ data: AdminActivityLog[]; current_page: number; last_page: number; total: number }> {
+  return apiFetch(`/admin/activity-log${buildQuery(params)}`)
 }
 
 export function getAdminUsers(params?: {

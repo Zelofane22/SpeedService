@@ -54,6 +54,12 @@ function formatXOFLong(amount: number): string {
   return `${amount.toLocaleString('fr-FR')} FCFA`
 }
 
+function trendProps(pct: number | null | undefined, vsLabel: string): { change?: string; up?: boolean } {
+  if (pct === null || pct === undefined) return {}
+  const formatted = `${pct > 0 ? '+' : ''}${pct.toLocaleString('fr-FR', { maximumFractionDigits: 1 })}% ${vsLabel}`
+  return { change: formatted, up: pct >= 0 }
+}
+
 function monthLabel(isoMonth: string): string {
   const [year, m] = isoMonth.split('-')
   const names = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
@@ -113,6 +119,16 @@ export default function DashboardPage() {
   const [deliveries, setDeliveries] = useState<AdminDelivery[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [adminName, setAdminName] = useState('')
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('user')
+      if (stored) setAdminName((JSON.parse(stored) as { name?: string }).name ?? '')
+    } catch {
+      // ignore parse errors
+    }
+  }, [])
 
   const todayLabel = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -188,7 +204,9 @@ export default function DashboardPage() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Bonjour, {adminName || 'Admin'} 👋
+          </h1>
           <p className="text-sm text-muted-foreground capitalize">{todayLabel}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -272,12 +290,14 @@ export default function DashboardPage() {
             value={formatXOF(stats?.revenue.today_xof ?? 0)}
             icon={TrendingUp}
             colorClass="bg-green-50 dark:bg-green-900/30 text-green-600"
+            {...trendProps(stats?.trends?.revenue_today_pct, 'vs hier')}
           />
           <StatCard
             label="CA ce mois"
             value={formatXOF(stats?.revenue.this_month_xof ?? 0)}
             icon={Wallet}
             colorClass="bg-primary/10 text-primary"
+            {...trendProps(stats?.trends?.revenue_month_pct, 'vs mois dernier')}
           />
           <StatCard
             label="Panier moyen"
@@ -290,7 +310,8 @@ export default function DashboardPage() {
             value={`${stats?.users.clients ?? 0} / ${stats?.users.drivers ?? 0}`}
             icon={Users}
             colorClass="bg-amber-50 dark:bg-amber-900/30 text-amber-600"
-            subtitle={`${stats?.users.total ?? 0} utilisateurs total`}
+            subtitle={`${stats?.users.total ?? 0} utilisateurs · +${stats?.trends?.new_clients_month ?? 0} client${(stats?.trends?.new_clients_month ?? 0) > 1 ? 's' : ''} ce mois`}
+            {...trendProps(stats?.trends?.new_clients_month_pct, 'vs mois dernier')}
           />
         </div>
       </div>

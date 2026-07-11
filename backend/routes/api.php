@@ -71,6 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
+        Route::get('/alerts', [AdminController::class, 'alerts']);
+        Route::get('/activity-log', [AdminController::class, 'activityLog']);
         Route::get('/users', [AdminController::class, 'listUsers']);
         Route::get('/users/{id}', [AdminController::class, 'showUser']);
         Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);

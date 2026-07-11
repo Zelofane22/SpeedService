@@ -7,6 +7,7 @@ use App\Enums\DocumentType;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Mail\DriverApplicationStatusMail;
+use App\Models\AdminActionLog;
 use App\Models\DriverApplication;
 use App\Models\DriverDocument;
 use App\Models\User;
@@ -242,6 +243,14 @@ class DriverApplicationController extends Controller
         Mail::to($application->email)->queue(
             new DriverApplicationStatusMail($application, $data['action'], $setupUrl)
         );
+
+        AdminActionLog::create([
+            'admin_id'     => $request->user()->id,
+            'action'       => 'driver_application.reviewed',
+            'subject_type' => 'driver_application',
+            'subject_id'   => $application->id,
+            'description'  => "Candidature de {$application->first_name} {$application->last_name} : {$newStatus->label()}.",
+        ]);
 
         return response()->json(['message' => 'Décision enregistrée.']);
     }
