@@ -28,7 +28,7 @@
    - `FRONTEND_URL` et `SANCTUM_STATEFUL_DOMAINS` → les URLs Vercel (à mettre à jour après le déploiement Vercel)
 
 5. **Déployer**
-   - Railway build et déploie automatiquement au push sur `main`
+   - Railway build et déploie automatiquement au push sur `prod`
    - Les migrations s'exécutent automatiquement au démarrage (`docker-entrypoint.sh`)
 
 6. **Seeder initial**
@@ -127,8 +127,24 @@ Après ajout des domaines custom, mettre à jour `APP_URL`, `FRONTEND_URL` et `S
 
 ## 5. CI/CD
 
-Les deux plateformes déploient automatiquement à chaque push sur `main`.
+La CI GitHub Actions s'exécute sur chaque push et pull request. Elle valide les trois applications Next.js, teste Laravel sur PostgreSQL 16, audite les dépendances, valide Docker Compose et recherche les secrets exposés dans l'historique Git.
+
+Vercel et Railway déploient automatiquement la branche `prod`. Configurer cette branche comme **Production Branch** sur les quatre projets, puis protéger `prod` dans GitHub en exigeant la réussite des jobs `Frontend CI`, `Backend CI`, `Docker Compose validation` et `Secret scanning` avant un merge.
+
 Pour éviter un redéploiement inutile, configurer des "Ignored Build Steps" sur Vercel :
 - Frontend : ignore si aucun fichier dans `frontend/`, `packages/`, `pnpm-lock.yaml` n'a changé
 - Admin : idem pour `admin/`
 - Driver : idem pour `driver/`
+
+Dependabot ouvre chaque semaine des pull requests groupées pour pnpm, Composer et GitHub Actions. Ces pull requests doivent passer la même CI avant leur fusion.
+
+## 6. Sauvegardes PostgreSQL
+
+Ajouter dans les secrets GitHub Actions :
+
+- `RAILWAY_DATABASE_URL` : URL PostgreSQL publique/externe du service Railway ;
+- `BACKUP_PASSPHRASE` : phrase secrète longue et unique, également conservée dans le gestionnaire de secrets de l'organisation.
+
+Le workflow `Database backup` s'exécute chaque jour à 03:00 UTC et conserve les dumps chiffrés pendant 30 jours. Après configuration, le lancer une première fois manuellement depuis l'onglet **Actions** et vérifier la restauration sur une base vide.
+
+Procédure complète : [docs/backups.md](docs/backups.md).

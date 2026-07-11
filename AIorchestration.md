@@ -76,7 +76,11 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section GPT Codex
 
-**Dernier état :** 2026-06-24
+**Dernier état :** 2026-07-11
+
+✅ Terminé : pipeline CI/CD renforcé (`.github/workflows/ci.yml`, `db-backup.yml`, `dependabot.yml`) avec validation des trois apps, tests Laravel sur PostgreSQL 16, audits, Gitleaks, sauvegarde Railway chiffrée et documentation d'exploitation mise à jour (`README.md`, `DEPLOY.md`, `docs/backups.md`).
+
+✅ Terminé : création de `AGENTS.md`, contexte permanent automatiquement chargé par Codex (architecture multi-app, conventions métier, commandes, coordination inter-IA et règles de vérification).
 
 ✅ Terminé : CI frontend migrée de npm vers pnpm workspace (`.github/workflows/ci.yml`) ; installation gelée, lint et build validés.
 

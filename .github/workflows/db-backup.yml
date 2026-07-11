@@ -1,0 +1,73 @@
+name: Database backup
+
+# Sauvegarde PostgreSQL Railway quotidienne, chiffrée avant son envoi à GitHub.
+# Secrets requis : RAILWAY_DATABASE_URL et BACKUP_PASSPHRASE.
+# Procédure de restauration : docs/backups.md.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Encrypted PostgreSQL backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+
+    steps:
+      - name: Check backup configuration
+        id: check
+        shell: bash
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::notice::RAILWAY_DATABASE_URL or BACKUP_PASSPHRASE is missing; backup skipped."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dump Railway database
+        if: steps.check.outputs.configured == 'true'
+        shell: bash
+        run: |
+          DUMP_NAME="speedservice-db-$(date -u +%F)-${GITHUB_RUN_ID}.dump"
+          echo "DUMP_NAME=$DUMP_NAME" >> "$GITHUB_ENV"
+          docker run --rm --network host \
+            --volume "$PWD:/backup" \
+            postgres:16-alpine \
+            pg_dump "$DATABASE_URL" \
+              --format=custom \
+              --no-owner \
+              --no-privileges \
+              --file="/backup/$DUMP_NAME"
+
+      - name: Encrypt database dump
+        if: steps.check.outputs.configured == 'true'
+        shell: bash
+        run: |
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg \
+            --batch \
+            --yes \
+            --pinentry-mode loopback \
+            --passphrase-fd 0 \
+            --symmetric \
+            --cipher-algo AES256 \
+            --output "$DUMP_NAME.gpg" \
+            "$DUMP_NAME"
+          shred --remove "$DUMP_NAME"
+
+      - name: Upload encrypted backup
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: speedservice-db-backup-${{ github.run_id }}
+          path: ${{ env.DUMP_NAME }}.gpg
+          retention-days: 30
+          if-no-files-found: error
