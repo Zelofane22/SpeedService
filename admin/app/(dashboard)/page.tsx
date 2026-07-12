@@ -8,7 +8,6 @@ import {
   Truck,
   TrendingUp,
   RefreshCw,
-  Download,
   Eye,
   AlertTriangle,
   CheckCircle2,
@@ -119,6 +118,7 @@ export default function DashboardPage() {
   const [deliveries, setDeliveries] = useState<AdminDelivery[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [adminName, setAdminName] = useState('')
 
   useEffect(() => {
@@ -140,6 +140,7 @@ export default function DashboardPage() {
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setRefreshing(true)
+    setLoadError(false)
     try {
       const [statsData, deliveriesData, reportsData] = await Promise.all([
         getAdminStats(),
@@ -149,15 +150,15 @@ export default function DashboardPage() {
       setStats(statsData)
       setDeliveries(deliveriesData.data ?? [])
       setReports(reportsData)
-    } catch (err) {
-      console.error('Erreur chargement dashboard', err)
+    } catch {
+      if (!silent) setLoadError(true)
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { void loadData() }, [loadData])
 
   // Merge monthly data for charts
   const chartData = reports
@@ -173,7 +174,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6" role="status" aria-label="Chargement du tableau de bord">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <Skeleton className="h-7 w-48" />
@@ -191,6 +192,29 @@ export default function DashboardPage() {
           <Skeleton className="h-56" />
         </div>
         <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-900/30">
+            <AlertTriangle size={22} aria-hidden="true" />
+          </div>
+          <h1 className="text-lg font-semibold text-foreground">Le tableau de bord est indisponible</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Vérifiez votre connexion puis réessayez. Les données opérationnelles n&apos;ont pas été modifiées.
+          </p>
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="mt-6 min-h-11 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     )
   }
@@ -213,13 +237,10 @@ export default function DashboardPage() {
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="p-2 rounded-xl border border-border hover:bg-muted/30 transition-colors disabled:opacity-50"
-            title="Rafraîchir"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted/30 disabled:opacity-50"
+            aria-label="Rafraîchir les données"
           >
-            <RefreshCw size={18} className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-          <button className="p-2 rounded-xl border border-border hover:bg-muted/30 transition-colors" title="Exporter">
-            <Download size={18} className="text-muted-foreground" />
+            <RefreshCw size={18} aria-hidden="true" className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>

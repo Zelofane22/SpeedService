@@ -96,7 +96,9 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@speedservice.bj"
-              className="w-full px-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'login-error' : undefined}
+              className="min-h-11 w-full rounded-xl border border-border bg-input-background px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
@@ -111,12 +113,14 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'login-error' : undefined}
+              className="min-h-11 w-full rounded-xl border border-border bg-input-background px-4 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+            <p id="login-error" role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
               {error}
             </p>
           )}

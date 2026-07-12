@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import {
-  Truck, MapPin, Clock, Star, Phone, Mail,
-  ArrowRight, Check, User, CheckCircle, Shield, Zap, Globe,
+  Truck, MapPin, Star, ArrowRight, User, CheckCircle, Shield, Zap,
   PlusCircle, CreditCard, Package,
 } from 'lucide-react'
 import { Logo } from '@/components/logo'
@@ -12,7 +11,7 @@ export default function HomePage() {
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-brand-border">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Logo />
           <nav className="hidden md:flex items-center gap-1">
             {[
@@ -40,26 +39,13 @@ export default function HomePage() {
       </header>
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative bg-linear-to-br from-primary via-[#9E2480] to-secondary min-h-[600px] flex items-center overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          {Array.from({ length: 20 }, (_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 bg-white rounded-full"
-              style={{
-                left: `${(i * 37) % 100}%`,
-                top: `${(i * 53) % 100}%`,
-                opacity: 0.3 + (i % 5) * 0.1,
-              }}
-            />
-          ))}
-        </div>
-        <div className="relative max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-white">
+      <section className="flex min-h-[34rem] items-center bg-linear-to-br from-primary via-[#9E2480] to-secondary">
+        <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+          <div className="max-w-2xl text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 rounded-full text-sm font-medium mb-8">
               <Zap size={14} /> Livraison en 2h dans Cotonou
             </div>
-            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+            <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-[-0.03em] sm:text-5xl md:text-6xl">
               Livrez vos colis<br />rapidement partout<br />
               <span className="text-white/70">au Bénin</span>
             </h1>
@@ -79,24 +65,6 @@ export default function HomePage() {
               >
                 Demander un devis
               </a>
-            </div>
-          </div>
-
-          <div className="hidden md:flex justify-center">
-            <div className="relative w-72 h-72">
-              <div className="absolute inset-0 bg-white/10 rounded-3xl backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                <Package size={120} className="text-white/60" />
-              </div>
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-3 shadow-xl">
-                <div className="flex items-center gap-2 text-sm font-semibold text-brand-foreground">
-                  <CheckCircle size={16} className="text-green-500" /> Livré !
-                </div>
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-3 shadow-xl">
-                <div className="flex items-center gap-2 text-sm font-semibold text-brand-foreground">
-                  <Truck size={16} className="text-primary" /> En route
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -136,10 +104,10 @@ export default function HomePage() {
           ].map(f => (
             <div
               key={f.title}
-              className="bg-white rounded-2xl border border-brand-border shadow-sm p-6 hover:shadow-lg hover:border-primary/30 transition-all group cursor-pointer"
+              className="rounded-2xl border border-brand-border bg-white p-6 shadow-sm transition-colors hover:border-primary/30"
             >
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 group-hover:bg-primary flex items-center justify-center mb-5 transition-colors">
-                <f.icon size={22} className="text-primary group-hover:text-white transition-colors" />
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <f.icon size={22} className="text-primary" aria-hidden="true" />
               </div>
               <h3 className="font-semibold mb-2 text-brand-foreground">{f.title}</h3>
               <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
@@ -187,11 +155,12 @@ export default function HomePage() {
             { name: 'Yves Dossou', city: 'Porto-Novo', rating: 4, text: 'Très professionnel, tarifs compétitifs. L\'application est facile à utiliser. Je suis client fidèle depuis 6 mois.' },
           ].map(t => (
             <div key={t.name} className="bg-white rounded-2xl border border-brand-border shadow-sm p-6">
-              <div className="flex gap-1 mb-4">
+              <div className="mb-4 flex gap-1" aria-label={`${t.rating} étoiles sur 5`}>
                 {Array.from({ length: 5 }, (_, i) => (
                   <Star
                     key={i}
                     size={14}
+                    aria-hidden="true"
                     className={i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
                   />
                 ))}

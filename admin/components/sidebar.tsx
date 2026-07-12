@@ -99,15 +99,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   return (
     <>
-      <div
+      <button
+        type="button"
+        aria-label="Fermer le menu"
         className={cn(
-          'fixed inset-0 z-40 bg-black/40 transition-opacity lg:hidden',
+          'fixed inset-0 z-40 border-0 bg-black/40 transition-opacity lg:hidden',
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         )}
         onClick={onClose}
       />
 
       <aside
+        id="admin-navigation"
+        aria-label="Navigation principale"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 max-w-full flex-col bg-card border-r border-border h-screen overflow-y-auto shadow-2xl transition-transform lg:static lg:translate-x-0 lg:flex lg:w-60',
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -117,7 +121,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <span className="text-xl font-extrabold text-primary">SpeedService</span>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
             onClick={onClose}
             aria-label="Fermer le menu"
           >
@@ -142,6 +146,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all',
                   active

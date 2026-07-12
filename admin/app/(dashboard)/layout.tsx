@@ -18,8 +18,10 @@ export default function DashboardLayout({
           <span className="text-lg font-semibold text-foreground">SpeedService</span>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border text-foreground transition hover:bg-muted/80"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border text-foreground transition hover:bg-muted/80"
             aria-label="Ouvrir le menu"
+            aria-controls="admin-navigation"
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={20} />

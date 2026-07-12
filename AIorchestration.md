@@ -80,7 +80,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-11
 
-🔒 En cours : mise à niveau stable complète (manifestes et lockfiles npm/Composer, configurations Next/Tailwind/ESLint, Dockerfiles, `docker-compose.yml`, workflows CI et documentation de migration PostgreSQL).
+✅ Terminé : audit et finition Impeccable du back-office — état d’indisponibilité et reprise du dashboard, formulaires/recherche et navigation mobile accessibles, focus/réduction des mouvements globaux, et cibles tactiles de 44 px. Validation : `git diff --check` ; lint/TypeScript non lancés car Node.js est absent du conteneur.
 
 ✅ Terminé : audit internet des versions stables (npm/Node.js, Packagist/PHP, Docker Hub, PostgreSQL, Redis et GitHub Actions). Aucun manifeste applicatif modifié : plusieurs mises à niveau sont des migrations majeures cassantes (Laravel 13, Tailwind 4, PostgreSQL 18, Redis 8, TypeScript 7, ESLint 10) et nécessitent une campagne dédiée avec tests et migration des données. Écarts et ordre recommandé communiqués à l'utilisateur.
 
