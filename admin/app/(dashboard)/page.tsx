@@ -36,6 +36,7 @@ import {
 import StatCard from '@/components/stat-card'
 import StatusBadge from '@/components/status-badge'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import { getAdminStats, getAdminDeliveries, getAdminReports } from '@/lib/api/admin'
 import type { AdminStats, AdminReports, AdminDelivery } from '@/types/admin'
 
@@ -65,6 +66,28 @@ function monthLabel(isoMonth: string): string {
   const label = names[parseInt(m, 10) - 1] ?? m
   const now = new Date()
   return now.getFullYear().toString() !== year ? `${label} ${year.slice(2)}` : label
+}
+
+function recentMonthBuckets(count = 6): Array<{ month: string; orders: number; revenue: number }> {
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date()
+    date.setDate(1)
+    date.setMonth(date.getMonth() - (count - index - 1))
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    return { month: monthLabel(month), orders: 0, revenue: 0 }
+  })
+}
+
+function hasChartActivity(data: Array<{ orders: number; revenue: number }>): boolean {
+  return data.some((item) => item.orders > 0 || item.revenue > 0)
+}
+
+const CHART_TOOLTIP_STYLE = {
+  borderRadius: '12px',
+  border: '1px solid rgb(var(--border))',
+  backgroundColor: 'rgb(var(--card))',
+  color: 'rgb(var(--foreground))',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
 }
 
 // ---------------------------------------------------------------------------
@@ -167,6 +190,8 @@ export default function DashboardPage() {
         return { month: monthLabel(d.month), orders: d.count, revenue: rev?.total_xof ?? 0 }
       })
     : []
+  const displayedChartData = chartData.length > 0 ? chartData : recentMonthBuckets()
+  const hasCharts = hasChartActivity(chartData)
 
   // ---------------------------------------------------------------------------
   // Loading skeleton
@@ -181,10 +206,10 @@ export default function DashboardPage() {
             <Skeleton className="h-4 w-32" />
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
         <div className="grid lg:grid-cols-2 gap-6">
@@ -268,7 +293,7 @@ export default function DashboardPage() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
           Opérationnel — temps réel
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <StatCard
             label="Commandes actives"
             value={String(stats?.deliveries.active_count ?? 0)}
@@ -305,7 +330,7 @@ export default function DashboardPage() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
           Finances & trafic
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <StatCard
             label="CA aujourd'hui"
             value={formatXOF(stats?.revenue.today_xof ?? 0)}
@@ -322,9 +347,10 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Panier moyen"
-            value={formatXOF(stats?.revenue.avg_basket_xof ?? 0)}
+            value={(stats?.deliveries.total ?? 0) > 0 ? formatXOF(stats?.revenue.avg_basket_xof ?? 0) : '—'}
             icon={ShoppingBag}
             colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600"
+            subtitle={(stats?.deliveries.total ?? 0) > 0 ? undefined : 'aucune commande calculable'}
           />
           <StatCard
             label="Clients / Livreurs"
@@ -364,33 +390,36 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-foreground">Livraisons / mois</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [Number(value ?? 0), 'Livraisons']}
+                />
+                <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de données"
+                description="Les livraisons mensuelles apparaîtront ici dès les premières commandes."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '12px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--card)',
-                  color: 'var(--foreground)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                }}
-                formatter={(value) => [Number(value ?? 0), 'Livraisons']}
-              />
-              <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
 
         <Card className="p-6">
@@ -398,46 +427,49 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-foreground">Revenus (FCFA)</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
-                  <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatXOF(v)}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#861D6D"
+                  strokeWidth={2}
+                  fill="url(#revenueGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de revenus"
+                description="Le chiffre d'affaires mensuel sera visible après les premiers paiements validés."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => formatXOF(v)}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '12px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--card)',
-                  color: 'var(--foreground)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                }}
-                formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#861D6D"
-                strokeWidth={2}
-                fill="url(#revenueGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
       </div>
 

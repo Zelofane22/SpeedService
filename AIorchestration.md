@@ -88,7 +88,11 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section GPT Codex
 
-**Dernier état :** 2026-07-11
+**Dernier état :** 2026-07-18
+
+✅ Terminé : amélioration responsive admin — filtres de statut Commandes/Paiements en select mobile + boutons wrap desktop, KPI dashboard en une colonne sur mobile étroit et sous-titres de cartes légèrement compactés. Validation : `git diff --check` ; lint non exécuté car `pnpm` est absent de l'environnement.
+
+✅ Terminé : améliorations UX admin ciblées — 404 française habillée, états vides/skeletons harmonisés, graphiques lisibles sans données, filtres Commandes en retour à la ligne, exports CSV Commandes/Clients/Paiements/Rapports, Paramètres enrichie, panier moyen non ambigu et renommage interne `CouriersPage` → `DriversPage`. Validation : `git diff --check` + recherche terminologique ; TypeScript/lint non exécutés car `node`/`pnpm` sont absents de l'environnement.
 
 ✅ Terminé : correction du lint React `set-state-in-effect` sur `frontend/app/(dashboard)/dashboard/page.tsx` ; validation Docker `pnpm --filter speedservice-frontend lint` au vert.
 

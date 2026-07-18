@@ -64,7 +64,7 @@ function DriverStatusBadge({ driver }: DriverStatusBadgeProps) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function CouriersPage() {
+export default function DriversPage() {
   const [drivers, setDrivers] = useState<AdminDriver[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')

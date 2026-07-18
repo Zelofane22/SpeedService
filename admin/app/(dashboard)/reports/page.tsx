@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { RefreshCw, TrendingUp, Package, CheckCircle2, FileText, Box, Boxes, Container } from 'lucide-react'
+import { RefreshCw, TrendingUp, Package, CheckCircle2, FileText, Box, Boxes, Container, Download } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -15,8 +15,10 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import StatCard from '@/components/stat-card'
 import { getAdminReports } from '@/lib/api/admin'
+import { exportRowsToCsv } from '@/lib/export'
 import type { AdminReports } from '@/types/admin'
 
 // ---------------------------------------------------------------------------
@@ -50,6 +52,20 @@ function monthLabelLong(isoMonth: string): string {
   return `${names[parseInt(m, 10) - 1] ?? m} ${year}`
 }
 
+function recentMonthBuckets(count = 6): Array<{ month: string; orders: number; revenue: number }> {
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date()
+    date.setDate(1)
+    date.setMonth(date.getMonth() - (count - index - 1))
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    return { month: monthLabel(month), orders: 0, revenue: 0 }
+  })
+}
+
+function hasChartActivity(data: Array<{ orders: number; revenue: number }>): boolean {
+  return data.some((item) => item.orders > 0 || item.revenue > 0)
+}
+
 // ---------------------------------------------------------------------------
 // Package type config
 // ---------------------------------------------------------------------------
@@ -63,9 +79,9 @@ const PACKAGE_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementTy
 
 const CHART_TOOLTIP_STYLE = {
   borderRadius: '12px',
-  border: '1px solid var(--border)',
-  backgroundColor: 'var(--card)',
-  color: 'var(--foreground)',
+  border: '1px solid rgb(var(--border))',
+  backgroundColor: 'rgb(var(--card))',
+  color: 'rgb(var(--foreground))',
   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
 }
 
@@ -122,29 +138,50 @@ export default function ReportsPage() {
     const rev = revenueByMonth.find((r) => r.month === d.month)
     return { month: monthLabel(d.month), orders: d.count, revenue: rev?.total_xof ?? 0 }
   })
+  const displayedChartData = chartData.length > 0 ? chartData : recentMonthBuckets()
+  const hasCharts = hasChartActivity(chartData)
 
   const totalRevenue6m = revenueByMonth.reduce((sum, r) => sum + r.total_xof, 0)
   const totalDeliveries6m = deliveriesByMonth.reduce((sum, d) => sum + d.count, 0)
   const maxPackageCount = Math.max(1, ...byPackageType.map((p) => p.count))
 
+  function handleExport() {
+    exportRowsToCsv('speedservice-rapports.csv', [
+      { header: 'Mois', value: (row) => row.month },
+      { header: 'Livraisons', value: (row) => row.orders },
+      { header: 'Revenus FCFA', value: (row) => row.revenue },
+    ], chartData)
+  }
+
   return (
     <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Rapports</h1>
           <p className="text-sm text-muted-foreground">
             Synthèse de l&apos;activité sur les 6 derniers mois.
           </p>
         </div>
-        <button
-          onClick={() => load(true)}
-          disabled={refreshing}
-          className="p-2 rounded-xl border border-border hover:bg-muted/30 transition-colors disabled:opacity-50 shrink-0"
-          title="Rafraîchir"
-        >
-          <RefreshCw size={18} className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExport}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/20 hover:text-foreground"
+          >
+            <Download size={16} aria-hidden="true" />
+            Exporter
+          </button>
+          <button
+            onClick={() => load(true)}
+            disabled={refreshing}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border hover:bg-muted/30 transition-colors disabled:opacity-50 shrink-0"
+            title="Rafraîchir"
+            aria-label="Rafraîchir les rapports"
+          >
+            <RefreshCw size={18} className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* ── KPIs ───────────────────────────────────────────────────────── */}
@@ -177,40 +214,49 @@ export default function ReportsPage() {
             <h2 className="text-base font-semibold text-foreground">Revenus (FCFA)</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="reportsRevenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
-                  <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="reportsRevenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatXOF(v)}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#861D6D"
+                  strokeWidth={2}
+                  fill="url(#reportsRevenueGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de revenus"
+                description="Les revenus mensuels apparaîtront après les premiers paiements validés."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => formatXOF(v)}
-              />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLE}
-                formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#861D6D"
-                strokeWidth={2}
-                fill="url(#reportsRevenueGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
 
         <Card className="p-6">
@@ -218,27 +264,36 @@ export default function ReportsPage() {
             <h2 className="text-base font-semibold text-foreground">Livraisons / mois</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [Number(value ?? 0), 'Livraisons']}
+                />
+                <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de données"
+                description="Les livraisons mensuelles apparaîtront ici dès les premières commandes."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={CHART_TOOLTIP_STYLE}
-                formatter={(value) => [Number(value ?? 0), 'Livraisons']}
-              />
-              <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
       </div>
 

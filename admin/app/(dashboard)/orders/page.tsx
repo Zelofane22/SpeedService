@@ -1,10 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Download } from 'lucide-react'
 import StatusBadge from '@/components/status-badge'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import SearchInput from '@/components/search-input'
 import { getAdminDeliveries } from '@/lib/api/admin'
+import { exportRowsToCsv } from '@/lib/export'
 import type { AdminDelivery } from '@/types/admin'
 import { cn } from '@/lib/utils'
 
@@ -98,12 +101,35 @@ export default function OrdersPage() {
     load(search, value)
   }
 
+  function handleExport() {
+    exportRowsToCsv('speedservice-commandes.csv', [
+      { header: 'Référence', value: (row) => row.reference },
+      { header: 'Date', value: (row) => formatDate(row.created_at) },
+      { header: 'Client', value: (row) => row.client?.name },
+      { header: 'Départ', value: (row) => row.from_address },
+      { header: 'Arrivée', value: (row) => row.to_address },
+      { header: 'Livreur', value: (row) => row.driver?.name },
+      { header: 'Statut', value: (row) => row.status },
+      { header: 'Montant FCFA', value: (row) => row.amount_xof },
+    ], deliveries)
+  }
+
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-foreground">
-        Gestion des commandes
-      </h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-foreground">
+          Gestion des commandes
+        </h1>
+        <button
+          type="button"
+          onClick={handleExport}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/20 hover:text-foreground sm:justify-start"
+        >
+          <Download size={16} aria-hidden="true" />
+          Exporter
+        </button>
+      </div>
 
       {/* Search + Filter tabs */}
       <div className="space-y-3">
@@ -112,23 +138,35 @@ export default function OrdersPage() {
           value={search}
           onChange={handleSearchChange}
         />
-        <div className="overflow-x-auto pb-1">
-          <div className="flex gap-2 min-w-max">
+        <label className="block md:hidden">
+          <span className="sr-only">Filtrer les commandes par statut</span>
+          <select
+            value={statusFilter}
+            onChange={(event) => handleStatusFilter(event.target.value)}
+            className="min-h-11 w-full rounded-xl border border-border bg-input-background px-3 py-2 text-sm font-medium text-foreground transition-colors focus:bg-card"
+          >
             {STATUS_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => handleStatusFilter(f.value)}
-                className={cn(
-                  'px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors',
-                  statusFilter === f.value
-                    ? 'bg-primary text-white'
-                    : 'bg-input-background border border-border text-muted-foreground hover:bg-muted/30',
-                )}
-              >
+              <option key={f.value} value={f.value}>
                 {f.label}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
+        </label>
+        <div className="hidden flex-wrap gap-2 md:flex">
+          {STATUS_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => handleStatusFilter(f.value)}
+              className={cn(
+                'min-h-9 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors',
+                statusFilter === f.value
+                  ? 'bg-primary text-white'
+                  : 'border border-border bg-input-background text-muted-foreground hover:bg-muted/30 hover:text-foreground',
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -160,9 +198,12 @@ export default function OrdersPage() {
                 <tr>
                   <td
                     colSpan={TABLE_HEADERS.length}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    className="px-5 py-8"
                   >
-                    Aucune commande trouvée
+                    <EmptyState
+                      title="Aucune commande trouvée"
+                      description="Modifiez la recherche ou le statut pour élargir la liste."
+                    />
                   </td>
                 </tr>
               ) : (

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Download } from 'lucide-react'
 import Card from '@/components/card'
 import { getAdminPayments, validatePayment } from '@/lib/api/admin'
+import { exportRowsToCsv } from '@/lib/export'
 import type { AdminPayment } from '@/types/admin'
 import { cn } from '@/lib/utils'
 
@@ -139,6 +140,18 @@ export default function PaymentsPage() {
     }
   }
 
+  function handleExport() {
+    exportRowsToCsv('speedservice-paiements.csv', [
+      { header: 'Référence', value: (row) => row.reference },
+      { header: 'Commande', value: (row) => row.delivery_reference },
+      { header: 'Client', value: (row) => row.client_name },
+      { header: 'Méthode', value: (row) => row.method },
+      { header: 'Montant FCFA', value: (row) => row.amount_xof },
+      { header: 'Date', value: (row) => formatDate(row.date) },
+      { header: 'Statut', value: (row) => row.status },
+    ], payments)
+  }
+
   // Derived stats
   const totalCollected = payments
     .filter((p) => p.status === 'success')
@@ -159,8 +172,12 @@ export default function PaymentsPage() {
         <h1 className="text-2xl font-bold text-foreground">
           Gestion des paiements
         </h1>
-        <button className="inline-flex items-center gap-2 border border-border rounded-xl px-4 py-2 text-sm text-muted-foreground hover:bg-muted/20 transition-colors">
-          <Download size={16} />
+        <button
+          type="button"
+          onClick={handleExport}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/20 hover:text-foreground"
+        >
+          <Download size={16} aria-hidden="true" />
           Exporter
         </button>
       </div>
@@ -194,16 +211,30 @@ export default function PaymentsPage() {
       </div>
 
       {/* Status filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <label className="block md:hidden">
+        <span className="sr-only">Filtrer les paiements par statut</span>
+        <select
+          value={statusFilter}
+          onChange={(event) => handleStatusFilter(event.target.value)}
+          className="min-h-11 w-full rounded-xl border border-border bg-input-background px-3 py-2 text-sm font-medium text-foreground transition-colors focus:bg-card"
+        >
+          {STATUS_FILTERS.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="hidden flex-wrap gap-2 md:flex">
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => handleStatusFilter(f.value)}
             className={cn(
-              'px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors',
+              'min-h-9 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors',
               statusFilter === f.value
                 ? 'bg-primary text-white'
-                : 'bg-input-background border border-border text-muted-foreground hover:bg-muted/30',
+                : 'border border-border bg-input-background text-muted-foreground hover:bg-muted/30 hover:text-foreground',
             )}
           >
             {f.label}

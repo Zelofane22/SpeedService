@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Eye, Edit } from 'lucide-react'
+import { User, Eye, Edit, Download } from 'lucide-react'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import SearchInput from '@/components/search-input'
 import { getAdminUsers } from '@/lib/api/admin'
+import { exportRowsToCsv } from '@/lib/export'
 import type { AdminUser } from '@/types/admin'
 
 // ---------------------------------------------------------------------------
@@ -71,6 +73,19 @@ export default function ClientsPage() {
     load(value)
   }
 
+  function handleExport() {
+    exportRowsToCsv('speedservice-clients.csv', [
+      { header: 'Nom', value: (row) => row.name },
+      { header: 'Email', value: (row) => row.email },
+      { header: 'Téléphone', value: (row) => row.phone },
+      { header: 'Ville', value: (row) => row.city },
+      { header: 'Commandes', value: (row) => row.deliveries_count },
+      { header: 'Total dépensé FCFA', value: (row) => row.total_spent_xof },
+      { header: 'Depuis', value: (row) => formatDate(row.created_at) },
+      { header: 'Statut', value: () => 'Actif' },
+    ], clients)
+  }
+
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
@@ -78,12 +93,22 @@ export default function ClientsPage() {
         <h1 className="text-2xl font-bold text-foreground shrink-0">
           Gestion des clients
         </h1>
-        <div className="w-full sm:w-72">
-          <SearchInput
-            placeholder="Rechercher un client…"
-            value={search}
-            onChange={handleSearchChange}
-          />
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="w-full sm:w-72">
+            <SearchInput
+              placeholder="Rechercher un client…"
+              value={search}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleExport}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/20 hover:text-foreground"
+          >
+            <Download size={16} aria-hidden="true" />
+            Exporter
+          </button>
         </div>
       </div>
 
@@ -115,9 +140,12 @@ export default function ClientsPage() {
                 <tr>
                   <td
                     colSpan={TABLE_HEADERS.length}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    className="px-5 py-8"
                   >
-                    Aucun client trouvé
+                    <EmptyState
+                      title="Aucun client trouvé"
+                      description="Essayez une recherche plus large ou vérifiez que les comptes clients existent."
+                    />
                   </td>
                 </tr>
               ) : (

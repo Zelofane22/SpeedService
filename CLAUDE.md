@@ -38,6 +38,20 @@ cd "SpeedService UI_UX Mockup" && npm i && npm run dev   # Vite dev server
 
 ---
 
+## Environnement dev (Railway)
+
+Le backend dev est déployé sur **Railway** et redéploie automatiquement à chaque push sur `develop`. C'est là qu'on vérifie le comportement réel de l'API déployée (au-delà des tests locaux Docker).
+
+- **Base URL API** : `https://speedservice-develop.up.railway.app/api`
+- **Santé** : `GET /api/status` → `{"status":"ok"}`
+- **Login** : `POST /api/auth/login` (préfixe `auth` — pas `/api/login`) avec `{email, password}` → `{user, token}`, puis header `Authorization: Bearer <token>`.
+- **Admin** : `admin@speedservice.bj` — mot de passe réel dans les variables Railway (secret, à demander à l'utilisateur ; le seeder utilise `AdminPassword123!` mais il diffère sur le dev).
+- **Migrations** : lancées au boot par `backend/docker-entrypoint.sh` (`migrate --force`). L'entrypoint fait aussi `config:cache` → toute nouvelle variable d'env doit être posée dans Railway **avant** le boot (Railway restart le conteneur à chaque modif de variable).
+
+> Les vérifications écrivent en base dev et peuvent créer des assets externes (ex. Cloudinary) → utiliser des marqueurs de test (`claude-test-*`) et penser au nettoyage.
+
+---
+
 ## Architecture
 
 ### Overview
