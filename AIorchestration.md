@@ -90,6 +90,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-18
 
+✅ Terminé : corrections espace frontend public — footer sans liens morts, vraie section/page tarifs, pages publiques support/entreprise/légal/contact, validation inscription côté client avec téléphone béninois `+229 01`, affichage/masquage et force mot de passe, métadonnées SEO/OG + favicon. Validation : `rg` liens morts + `git diff --check` ; lint/build non exécutés car `node`/`pnpm`/`npm` sont absents de l'environnement.
+
 ✅ Terminé : amélioration responsive admin — filtres de statut Commandes/Paiements en select mobile + boutons wrap desktop, KPI dashboard en une colonne sur mobile étroit et sous-titres de cartes légèrement compactés. Validation : `git diff --check` ; lint non exécuté car `pnpm` est absent de l'environnement.
 
 ✅ Terminé : améliorations UX admin ciblées — 404 française habillée, états vides/skeletons harmonisés, graphiques lisibles sans données, filtres Commandes en retour à la ligne, exports CSV Commandes/Clients/Paiements/Rapports, Paramètres enrichie, panier moyen non ambigu et renommage interne `CouriersPage` → `DriversPage`. Validation : `git diff --check` + recherche terminologique ; TypeScript/lint non exécutés car `node`/`pnpm` sont absents de l'environnement.

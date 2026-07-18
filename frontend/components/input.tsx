@@ -5,10 +5,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string
   error?: string
   icon?: React.ElementType
+  rightElement?: React.ReactNode
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, icon: Icon, className, id, ...props }, ref) => {
+  ({ label, error, icon: Icon, rightElement, className, id, ...props }, ref) => {
     const generatedId = React.useId()
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-') ?? generatedId
     const errorId = error ? `${inputId}-error` : undefined
@@ -37,10 +38,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all',
               error && 'border-red-400 focus:ring-red-300',
               Icon ? 'pl-10' : 'pl-4',
+              rightElement && 'pr-12',
               className,
             )}
             {...props}
           />
+          {rightElement && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              {rightElement}
+            </div>
+          )}
         </div>
         {error && <p id={errorId} className="text-xs text-red-500">{error}</p>}
       </div>

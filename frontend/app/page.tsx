@@ -1,9 +1,63 @@
 import Link from 'next/link'
 import {
   Truck, MapPin, Star, ArrowRight, User, CheckCircle, Shield, Zap,
-  PlusCircle, CreditCard, Package,
+  PlusCircle, CreditCard, Package, Building2,
 } from 'lucide-react'
 import { Logo } from '@/components/logo'
+
+const pricingPlans = [
+  {
+    id: 'standard',
+    name: 'Standard',
+    price: '1 500 FCFA',
+    detail: 'Livraison sous 24h a Cotonou',
+    icon: Package,
+  },
+  {
+    id: 'express',
+    name: 'Express',
+    price: '2 500 FCFA',
+    detail: 'Priorite 2h selon disponibilite',
+    icon: Zap,
+  },
+  {
+    id: 'entreprise',
+    name: 'Entreprise',
+    price: 'Sur devis',
+    detail: 'Volumes reguliers, API et suivi dedie',
+    icon: Building2,
+  },
+]
+
+const footerGroups = [
+  {
+    title: 'Services',
+    links: [
+      { label: 'Livraison Standard', href: '/tarifs#standard' },
+      { label: 'Livraison Express', href: '/tarifs#express' },
+      { label: 'API Entreprise', href: '/tarifs#entreprise' },
+      { label: 'Tarifs', href: '/tarifs' },
+    ],
+  },
+  {
+    title: 'Entreprise',
+    links: [
+      { label: 'À propos', href: '/a-propos' },
+      { label: 'Carrières', href: '/carrieres' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Partenaires', href: '/partenaires' },
+    ],
+  },
+  {
+    title: 'Support',
+    links: [
+      { label: 'Centre d’aide', href: '/aide' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Politique', href: '/politique' },
+      { label: 'CGU', href: '/cgu' },
+    ],
+  },
+]
 
 export default function HomePage() {
   return (
@@ -15,7 +69,7 @@ export default function HomePage() {
           <Logo />
           <nav className="hidden md:flex items-center gap-1">
             {[
-              { href: '#', label: 'Accueil' },
+              { href: '/', label: 'Accueil' },
               { href: '#services', label: 'Services' },
               { href: '#tarifs', label: 'Tarifs' },
               { href: '#contact', label: 'Contact' },
@@ -59,12 +113,12 @@ export default function HomePage() {
               >
                 Commander maintenant <ArrowRight size={18} />
               </Link>
-              <a
-                href="#services"
+              <Link
+                href="/contact"
                 className="inline-flex items-center justify-center gap-2 font-semibold rounded-2xl border-2 border-white/40 text-white bg-transparent hover:bg-white/10 active:scale-[0.98] transition-all px-8 py-4 text-base"
               >
                 Demander un devis
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -180,12 +234,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Pricing ──────────────────────────────────────────────────────── */}
+      <section id="tarifs" className="bg-white border-y border-brand-border py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12 max-w-2xl">
+            <h2 className="text-4xl font-bold mb-4 text-brand-foreground">Tarifs simples pour envoyer vite</h2>
+            <p className="text-gray-500 leading-relaxed">
+              Les prix demarrent a Cotonou et sont confirmes avant paiement selon la distance, le type de colis et le niveau de priorite.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {pricingPlans.map(plan => (
+              <article
+                key={plan.id}
+                id={plan.id}
+                className="scroll-mt-24 rounded-2xl border border-brand-border bg-brand-background p-6"
+              >
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <plan.icon size={22} className="text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="text-xl font-bold text-brand-foreground">{plan.name}</h3>
+                <p className="mt-3 text-3xl font-extrabold text-primary">{plan.price}</p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-500">{plan.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className="mt-6 text-sm text-gray-500">
+            Hors formats volumineux ou trajets interurbains specifiques. Le montant final est affiche avant validation de la commande.
+          </p>
+        </div>
+      </section>
+
       {/* ── CTA Banner ───────────────────────────────────────────────────── */}
-      <section id="tarifs" className="max-w-6xl mx-auto px-6 pb-20">
+      <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="rounded-3xl bg-linear-to-r from-primary to-secondary p-12 text-white text-center">
           <h2 className="text-4xl font-bold mb-4">Prêt à envoyer votre premier colis ?</h2>
           <p className="text-white/80 mb-8 max-w-lg mx-auto">
-            Rejoignez plus de 10 000 clients qui font confiance à Speed Service chaque mois.
+            Rejoignez les clients qui font deja confiance a Speed Service pour leurs livraisons au quotidien.
           </p>
           <Link
             href="/register"
@@ -210,17 +295,15 @@ export default function HomePage() {
               Votre partenaire livraison de confiance au Bénin.
             </p>
           </div>
-          {[
-            { title: 'Services', links: ['Livraison Standard', 'Livraison Express', 'API Entreprise', 'Tarifs'] },
-            { title: 'Entreprise', links: ['À propos', 'Carrières', 'Blog', 'Partenaires'] },
-            { title: 'Support', links: ['Centre d\'aide', 'Contact', 'Politique', 'CGU'] },
-          ].map(g => (
+          {footerGroups.map(g => (
             <div key={g.title}>
               <h4 className="font-semibold mb-4 text-sm text-white/60 tracking-wider uppercase">{g.title}</h4>
               <ul className="space-y-2">
                 {g.links.map(l => (
-                  <li key={l}>
-                    <a href="#" className="text-sm text-white/70 hover:text-white transition-colors">{l}</a>
+                  <li key={l.label}>
+                    <Link href={l.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -228,8 +311,8 @@ export default function HomePage() {
           ))}
         </div>
         <div className="border-t border-white/10 max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row justify-between items-center gap-2">
-          <p className="text-white/40 text-xs">© 2024 Speed Service. Tous droits réservés.</p>
-          <p className="text-white/40 text-xs">Cotonou, Bénin · +229 97 00 00 00</p>
+          <p className="text-white/40 text-xs">© 2026 Speed Service. Tous droits réservés.</p>
+          <p className="text-white/40 text-xs">Cotonou, Bénin · +229 01 97 00 00 00</p>
         </div>
       </footer>
 

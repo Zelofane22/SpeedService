@@ -100,7 +100,7 @@ export default function LoginPage() {
           <Input
             label="Email ou téléphone"
             type="text"
-            placeholder="koffi@gmail.com ou +229 97 00 00 00"
+            placeholder="koffi@gmail.com ou +229 01 97 00 00 00"
             autoComplete="username"
             icon={User}
             value={form.identifier}
