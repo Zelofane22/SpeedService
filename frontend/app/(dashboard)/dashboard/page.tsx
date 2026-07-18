@@ -32,6 +32,10 @@ function shortAddress(addr: string) {
   return parts[0]?.trim() ?? addr
 }
 
+function fetchDeliveries() {
+  return apiGet<Delivery[]>('/deliveries')
+}
+
 export default function DashboardPage() {
   const { user } = useAuthUser()
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
@@ -43,7 +47,7 @@ export default function DashboardPage() {
     setLoadError(false)
 
     try {
-      setDeliveries(await apiGet<Delivery[]>('/deliveries'))
+      setDeliveries(await fetchDeliveries())
     } catch {
       setLoadError(true)
     } finally {
@@ -52,8 +56,33 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    void loadDeliveries()
-  }, [loadDeliveries])
+    let ignore = false
+
+    async function loadInitialDeliveries() {
+      try {
+        const initialDeliveries = await fetchDeliveries()
+
+        if (!ignore) {
+          setDeliveries(initialDeliveries)
+          setLoadError(false)
+        }
+      } catch {
+        if (!ignore) {
+          setLoadError(true)
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadInitialDeliveries()
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   const total     = deliveries.length
   const active    = deliveries.filter((d) => ACTIVE_STATUSES.has(d.status)).length

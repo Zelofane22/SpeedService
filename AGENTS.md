@@ -106,3 +106,12 @@ Les endpoints `/driver/*` sont servis par le backend partagé. Le CORS doit rest
 - Pour une modification d'un package partagé, vérifier ses consommateurs pertinents.
 - Dans le compte rendu final, indiquer les fichiers modifiés, les validations exécutées et toute validation non exécutée.
 
+### multi agents
+utiliser le mode multi agents quand c'est neccessaire pour les grosses tâches full-stck pour améliorer la productivité
+
+
+## choix de model et de niveau d'effort
+Avant d'executer une tâche, identifie d'abord le model adapté pour la tâche.
+Sortie attendue : Model : Effort
+Ensuite tu attends ma confirmation que j'ai changé de model avant d'excuter la tâche.
+Cela devrais permettre le gaspillage de tockens.
