@@ -88,7 +88,7 @@ const CONTENT_LABELS: Record<string, string> = {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  mtn_momo: 'MTN Mobile Money',
+  mtn_momo: 'MTN MoMo',
   moov_money: 'Moov Money',
   card: 'Carte bancaire',
   cash_on_delivery: 'Paiement à la livraison',
@@ -263,7 +263,7 @@ export default function DeliveryTrackingPage() {
               <Detail label="Type" value={PACKAGE_LABELS[delivery.package_type] ?? delivery.package_type} />
               <Detail label="Contenu" value={CONTENT_LABELS[delivery.content_category] ?? delivery.content_category} />
               {delivery.package_weight && <Detail label="Poids estimé" value={`${delivery.package_weight} kg`} />}
-              <Detail label="Service" value={delivery.delivery_type === 'express' ? 'Express (2–4 h)' : 'Standard (24–48 h)'} />
+              <Detail label="Service" value={delivery.delivery_type === 'express' ? 'Express (2-4 h)' : 'Standard (24-48 h)'} />
               <Detail label="Prix" value={formatPrice(delivery.price)} strong />
             </dl>
             {delivery.package_description && <p className="mt-4 rounded-xl bg-brand-muted/40 p-3 text-xs leading-5 text-gray-600">{delivery.package_description}</p>}

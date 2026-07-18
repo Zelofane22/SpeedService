@@ -90,6 +90,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-18
 
+✅ Terminé : correction textes landing/délais/paiements dans `frontend/app/page.tsx`, `frontend/app/(dashboard)/new-delivery/page.tsx`, `frontend/app/(dashboard)/deliveries/[id]/page.tsx` — délais harmonisés en `2-4 h` / `24-48 h`, paiement public limité au paiement à la livraison en espèces, libellé `MTN MoMo` unifié. Validation : `rg` ciblé + `git diff --check` ; lint non exécuté car `node`/`pnpm` sont absents de l'environnement.
+
 ✅ Terminé : corrections espace frontend public — footer sans liens morts, vraie section/page tarifs, pages publiques support/entreprise/légal/contact, validation inscription côté client avec téléphone béninois `+229 01`, affichage/masquage et force mot de passe, métadonnées SEO/OG + favicon. Validation : `rg` liens morts + `git diff --check` ; lint/build non exécutés car `node`/`pnpm`/`npm` sont absents de l'environnement.
 
 ✅ Terminé : amélioration responsive admin — filtres de statut Commandes/Paiements en select mobile + boutons wrap desktop, KPI dashboard en une colonne sur mobile étroit et sous-titres de cartes légèrement compactés. Validation : `git diff --check` ; lint non exécuté car `pnpm` est absent de l'environnement.

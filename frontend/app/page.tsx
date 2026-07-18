@@ -10,14 +10,14 @@ const pricingPlans = [
     id: 'standard',
     name: 'Standard',
     price: '1 500 FCFA',
-    detail: 'Livraison sous 24h a Cotonou',
+    detail: 'Livraison sous 24-48 h a Cotonou',
     icon: Package,
   },
   {
     id: 'express',
     name: 'Express',
     price: '2 500 FCFA',
-    detail: 'Priorite 2h selon disponibilite',
+    detail: 'Express 2-4 h selon disponibilite',
     icon: Zap,
   },
   {
@@ -97,14 +97,14 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <div className="max-w-2xl text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 rounded-full text-sm font-medium mb-8">
-              <Zap size={14} /> Livraison en 2h dans Cotonou
+              <Zap size={14} /> Express 2-4 h dans Cotonou
             </div>
             <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-[-0.03em] sm:text-5xl md:text-6xl">
               Livrez vos colis<br />rapidement partout<br />
               <span className="text-white/70">au Bénin</span>
             </h1>
             <p className="text-white/80 text-lg leading-relaxed mb-10 max-w-md">
-              Commande en ligne, suivi par statut et paiement sécurisé. MTN MoMo &amp; Moov Money acceptés.
+              Commande en ligne, suivi par statut et paiement à la livraison en espèces.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -131,7 +131,7 @@ export default function HomePage() {
             { n: '50 000+', l: 'Colis livrés' },
             { n: '12', l: 'Villes couvertes' },
             { n: '98%', l: 'Satisfaction client' },
-            { n: '2h', l: 'Délai express' },
+            { n: '2-4 h', l: 'Délai express' },
           ].map(s => (
             <div key={s.l} className="text-center">
               <p className="text-3xl font-extrabold text-primary">{s.n}</p>
@@ -151,9 +151,9 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-4 gap-6">
           {[
-            { icon: Zap, title: 'Livraison rapide', desc: 'Express en 2h, standard en 24h. Nous respectons les délais.' },
+            { icon: Zap, title: 'Livraison rapide', desc: 'Express en 2-4 h, standard en 24-48 h. Nous respectons les délais.' },
             { icon: MapPin, title: 'Suivi simplifié', desc: 'Suivez l\'avancement de votre colis à chaque étape : confirmé, récupéré, en livraison, livré.' },
-            { icon: Shield, title: 'Paiement sécurisé', desc: 'MTN MoMo, Moov Money et carte bancaire acceptés.' },
+            { icon: Shield, title: 'Paiement à la livraison', desc: 'Réglez en espèces à la livraison.' },
             { icon: Star, title: 'Service premium', desc: 'Support client disponible 7j/7 de 7h à 22h.' },
           ].map(f => (
             <div
@@ -180,7 +180,7 @@ export default function HomePage() {
             <div className="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-px bg-linear-to-r from-primary/20 via-primary/40 to-primary/20" />
             {[
               { n: '01', icon: PlusCircle, title: 'Créez votre commande', desc: 'Renseignez expéditeur, destinataire et détails du colis.' },
-              { n: '02', icon: CreditCard, title: 'Payez en ligne', desc: 'Paiement sécurisé via MTN MoMo ou Moov Money.' },
+              { n: '02', icon: CreditCard, title: 'Payez à la livraison', desc: 'Réglez en espèces lorsque le colis est livré.' },
               { n: '03', icon: Truck, title: 'On collecte votre colis', desc: 'Un livreur vient récupérer votre colis à domicile.' },
               { n: '04', icon: CheckCircle, title: 'Livraison confirmée', desc: 'Le destinataire reçoit son colis, vous êtes notifié.' },
             ].map(s => (
@@ -204,7 +204,7 @@ export default function HomePage() {
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { name: 'Koffi Mensah', city: 'Cotonou', rating: 5, text: 'Service incroyable ! Mon colis est arrivé en 1h30. Je recommande Speed Service à tous mes amis commerçants.' },
+            { name: 'Koffi Mensah', city: 'Cotonou', rating: 5, text: 'Service incroyable ! Mon colis est arrivé dans le délai express annoncé. Je recommande Speed Service à tous mes amis commerçants.' },
             { name: 'Aïcha Bah', city: 'Cotonou', rating: 5, text: 'Le suivi par statut est très pratique. Je sais exactement où en est ma livraison à chaque étape.' },
             { name: 'Yves Dossou', city: 'Porto-Novo', rating: 4, text: 'Très professionnel, tarifs compétitifs. L\'application est facile à utiliser. Je suis client fidèle depuis 6 mois.' },
           ].map(t => (
