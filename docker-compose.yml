@@ -21,6 +21,8 @@ services:
       - db
       - redis
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
 
   # ─── App client (speedservice.bj) ──────────────────────────────────────────
   frontend:
@@ -32,6 +34,8 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
 
   # ─── Back-office admin (admin.speedservice.bj) ─────────────────────────────
   admin:
@@ -43,6 +47,8 @@ services:
     ports:
       - "3001:3001"
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
 
   # ─── App livreur PWA (driver.speedservice.bj) ──────────────────────────────
   driver:
@@ -54,6 +60,8 @@ services:
     ports:
       - "3002:3002"
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
 
   # ─── Base de données ────────────────────────────────────────────────────────
   # Lit POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD depuis backend/.env
@@ -64,11 +72,15 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
 
   # ─── Cache / Queue ──────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
 
 volumes:
   db_data:
