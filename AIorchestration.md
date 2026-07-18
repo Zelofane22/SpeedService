@@ -20,6 +20,16 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 🔒 En cours : reprise (demandée par l'utilisateur) de la mise à niveau stable démarrée par Codex — validations frontend (tsc/lint/build des 3 apps via Docker), alignement Dockerfiles Node 24 + pnpm 10.34.3, puis Laravel et services de données. Fichiers touchés : `frontend/Dockerfile`, `admin/Dockerfile`, `driver/Dockerfile`, + validations sur l'arbre laissé par Codex.
 
+### Intégration Cloudinary (images & documents) — ✅ Terminé (2026-07-18, branche `develop`, non commité)
+
+**Backend :** stockage des documents/images livreur migré du disque local vers Cloudinary en mode **privé (authenticated)** + URLs signées à durée limitée.
+- ✅ SDK `cloudinary/cloudinary_php ^2.13` ajouté (`composer.json` + `composer.lock` régénéré via conteneur Docker)
+- ✅ `App\Services\CloudinaryService` — `uploadPrivate()`, `signedUrl()` (privateDownloadUrl, TTL configurable), `delete()`
+- ✅ `config/services.php` bloc `cloudinary` + variables `.env.example` (`CLOUDINARY_*`)
+- ✅ Migration `2026_07_18_100000` : colonnes `storage_disk` / `resource_type` / `format` sur `driver_documents` (rétrocompat avec les anciens fichiers `local`)
+- ✅ `DriverApplicationController` : `uploadDocuments` + `complement` refactorés (helper `storeDocuments`), photos profil/véhicule reliées sur la candidature ; `downloadDocument` redirige vers l'URL signée pour Cloudinary, fallback disque local conservé
+- ⚠️ Reste à faire côté utilisateur : renseigner les creds Cloudinary dans `.env`, puis **rebuild de l'image backend** (le SDK est baké au build). Suite de tests non relancée (les tests existants ne couvrent pas l'upload/download de fichiers).
+
 ### Améliorations admin inspirées d'ANIFOWOCHE — ✅ Terminé (2026-07-11, branche `develop`, non commité)
 
 **Backend :**

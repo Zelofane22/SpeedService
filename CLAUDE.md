@@ -114,4 +114,10 @@ Dernier état : Sprint 9 démarré le 2026-06-24 — monorepo pnpm workspaces mi
 Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
 
 ### multi agents
-utiliser les agent worcktree spécialisé existant pour améliorer la productivité
+utiliser le mode multi agents quand c'est neccessaire pour les grosses tâches full-stck pour améliorer la productivité
+
+## choix de model et de niveau d'effort
+Avant d'executer une tâche, identifie d'abord le model adapté pour la tâche.
+Sortie attendue : Model : Effort
+Ensuite tu attends ma confirmation que j'ai changé de model avant d'excuter la tâche.
+Cela devrais permettre le gaspillage de tockens.

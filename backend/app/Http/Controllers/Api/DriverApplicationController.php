@@ -11,6 +11,7 @@ use App\Models\AdminActionLog;
 use App\Models\DriverApplication;
 use App\Models\DriverDocument;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -53,7 +54,7 @@ class DriverApplicationController extends Controller
         ], 201);
     }
 
-    public function uploadDocuments(Request $request): JsonResponse
+    public function uploadDocuments(Request $request, CloudinaryService $cloudinary): JsonResponse
     {
         $request->validate([
             'application_id' => 'required|uuid|exists:driver_applications,id',
@@ -64,24 +65,7 @@ class DriverApplicationController extends Controller
 
         $application = DriverApplication::findOrFail($request->application_id);
 
-        foreach ($request->file('documents') as $index => $docData) {
-            $type = $request->input("documents.{$index}.type");
-            $file = $docData['file'];
-
-            $path = Storage::disk('local')->put(
-                "driver_documents/{$application->id}",
-                $file
-            );
-
-            DriverDocument::create([
-                'application_id'    => $application->id,
-                'document_type'     => $type,
-                'file_path'         => $path,
-                'original_name'     => $file->getClientOriginalName(),
-                'mime_type'         => $file->getMimeType(),
-                'validation_status' => 'pending',
-            ]);
-        }
+        $this->storeDocuments($request, $application, "documents/{$application->id}", $cloudinary);
 
         return response()->json(['message' => 'Documents téléversés avec succès.']);
     }
@@ -109,7 +93,7 @@ class DriverApplicationController extends Controller
         ]);
     }
 
-    public function complement(Request $request): JsonResponse
+    public function complement(Request $request, CloudinaryService $cloudinary): JsonResponse
     {
         $request->validate([
             'application_id' => 'required|uuid|exists:driver_applications,id',
@@ -124,28 +108,52 @@ class DriverApplicationController extends Controller
             return response()->json(['message' => 'Aucun complément demandé.'], 422);
         }
 
-        foreach ($request->file('documents') as $index => $docData) {
-            $type = $request->input("documents.{$index}.type");
-            $file = $docData['file'];
-
-            $path = Storage::disk('local')->put(
-                "driver_documents/{$application->id}/complement",
-                $file
-            );
-
-            DriverDocument::create([
-                'application_id'    => $application->id,
-                'document_type'     => $type,
-                'file_path'         => $path,
-                'original_name'     => $file->getClientOriginalName(),
-                'mime_type'         => $file->getMimeType(),
-                'validation_status' => 'pending',
-            ]);
-        }
+        $this->storeDocuments($request, $application, "documents/{$application->id}/complement", $cloudinary);
 
         $application->update(['status' => DriverApplicationStatus::UnderReview]);
 
         return response()->json(['message' => 'Documents complémentaires soumis.']);
+    }
+
+    /**
+     * Téléverse chaque document vers Cloudinary (privé) et crée les DriverDocument associés.
+     * Les photos de profil / véhicule sont en plus reliées sur la candidature pour un accès direct.
+     */
+    private function storeDocuments(
+        Request $request,
+        DriverApplication $application,
+        string $folder,
+        CloudinaryService $cloudinary,
+    ): void {
+        foreach ($request->file('documents') as $index => $docData) {
+            $type = $request->input("documents.{$index}.type");
+            $file = $docData['file'];
+
+            $upload = $cloudinary->uploadPrivate($file, $folder);
+
+            DriverDocument::create([
+                'application_id'    => $application->id,
+                'document_type'     => $type,
+                'file_path'         => $upload['public_id'],
+                'storage_disk'      => 'cloudinary',
+                'resource_type'     => $upload['resource_type'],
+                'format'            => $upload['format'],
+                'original_name'     => $file->getClientOriginalName(),
+                'mime_type'         => $file->getMimeType(),
+                'validation_status' => 'pending',
+            ]);
+
+            // Photos profil / véhicule : on relie aussi le public_id sur la candidature.
+            if ($type === DocumentType::ProfilePhoto->value) {
+                $application->profile_photo_path = $upload['public_id'];
+            } elseif ($type === DocumentType::VehiclePhoto->value) {
+                $application->vehicle_photo_path = $upload['public_id'];
+            }
+        }
+
+        if ($application->isDirty(['profile_photo_path', 'vehicle_photo_path'])) {
+            $application->save();
+        }
     }
 
     // --- Admin endpoints ---
@@ -177,10 +185,22 @@ class DriverApplicationController extends Controller
         return response()->json($data);
     }
 
-    public function downloadDocument(string $documentId): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\JsonResponse
+    public function downloadDocument(string $documentId, CloudinaryService $cloudinary): \Symfony\Component\HttpFoundation\Response
     {
         $document = DriverDocument::findOrFail($documentId);
 
+        // Documents stockés sur Cloudinary : redirection vers une URL signée à durée limitée.
+        if ($document->storage_disk === 'cloudinary') {
+            $url = $cloudinary->signedUrl(
+                $document->file_path,
+                $document->resource_type ?? 'image',
+                $document->format,
+            );
+
+            return redirect()->away($url);
+        }
+
+        // Fallback historique : anciens fichiers sur le disque local.
         if (!Storage::disk('local')->exists($document->file_path)) {
             return response()->json(['message' => 'Fichier introuvable.'], 404);
         }
