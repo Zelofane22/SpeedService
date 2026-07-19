@@ -38,6 +38,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+✅ Terminé : corrections driver — disponibilité `is_online` backend + toggle Missions/Paramètres, historique basé sur la date du statut livré/annulé avec format local, header/nav harmonisés en sombre, Paramètres enrichis (profil, véhicule, paiement, notifications, langue, sécurité, compte). Validation : `git diff --check`, syntaxe PHP via image Docker, `artisan test --filter=DriverAvailabilityTest` au vert, `corepack pnpm --filter speedservice-driver lint` au vert avec avertissement existant `eslint.config.mjs`, `corepack pnpm --filter speedservice-driver build` au vert. `docker compose build backend` non exécuté jusqu'au bout : Docker Desktop bloque sur `php:8.4-fpm` avec `error getting credentials`.
+
 ✅ Terminé : détails utilisateur au clic sur le nom dans Clients/Livreurs, avec fiche profil, contact, changement de rôle, reset mot de passe, suppression et activation livreur selon droits. Validation : `git diff --check` et `docker compose build admin` au vert.
 
 ✅ Terminé : Accès & privilèges ajouté dans la navbar admin avec route dédiée `/access-privileges`; Paramètres conserve un raccourci vers cet espace. Validation : `git diff --check` et `docker compose build admin` au vert.

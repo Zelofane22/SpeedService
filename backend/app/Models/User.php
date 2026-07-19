@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'is_online',
         'is_super_admin',
         'must_change_password',
     ];
@@ -39,6 +40,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'role'              => UserRole::class,
             'is_active'             => 'boolean',
+            'is_online'             => 'boolean',
             'is_super_admin'        => 'boolean',
             'must_change_password'  => 'boolean',
         ];

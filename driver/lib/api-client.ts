@@ -36,6 +36,15 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return handle<T>(res)
 }
 
+export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'PUT',
+    headers: headers(),
+    body: JSON.stringify(body),
+  })
+  return handle<T>(res)
+}
+
 export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: 'PATCH',
@@ -51,4 +60,6 @@ export type DriverUser = {
   email: string
   phone: string
   role: string
+  is_active?: boolean
+  is_online?: boolean
 }

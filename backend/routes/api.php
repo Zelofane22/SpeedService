@@ -60,6 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Driver routes
     Route::prefix('driver')->group(function () {
+        Route::get('/profile', [DriverController::class, 'profile']);
+        Route::patch('/availability', [DriverController::class, 'updateAvailability']);
         Route::get('/missions/available', [DriverController::class, 'availableMissions']);
         Route::get('/missions', [DriverController::class, 'myMissions']);
         Route::post('/missions/{id}/accept', [DriverController::class, 'acceptMission']);

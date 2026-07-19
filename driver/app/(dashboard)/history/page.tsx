@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { apiGet } from '@/lib/api-client'
+import { formatDriverLocalDate } from '@/lib/utils'
+
+type StatusHistory = {
+  status: string
+  created_at: string
+}
 
 type Mission = {
   id: string
@@ -15,6 +21,7 @@ type Mission = {
   delivery_type: 'standard' | 'express'
   client: { id: string; name: string; phone: string }
   created_at: string
+  status_histories?: StatusHistory[]
 }
 
 const DONE = new Set(['delivered', 'cancelled'])
@@ -26,7 +33,7 @@ const STATUS: Record<string, { label: string; color: string }> = {
 }
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+  return formatDriverLocalDate(iso, { day: '2-digit', month: 'short' })
 }
 
 function fmtPrice(v: string | number) {
@@ -35,6 +42,12 @@ function fmtPrice(v: string | number) {
 
 function short(addr: string) {
   return addr.split(',')[0]?.trim() ?? addr
+}
+
+function historyDate(mission: Mission) {
+  return mission.status_histories?.find((history) => history.status === 'delivered')?.created_at
+    ?? mission.status_histories?.find((history) => history.status === 'cancelled')?.created_at
+    ?? mission.created_at
 }
 
 export default function HistoryPage() {
@@ -56,7 +69,7 @@ export default function HistoryPage() {
   return (
     <div className="px-4 pt-4">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 mb-4">{error}</div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 mb-4 dark:bg-red-950/30 dark:border-red-900 dark:text-red-200">{error}</div>
       )}
 
       {loading ? (
@@ -66,13 +79,13 @@ export default function HistoryPage() {
       ) : missions.length === 0 ? (
         <div className="flex flex-col items-center text-center py-16 gap-3">
           <div className="text-5xl">📋</div>
-          <p className="font-semibold text-[#1D1D1F]">Aucune mission terminée</p>
-          <p className="text-sm text-gray-500">Vos missions complétées apparaîtront ici.</p>
+          <p className="font-semibold text-[#1D1D1F] dark:text-gray-100">Aucune mission terminée</p>
+          <p className="text-sm text-gray-500 dark:text-[#b9adba]">Vos missions complétées apparaîtront ici.</p>
         </div>
       ) : (
         <>
           {/* Summary card */}
-          <div className="bg-[#861D6D] rounded-2xl p-4 mb-4 text-white">
+          <div className="bg-[#861D6D] rounded-2xl p-4 mb-4 text-white dark:bg-[#221527] dark:border dark:border-[#55314f]">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-white/70 text-xs">Missions livrées</p>
@@ -90,20 +103,20 @@ export default function HistoryPage() {
             {missions.map((m) => {
               const st = STATUS[m.status]
               return (
-                <div key={m.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div key={m.id} className="bg-white rounded-xl border border-gray-200 p-4 dark:bg-[#181A20] dark:border-[#39313d]">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
                       <p className="text-xs font-mono font-bold text-[#861D6D]">{m.reference}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{fmtDate(m.created_at)}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 dark:text-[#b9adba]">{fmtDate(historyDate(m))}</p>
                     </div>
                     <div className="text-right flex flex-col items-end gap-1">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${st?.color ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${st?.color ?? 'bg-gray-100 text-gray-600'} dark:bg-[#24212a] dark:text-gray-100`}>
                         {st?.label ?? m.status}
                       </span>
-                      <p className="font-bold text-sm text-[#1D1D1F]">{fmtPrice(m.price)}</p>
+                      <p className="font-bold text-sm text-[#1D1D1F] dark:text-gray-100">{fmtPrice(m.price)}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-[#b9adba]">
                     {short(m.pickup_address)} → {short(m.delivery_address)}
                     {m.distance && ` · ${Number(m.distance).toFixed(1)} km`}
                   </p>
