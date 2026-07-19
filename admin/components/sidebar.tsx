@@ -13,6 +13,7 @@ import {
   BarChart3,
   Bell,
   History,
+  ShieldCheck,
   Settings,
   LogOut,
   User,
@@ -38,6 +39,7 @@ const navLinks: NavLink[] = [
   { href: '/reports', icon: BarChart3, label: 'Rapports', exact: false },
   { href: '/alerts', icon: Bell, label: 'Alertes', exact: false },
   { href: '/activity', icon: History, label: 'Journal', exact: false },
+  { href: '/access-privileges', icon: ShieldCheck, label: 'Accès & privilèges', exact: false },
   { href: '/settings', icon: Settings, label: 'Paramètres', exact: false },
 ]
 

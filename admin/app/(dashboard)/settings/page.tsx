@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import {
   Bell,
   CreditCard,
@@ -15,16 +16,17 @@ import { ThemeToggle } from '@/components/theme-toggle'
 interface StoredUser {
   name?: string
   email?: string
+  is_super_admin?: boolean
 }
 
 const SETTINGS_GROUPS = [
   {
-    title: 'Accès & rôles',
+    title: 'Accès & privilèges',
     icon: ShieldCheck,
     items: [
-      ['Administrateurs', 'Compte propriétaire actif'],
-      ['Rôles', 'Lecture, validation, supervision'],
-      ['Invitations', 'À connecter au backend'],
+      ['Niveaux admin', 'Voir dans le menu dédié'],
+      ['Actions sensibles', 'Réservées au super admin'],
+      ['Journalisation', 'Suivie dans Journal'],
     ],
   },
   {
@@ -68,6 +70,8 @@ export default function SettingsPage() {
     }
   }, [])
 
+  const accessLabel = user.is_super_admin === true ? 'Super administrateur' : 'Administrateur'
+
   return (
     <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
       <div className="space-y-1">
@@ -98,7 +102,7 @@ export default function SettingsPage() {
                 <p className="font-semibold text-foreground">
                   {user.name || 'Administrateur'}
                 </p>
-                <p className="text-xs text-muted-foreground">Rôle propriétaire</p>
+                <p className="text-xs text-muted-foreground">{accessLabel}</p>
               </div>
             </section>
           </Card>
@@ -128,6 +132,8 @@ export default function SettingsPage() {
           <div className="grid gap-5 lg:grid-cols-2">
             {SETTINGS_GROUPS.map((group) => {
               const Icon = group.icon
+              const isAccessGroup = group.title === 'Accès & privilèges'
+
               return (
                 <Card key={group.title} className="overflow-hidden">
                   <div className="flex items-center gap-3 border-b border-border px-5 py-4">
@@ -151,6 +157,16 @@ export default function SettingsPage() {
                       </div>
                     ))}
                   </div>
+                  {isAccessGroup && (
+                    <div className="border-t border-border px-5 py-4">
+                      <Link
+                        href="/access-privileges"
+                        className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+                      >
+                        Ouvrir l&apos;espace
+                      </Link>
+                    </div>
+                  )}
                 </Card>
               )
             })}
@@ -164,7 +180,7 @@ export default function SettingsPage() {
               ['Thème', 'Configuré'],
               ['Alertes admin', 'Configuré'],
               ['Exports CSV', 'Configuré'],
-              ['Gestion multi-rôles', 'À connecter'],
+              ['Accès & privilèges', accessLabel],
               ['Tarifs dynamiques', 'À connecter'],
             ].map(([label, status]) => (
               <div key={label} className="flex items-center justify-between gap-3">

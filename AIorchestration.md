@@ -11,7 +11,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - Si une tâche bloque ou nécessite l'intervention de l'autre IA, écrire `🚧 Bloqué : <raison>` + mentionner les fichiers concernés.
 - Ne jamais toucher un fichier marqué `🔒 En cours` par l'autre IA.
 - Mettre à jour ce fichier à chaque début et fin de tâche significative.
-- **Ne garder que les modifications en cours (`🔒 En cours` / `🚧 Bloqué`) ou terminées il y a moins de 15 min.** Toute entrée `✅ Terminé` datant de plus de 5 min doit être supprimée du fichier (l'historique complet reste dans git).
+- **Ne garder que les modifications en cours (`🔒 En cours` / `🚧 Bloqué`)
 
 ---
 
@@ -37,6 +37,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 ## Section GPT Codex
 
 **Dernier état :** 2026-07-19
+
+✅ Terminé : Accès & privilèges ajouté dans la navbar admin avec route dédiée `/access-privileges`; Paramètres conserve un raccourci vers cet espace. Validation : `git diff --check` et `docker compose build admin` au vert.
 
 ✅ Terminé : correction bugs Livreurs admin — `toggleDriverActive()` appelle `/admin/drivers/{id}/toggle-active`, `listDrivers()` applique `search` sur nom/email/téléphone et renvoie le vrai `is_active`; tests backend ajoutés pour recherche et état inactif. Validation : `git diff --check`, syntaxe PHP via Docker (`php -l AdminController.php`). PHPUnit non exécuté : l'image backend n'inclut pas `artisan test`; lint/typecheck admin non exécutés car `node` est absent.
 
