@@ -11,14 +11,26 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - Si une tâche bloque ou nécessite l'intervention de l'autre IA, écrire `🚧 Bloqué : <raison>` + mentionner les fichiers concernés.
 - Ne jamais toucher un fichier marqué `🔒 En cours` par l'autre IA.
 - Mettre à jour ce fichier à chaque début et fin de tâche significative.
+- **Ne garder que les modifications en cours (`🔒 En cours` / `🚧 Bloqué`) ou terminées il y a moins de 15 min.** Toute entrée `✅ Terminé` datant de plus de 15 min doit être supprimée du fichier (l'historique complet reste dans git).
 
 ---
 
 ## Section Claude Code
 
-**Dernier état :** 2026-07-12
+**Dernier état :** 2026-07-19
 
-🔒 En cours : reprise (demandée par l'utilisateur) de la mise à niveau stable démarrée par Codex — validations frontend (tsc/lint/build des 3 apps via Docker), alignement Dockerfiles Node 24 + pnpm 10.34.3, puis Laravel et services de données. Fichiers touchés : `frontend/Dockerfile`, `admin/Dockerfile`, `driver/Dockerfile`, + validations sur l'arbre laissé par Codex.
+✅ Terminé : actions super-admin sur les utilisateurs (reset mot de passe, suppression, changement de rôle) — back-office. Fichiers libérés.
+
+### Actions super-admin sur les utilisateurs — ✅ Terminé (2026-07-19, branche `develop`, non commité)
+
+- ✅ Modèle superadmin retenu : flag `is_super_admin` (bool) sur `users` (role reste `admin`) + `softDeletes` — migration `2026_07_19_000000`
+- ✅ Middleware `superadmin` (`EnsureSuperAdmin`) enregistré ; routes `PATCH /admin/users/{id}/password`, `DELETE /admin/users/{id}` et `PATCH /admin/users/{id}/role` déplacées derrière cette garde
+- ✅ `AdminController::resetUserPassword` (force `must_change_password` + révoque les tokens) et `deleteUser` (soft-delete) avec garde-fous : pas d'auto-suppression, pas d'action destructive sur un autre super-admin ; actions loguées (`user.password_reset`, `user.deleted`)
+- ✅ Le login renvoie déjà `is_super_admin` (attribut du modèle) → lu côté front via `localStorage`
+- ✅ Front admin : `UserActionsMenu` (menu `…` + modales reset password / suppression), câblé sur pages **Livreurs** et **Clients**, visible uniquement si super-admin
+- ✅ Tests : 9 nouveaux (`SuperAdminUserActionsTest`) + `AdminControllerTest` adapté (role update via super-admin) — suite Admin au vert (46 tests) via Docker
+- ✅ Typecheck build admin au vert (`docker compose build admin`, exit 0 — `next build` inclut le typecheck)
+- ⚠️ Reste côté utilisateur : promouvoir un compte en super-admin (`is_super_admin = true`) pour activer les actions ; rebuild image backend nécessaire (migration + code bakés) avant test sur le dev déployé
 
 ### Intégration Cloudinary (images & documents) — ✅ Terminé (2026-07-18, branche `develop`, non commité)
 
@@ -90,7 +102,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-18
 
-🔒 En cours : ajout du flux mot de passe oublié au login driver. Fichiers touchés : `driver/app/login/page.tsx`, `driver/app/forgot-password/page.tsx`, fichiers adjacents si nécessaire.
+✅ Terminé : mot de passe oublié driver raccordé au bon écran livreur — la page driver envoie une URL de reset `/set-password`, le backend accepte une `reset_url` optionnelle uniquement si son origine correspond à `FRONTEND_URL` ou `DRIVER_URL`, les emails utilisent cette URL autorisée sinon retombent sur le reset client, et `DRIVER_URL` est documenté dans `backend/.env.example`. Tests ajoutés pour URL driver autorisée et URL externe ignorée. Validation : `docker compose build backend`, `git diff --check -- AIorchestration.md backend/.env.example backend/app/Http/Controllers/Api/AuthController.php backend/app/Http/Requests/Auth/ForgotPasswordRequest.php backend/app/Notifications/ResetPasswordNotification.php backend/config/app.php backend/tests/Feature/Auth/PasswordResetTest.php driver/app/forgot-password/page.tsx`, `php -l` via image Docker sur les fichiers PHP modifiés. PHPUnit non exécuté : l'image backend production installe Composer avec `--no-dev`, donc `artisan test` n'est pas disponible.
 
 ✅ Terminé : améliorations prioritaires UX/validation/accessibilité driver — validation email/téléphone/paiement/documents en amont, erreurs API lisibles et redirigées vers l’étape concernée, brouillon de candidature en `sessionStorage`, documents véhicule conditionnels au type de véhicule, uploads contraints avec aperçus, labels/autocomplete/viewport corrigés, login harmonisé avec affichage mot de passe + réinitialisation, 404 française et titres de pages. Validation : `git diff --check -- AIorchestration.md driver/app` au vert ; recherches ciblées `maximumScale`, uploads `image/*,.pdf` et labels non liés sans résultat ; TypeScript/lint non exécutés car `node`/`pnpm` sont absents de l'environnement.
 

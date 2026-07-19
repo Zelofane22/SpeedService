@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Eye, Edit, Download } from 'lucide-react'
+import { User, Eye, Download } from 'lucide-react'
 import Card from '@/components/card'
 import { EmptyState } from '@/components/empty-state'
 import SearchInput from '@/components/search-input'
+import UserActionsMenu from '@/components/user-actions-menu'
 import { getAdminUsers } from '@/lib/api/admin'
 import { exportRowsToCsv } from '@/lib/export'
 import type { AdminUser } from '@/types/admin'
@@ -197,12 +198,13 @@ export default function ClientsPage() {
                         >
                           <Eye size={15} className="text-muted-foreground" />
                         </button>
-                        <button
-                          className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
-                          title="Modifier"
-                        >
-                          <Edit size={15} className="text-muted-foreground" />
-                        </button>
+                        <UserActionsMenu
+                          userId={c.id}
+                          userName={c.name}
+                          onDeleted={(id) =>
+                            setClients((prev) => prev.filter((x) => x.id !== id))
+                          }
+                        />
                       </div>
                     </td>
                   </tr>

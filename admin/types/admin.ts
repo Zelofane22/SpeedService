@@ -65,6 +65,7 @@ export interface AdminUser {
   email: string
   phone?: string
   role: string
+  is_super_admin?: boolean
   city?: string
   created_at: string
   deliveries_count: number

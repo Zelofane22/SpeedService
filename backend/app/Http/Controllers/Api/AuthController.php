@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -75,12 +76,53 @@ class AuthController extends Controller
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        Password::sendResetLink($request->only('email'));
+        $broker = Password::broker();
+        $user = $broker->getUser($request->only('email'));
+
+        if ($user) {
+            $token = $broker->createToken($user);
+            $user->notify(new ResetPasswordNotification($token, $this->allowedResetUrl($request->input('reset_url'))));
+        }
 
         // Always return the same message to prevent email enumeration.
         return response()->json([
             'message' => 'Si un compte correspond à cette adresse, vous recevrez un lien de réinitialisation.',
         ]);
+    }
+
+    private function allowedResetUrl(?string $requestedUrl): ?string
+    {
+        if (! $requestedUrl) {
+            return null;
+        }
+
+        $allowedOrigins = array_filter([
+            config('app.frontend_url'),
+            config('app.driver_url'),
+        ]);
+
+        $requestedOrigin = $this->origin($requestedUrl);
+
+        foreach ($allowedOrigins as $allowedOrigin) {
+            if ($requestedOrigin === $this->origin($allowedOrigin)) {
+                return rtrim($requestedUrl, '/');
+            }
+        }
+
+        return null;
+    }
+
+    private function origin(string $url): ?string
+    {
+        $parts = parse_url($url);
+
+        if (! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+
+        return strtolower($parts['scheme'] . '://' . $parts['host'] . $port);
     }
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse

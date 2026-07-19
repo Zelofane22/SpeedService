@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, reset_url: `${window.location.origin}/set-password` }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.message ?? 'Une erreur est survenue.')
@@ -99,4 +99,3 @@ export default function ForgotPasswordPage() {
     </main>
   )
 }
-

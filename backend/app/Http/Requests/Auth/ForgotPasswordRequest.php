@@ -14,15 +14,17 @@ class ForgotPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'email'     => ['required', 'email'],
+            'reset_url' => ['nullable', 'url'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'email.required' => 'L\'adresse email est obligatoire.',
-            'email.email'    => 'L\'adresse email n\'est pas valide.',
+            'email.required'  => 'L\'adresse email est obligatoire.',
+            'email.email'     => 'L\'adresse email n\'est pas valide.',
+            'reset_url.url'   => 'Le lien de réinitialisation n\'est pas valide.',
         ];
     }
 }
