@@ -442,11 +442,13 @@ class AdminController extends Controller
         ]);
 
         $event = match ($newStatus) {
-            DeliveryStatus::Confirmed   => DeliveryNotificationEvent::OrderConfirmed,
-            DeliveryStatus::Assigned    => DeliveryNotificationEvent::DriverAssigned,
-            DeliveryStatus::InDelivery  => DeliveryNotificationEvent::PackagePickedUp,
-            DeliveryStatus::Delivered   => DeliveryNotificationEvent::PackageDelivered,
-            default                     => null,
+            DeliveryStatus::Confirmed          => DeliveryNotificationEvent::OrderConfirmed,
+            DeliveryStatus::Assigned           => DeliveryNotificationEvent::DriverAssigned,
+            DeliveryStatus::InDelivery         => DeliveryNotificationEvent::PackagePickedUp,
+            DeliveryStatus::Delivered          => DeliveryNotificationEvent::PackageDelivered,
+            DeliveryStatus::AwaitingValidation => DeliveryNotificationEvent::AwaitingValidation,
+            DeliveryStatus::Cancelled          => DeliveryNotificationEvent::OrderCancelled,
+            default                            => null,
         };
 
         if ($event !== null) {

@@ -92,12 +92,13 @@ class PaymentController extends Controller
 
         $adminEmail = config('mail.admin_notification_email');
 
-        if ($isElectronic) {
-            try {
-                $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderConfirmed);
-            } catch (\Throwable $e) {
-                report($e);
-            }
+        try {
+            $this->notifications->send(
+                $delivery->fresh(['client', 'driver']),
+                $isElectronic ? DeliveryNotificationEvent::OrderConfirmed : DeliveryNotificationEvent::AwaitingValidation,
+            );
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         if ($adminEmail) {
