@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { User, Eye, Download } from 'lucide-react'
 import Card from '@/components/card'
 import { EmptyState } from '@/components/empty-state'
 import SearchInput from '@/components/search-input'
 import UserActionsMenu from '@/components/user-actions-menu'
+import UserDetailDialog from '@/components/user-detail-dialog'
 import { getAdminUsers } from '@/lib/api/admin'
 import { exportRowsToCsv } from '@/lib/export'
 import type { AdminUser } from '@/types/admin'
@@ -47,10 +47,10 @@ const TABLE_HEADERS = [
 // ---------------------------------------------------------------------------
 
 export default function ClientsPage() {
-  const router = useRouter()
   const [clients, setClients] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [selectedClient, setSelectedClient] = useState<AdminUser | null>(null)
 
   function load(searchValue: string) {
     setLoading(true)
@@ -161,7 +161,13 @@ export default function ClientsPage() {
                         <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
                           <User size={14} className="text-primary" />
                         </div>
-                        <span className="text-sm font-semibold">{c.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedClient(c)}
+                          className="text-left text-sm font-semibold text-foreground underline-offset-4 transition hover:text-primary hover:underline"
+                        >
+                          {c.name}
+                        </button>
                       </div>
                     </td>
                     {/* Téléphone */}
@@ -192,7 +198,8 @@ export default function ClientsPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => router.push(`/clients/${c.id}`)}
+                          type="button"
+                          onClick={() => setSelectedClient(c)}
                           className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
                           title="Voir le profil"
                         >
@@ -214,6 +221,26 @@ export default function ClientsPage() {
           </table>
           </div>
         </Card>
+      )}
+
+      {selectedClient && (
+        <UserDetailDialog
+          user={selectedClient}
+          title="Détails client"
+          onClose={() => setSelectedClient(null)}
+          onUpdated={(updated) => {
+            setSelectedClient((prev) => prev && prev.id === updated.id ? { ...prev, ...updated } : prev)
+            setClients((prev) =>
+              updated.role && updated.role !== 'client'
+                ? prev.filter((client) => client.id !== updated.id)
+                : prev.map((client) => client.id === updated.id ? { ...client, ...updated } : client),
+            )
+          }}
+          onDeleted={(id) => {
+            setSelectedClient(null)
+            setClients((prev) => prev.filter((client) => client.id !== id))
+          }}
+        />
       )}
     </div>
   )

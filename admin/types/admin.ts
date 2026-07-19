@@ -72,6 +72,26 @@ export interface AdminUser {
   total_spent_xof?: number
 }
 
+export interface AdminUserDetail {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  role: string
+  is_super_admin?: boolean
+  city?: string
+  created_at: string
+  deliveries_count?: number
+  total_spent_xof?: number
+  deliveries_as_client?: Array<{
+    id: string
+    reference: string
+    status: string
+    price: number
+    created_at: string
+  }>
+}
+
 export interface AdminDelivery {
   id: string
   reference: string
@@ -89,6 +109,7 @@ export interface AdminDriver {
   id: string
   name: string
   email: string
+  role?: string
   phone?: string
   city?: string
   is_active: boolean

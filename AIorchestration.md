@@ -38,6 +38,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+✅ Terminé : détails utilisateur au clic sur le nom dans Clients/Livreurs, avec fiche profil, contact, changement de rôle, reset mot de passe, suppression et activation livreur selon droits. Validation : `git diff --check` et `docker compose build admin` au vert.
+
 ✅ Terminé : Accès & privilèges ajouté dans la navbar admin avec route dédiée `/access-privileges`; Paramètres conserve un raccourci vers cet espace. Validation : `git diff --check` et `docker compose build admin` au vert.
 
 ✅ Terminé : correction bugs Livreurs admin — `toggleDriverActive()` appelle `/admin/drivers/{id}/toggle-active`, `listDrivers()` applique `search` sur nom/email/téléphone et renvoie le vrai `is_active`; tests backend ajoutés pour recherche et état inactif. Validation : `git diff --check`, syntaxe PHP via Docker (`php -l AdminController.php`). PHPUnit non exécuté : l'image backend n'inclut pas `artisan test`; lint/typecheck admin non exécutés car `node` est absent.

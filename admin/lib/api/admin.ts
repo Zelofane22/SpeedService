@@ -2,6 +2,7 @@ import type {
   AdminStats,
   AdminReports,
   AdminUser,
+  AdminUserDetail,
   AdminDelivery,
   AdminDriver,
   AdminPayment,
@@ -81,6 +82,10 @@ export function getAdminUsers(params?: {
   return apiFetch<{ data: AdminUser[]; meta: unknown }>(
     `/admin/users${buildQuery(params)}`
   )
+}
+
+export function getAdminUser(userId: string): Promise<AdminUserDetail> {
+  return apiFetch<AdminUserDetail>(`/admin/users/${userId}`)
 }
 
 export function updateUserRole(userId: string, role: string): Promise<AdminUser> {
