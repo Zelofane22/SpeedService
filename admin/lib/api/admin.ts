@@ -142,11 +142,10 @@ export function getAdminDrivers(params?: {
 
 export function toggleDriverActive(
   driverId: string,
-  isActive: boolean
+  _isActive: boolean
 ): Promise<AdminDriver> {
-  return apiFetch<AdminDriver>(`/admin/drivers/${driverId}/active`, {
+  return apiFetch<AdminDriver>(`/admin/drivers/${driverId}/toggle-active`, {
     method: 'PATCH',
-    body: JSON.stringify({ is_active: isActive }),
   })
 }
 

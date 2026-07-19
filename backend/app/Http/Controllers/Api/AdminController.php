@@ -625,21 +625,21 @@ class AdminController extends Controller
     public function listDrivers(Request $request): JsonResponse
     {
         $query = User::where('role', UserRole::Driver)
-            ->select(['id', 'name', 'email', 'created_at'])
+            ->select(['id', 'name', 'email', 'is_active', 'created_at'])
             ->withCount([
                 'deliveriesAsDriver as deliveries_completed' => fn ($q) => $q->where('status', DeliveryStatus::Delivered),
             ]);
 
-        // The users table has no `is_active` column, so we filter/expose a virtual value.
-        // For forward compatibility we include it in the response as always true for now.
+        if ($request->filled('search')) {
+            $search = '%' . $request->input('search') . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', $search)
+                    ->orWhere('email', 'like', $search)
+                    ->orWhere('phone', 'like', $search);
+            });
+        }
 
         $drivers = $query->latest()->paginate(20);
-
-        // Append is_active (virtual — always true until a column is added)
-        $drivers->getCollection()->transform(function ($driver) {
-            $driver->is_active = true;
-            return $driver;
-        });
 
         return response()->json($drivers);
     }

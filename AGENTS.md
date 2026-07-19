@@ -109,6 +109,14 @@ Les endpoints `/driver/*` sont servis par le backend partagé. Le CORS doit rest
 ### multi agents
 utiliser le mode multi agents quand c'est neccessaire pour les grosses tâches full-stck pour améliorer la productivité
 
+## Workflow worktrees
+
+Après toute tâche sur un worktree :
+- Faire le commit des changements avec un message clair
+- Pousser vers `develop` avec `git push origin HEAD:develop`
+- Ne pas laisser de changements non-commités dans le worktree
+
+Cela garantit que le travail remonte sur la branche principale (`develop` → Railway auto-déploie).
 
 ## choix de model et de niveau d'effort
 Avant d'executer une tâche, identifie d'abord le model adapté pour la tâche.

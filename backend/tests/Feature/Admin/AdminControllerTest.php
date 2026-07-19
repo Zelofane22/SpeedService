@@ -449,7 +449,8 @@ class AdminControllerTest extends TestCase
 
     public function test_admin_can_list_drivers(): void
     {
-        User::factory()->driver()->count(5)->create();
+        User::factory()->driver()->count(4)->create();
+        User::factory()->driver()->create(['is_active' => false]);
 
         $response = $this->actingAs($this->admin, 'sanctum')
             ->getJson('/api/admin/drivers');
@@ -459,9 +460,28 @@ class AdminControllerTest extends TestCase
                 'data' => [['id', 'name', 'email', 'is_active', 'deliveries_completed', 'created_at']],
             ]);
 
-        foreach ($response->json('data') as $driver) {
-            $this->assertTrue($driver['is_active']);
-        }
+        $this->assertContains(false, array_column($response->json('data'), 'is_active'));
+    }
+
+    public function test_admin_can_search_drivers(): void
+    {
+        $matchingDriver = User::factory()->driver()->create([
+            'name'  => 'Awa Livraison',
+            'email' => 'awa.driver@example.com',
+            'phone' => '+2290102030405',
+        ]);
+        User::factory()->driver()->create([
+            'name'  => 'Kofi Express',
+            'email' => 'kofi.driver@example.com',
+            'phone' => '+2290199999999',
+        ]);
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/admin/drivers?search=Livraison');
+
+        $response->assertOk();
+
+        $this->assertSame([$matchingDriver->id], array_column($response->json('data'), 'id'));
     }
 
     // ── Reports ───────────────────────────────────────────────────────────────

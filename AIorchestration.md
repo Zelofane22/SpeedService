@@ -11,7 +11,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - Si une tâche bloque ou nécessite l'intervention de l'autre IA, écrire `🚧 Bloqué : <raison>` + mentionner les fichiers concernés.
 - Ne jamais toucher un fichier marqué `🔒 En cours` par l'autre IA.
 - Mettre à jour ce fichier à chaque début et fin de tâche significative.
-- **Ne garder que les modifications en cours (`🔒 En cours` / `🚧 Bloqué`) ou terminées il y a moins de 15 min.** Toute entrée `✅ Terminé` datant de plus de 15 min doit être supprimée du fichier (l'historique complet reste dans git).
+- **Ne garder que les modifications en cours (`🔒 En cours` / `🚧 Bloqué`) ou terminées il y a moins de 15 min.** Toute entrée `✅ Terminé` datant de plus de 5 min doit être supprimée du fichier (l'historique complet reste dans git).
 
 ---
 
@@ -32,75 +32,15 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 - ✅ Typecheck build admin au vert (`docker compose build admin`, exit 0 — `next build` inclut le typecheck)
 - ⚠️ Reste côté utilisateur : promouvoir un compte en super-admin (`is_super_admin = true`) pour activer les actions ; rebuild image backend nécessaire (migration + code bakés) avant test sur le dev déployé
 
-### Intégration Cloudinary (images & documents) — ✅ Terminé (2026-07-18, branche `develop`, non commité)
-
-**Backend :** stockage des documents/images livreur migré du disque local vers Cloudinary en mode **privé (authenticated)** + URLs signées à durée limitée.
-- ✅ SDK `cloudinary/cloudinary_php ^2.13` ajouté (`composer.json` + `composer.lock` régénéré via conteneur Docker)
-- ✅ `App\Services\CloudinaryService` — `uploadPrivate()`, `signedUrl()` (privateDownloadUrl, TTL configurable), `delete()`
-- ✅ `config/services.php` bloc `cloudinary` + variables `.env.example` (`CLOUDINARY_*`)
-- ✅ Migration `2026_07_18_100000` : colonnes `storage_disk` / `resource_type` / `format` sur `driver_documents` (rétrocompat avec les anciens fichiers `local`)
-- ✅ `DriverApplicationController` : `uploadDocuments` + `complement` refactorés (helper `storeDocuments`), photos profil/véhicule reliées sur la candidature ; `downloadDocument` redirige vers l'URL signée pour Cloudinary, fallback disque local conservé
-- ⚠️ Reste à faire côté utilisateur : renseigner les creds Cloudinary dans `.env`, puis **rebuild de l'image backend** (le SDK est baké au build). Suite de tests non relancée (les tests existants ne couvrent pas l'upload/download de fichiers).
-
-### Améliorations admin inspirées d'ANIFOWOCHE — ✅ Terminé (2026-07-11, branche `develop`, non commité)
-
-**Backend :**
-- ✅ `AdminActionLog` (modèle + migration `2026_07_11_000000`) — journal d'audit des actions admin
-- ✅ `AdminController` : `stats()` enrichi de `trends` (variations vs période précédente), nouveaux endpoints `alerts()` (alertes dérivées des données) et `activityLog()` (paginé, filtrable par action), `reports()` enrichi (`top_drivers`, `deliveries_by_package_type`), logging des actions sensibles (rôle, statut forcé, validation paiement, activation livreur)
-- ✅ `DriverApplicationController::adminReview` loggé aussi
-- ✅ Routes : `GET /admin/alerts`, `GET /admin/activity-log`
-- ✅ 10 nouveaux tests — suite complète au vert (122 tests, 501 assertions, via Docker)
-
-**Admin (Next.js) :**
-- ✅ Dashboard : salutation personnalisée + variations ↗/↘ sur les KPI (CA jour/mois, nouveaux clients)
-- ✅ Nouvelles pages : `/alerts` (centre d'alertes), `/reports` (rapports), `/activity` (journal)
-- ✅ Sidebar : entrées Rapports/Alertes/Journal + badge compteur d'alertes
-- ✅ `/orders` et `/payments` lisent `?status=` (liens des alertes) — `next build` au vert
-
-**⚠️ Notes d'environnement local** (voir mémoire Claude) : `backend/.env` recréé depuis `.env.example` (l'ancien était perdu) ; les tests passent par SQLite in-memory avec les env forcées en `-e` (le `env_file` compose écrase phpunit.xml).
-
-### Correctifs stack Docker — ✅ Terminé (2026-07-11)
-
-- ✅ Mot de passe Postgres du volume `db` réaligné sur le `.env` recréé (`ALTER ROLE` via socket local, non destructif) — backend ne crashloop plus
-- ✅ `backend/.env` + `.env.example` : bloc `POSTGRES_DB/USER/PASSWORD` ajouté (le service `db` du compose les lit ; ils manquaient) + `APP_KEY` générée dans le `.env` local
-- ✅ Admin `Cannot find module 'next'` corrigé : `outputFileTracingRoot` (racine du monorepo) ajouté dans `admin/next.config.ts` + `WORKDIR /app/admin` dans `admin/Dockerfile` (aligné sur frontend/driver)
-- ✅ Bugs latents corrigés : `output: 'standalone'` + `outputFileTracingRoot` ajoutés à `frontend/next.config.mjs` et `driver/next.config.ts` (leurs Dockerfiles copient `.next/standalone` qui n'aurait pas existé au prochain rebuild)
-- ✅ Vérifié : 6 services up, `GET /api/status` → 200, admin `/login` → 200, migrations OK (dont `admin_action_logs`)
-
-### Sprint 8 — Driver App — ✅ Terminé (branche `sprint8`, mergé dans `develop`)
-
-- ✅ Backend : `DriverApplicationController` + migrations + enums + tests
-- ✅ Admin : page `/drivers` candidatures livreurs
-- ✅ Driver app `driver/` : tunnel candidature complet + espace missions connecté
-
----
-
-### Sprint 9 — Stabilisation & déploiement — 🔄 En cours (branche `develop`)
-
-**Tâches terminées :**
-- ✅ Monorepo pnpm workspaces configuré (`pnpm-workspace.yaml` + root `package.json`)
-- ✅ `packages/ui/` créé — `@speedservice/ui` (cn, ThemeToggle, StatusBadge)
-- ✅ `packages/api-client/` créé — `@speedservice/api-client` (apiGet, apiPost, apiPut, apiPatch, apiDelete)
-- ✅ `frontend/`, `admin/`, `driver/` mis à jour — consomment les packages workspace
-- ✅ Shims de rétrocompatibilité : `lib/utils.ts`, `components/theme-toggle.tsx`, `components/status-badge.tsx`
-- ✅ Refactor terminologie : `rider/` → `driver/`, routes `/driver/apply/*`, labels UI « Livreur »
-- ✅ TypeScript au vert sur les 3 apps (tsc --noEmit)
-- ✅ README + CLAUDE.md mis à jour
-
-**Stabilisation pipeline CI — 2026-06-25 :**
-- ✅ `frontend/app/page.tsx` — apostrophe `&apos;` (lint)
-- ✅ `backend/phpunit.xml.dist` — créé avec `APP_KEY` + SQLite in-memory
-- ✅ `backend/tests/` — `TestCase.php`, `Feature/`, `Unit/` créés
-- ✅ `.gitignore` — `!backend/.env.example`
-- ✅ `.github/workflows/ci.yml` — setup `.env` + `key:generate`
-- ✅ `frontend/app/(dashboard)/deliveries/[id]/page.tsx` — `react-hooks/set-state-in-effect` résolu
-- ✅ `AdminController` — `select()` avant `withCount()` + `JSON_PRESERVE_ZERO_FRACTION` (4 tests)
-
 ---
 
 ## Section GPT Codex
 
-**Dernier état :** 2026-07-18
+**Dernier état :** 2026-07-19
+
+✅ Terminé : correction bugs Livreurs admin — `toggleDriverActive()` appelle `/admin/drivers/{id}/toggle-active`, `listDrivers()` applique `search` sur nom/email/téléphone et renvoie le vrai `is_active`; tests backend ajoutés pour recherche et état inactif. Validation : `git diff --check`, syntaxe PHP via Docker (`php -l AdminController.php`). PHPUnit non exécuté : l'image backend n'inclut pas `artisan test`; lint/typecheck admin non exécutés car `node` est absent.
+
+✅ Terminé : tests de gestion des Livreurs sur Vercel develop — accès SSO OK avec cookies fournis, page `/drivers` charge (`200`), API develop identifiée (`speedservice-develop.up.railway.app/api`), liste Livreurs OK (2), candidatures OK (3 + détail documents). Bugs constatés : recherche `/admin/drivers?search=...` ignorée, bouton frontend d'activation appelle `/active` alors que le backend expose `/toggle-active`, et la liste force `is_active=true` même après désactivation. Aucun code applicatif modifié. Validation : `git diff --check -- AIorchestration.md`.
 
 ✅ Terminé : mot de passe oublié driver raccordé au bon écran livreur — la page driver envoie une URL de reset `/set-password`, le backend accepte une `reset_url` optionnelle uniquement si son origine correspond à `FRONTEND_URL` ou `DRIVER_URL`, les emails utilisent cette URL autorisée sinon retombent sur le reset client, et `DRIVER_URL` est documenté dans `backend/.env.example`. Tests ajoutés pour URL driver autorisée et URL externe ignorée. Validation : `docker compose build backend`, `git diff --check -- AIorchestration.md backend/.env.example backend/app/Http/Controllers/Api/AuthController.php backend/app/Http/Requests/Auth/ForgotPasswordRequest.php backend/app/Notifications/ResetPasswordNotification.php backend/config/app.php backend/tests/Feature/Auth/PasswordResetTest.php driver/app/forgot-password/page.tsx`, `php -l` via image Docker sur les fichiers PHP modifiés. PHPUnit non exécuté : l'image backend production installe Composer avec `--no-dev`, donc `artisan test` n'est pas disponible.
 
