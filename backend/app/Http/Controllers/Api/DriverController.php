@@ -219,7 +219,9 @@ class DriverController extends Controller
 
         $request->validate(['status' => 'required|string']);
 
-        $delivery = Delivery::where('driver_id', Auth::id())->findOrFail($id);
+        $delivery = Delivery::where('driver_id', Auth::id())
+            ->with('payment')
+            ->findOrFail($id);
 
         $transitions = [
             DeliveryStatus::Assigned->value   => DeliveryStatus::PickingUp,
@@ -231,6 +233,19 @@ class DriverController extends Controller
 
         if ($next === null || $request->status !== $next->value) {
             return response()->json(['message' => 'Transition de statut invalide.'], 422);
+        }
+
+        $cashMethods = [PaymentMethod::CashOnDelivery->value, PaymentMethod::Agency->value];
+        if (
+            $delivery->status === DeliveryStatus::PickingUp
+            && $next === DeliveryStatus::InDelivery
+            && $delivery->payment
+            && in_array($delivery->payment->method->value, $cashMethods)
+            && $delivery->payment->status !== PaymentStatus::Succeeded
+        ) {
+            return response()->json([
+                'message' => 'Confirmez d’abord le paiement physique avec le code PAIEMENTRECU.',
+            ], 422);
         }
 
         $delivery->update(['status' => $next]);

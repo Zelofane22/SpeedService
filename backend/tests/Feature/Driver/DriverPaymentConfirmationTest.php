@@ -56,6 +56,31 @@ class DriverPaymentConfirmationTest extends TestCase
         ]);
     }
 
+    public function test_driver_cannot_skip_cash_payment_confirmation_with_status_update(): void
+    {
+        Notification::fake();
+
+        $driver = User::factory()->driver()->create();
+        $delivery = $this->cashMissionFor($driver);
+
+        $this->actingAs($driver, 'sanctum')
+            ->patchJson("/api/driver/missions/{$delivery->id}/status", [
+                'status' => DeliveryStatus::InDelivery->value,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Confirmez d’abord le paiement physique avec le code PAIEMENTRECU.');
+
+        $this->assertDatabaseHas('deliveries', [
+            'id' => $delivery->id,
+            'status' => DeliveryStatus::PickingUp->value,
+        ]);
+
+        $this->assertDatabaseHas('payments', [
+            'delivery_id' => $delivery->id,
+            'status' => PaymentStatus::Pending->value,
+        ]);
+    }
+
     private function cashMissionFor(User $driver): Delivery
     {
         $delivery = Delivery::factory()->create([
