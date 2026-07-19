@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 :root {
   color-scheme: light;
@@ -33,6 +32,27 @@ body {
   min-height: 100%;
   background-color: rgb(var(--background));
   color: rgb(var(--foreground));
+}
+
+:focus-visible {
+  outline: 2px solid rgb(134 29 109);
+  outline-offset: 3px;
+}
+
+::selection {
+  background-color: rgb(134 29 109 / 0.2);
+  color: rgb(var(--foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .dark .text-primary {

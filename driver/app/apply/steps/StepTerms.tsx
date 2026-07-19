@@ -28,16 +28,18 @@ export default function StepTerms({ loading, onSubmit }: Props) {
         </ul>
       </div>
 
-      <label className="flex items-start gap-3 cursor-pointer">
-        <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#861D6D] focus:ring-[#861D6D]" />
+      <label htmlFor="terms-accepted" className="flex items-start gap-3 cursor-pointer">
+        <input id="terms-accepted" type="checkbox" required checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#861D6D] focus:ring-[#861D6D]" />
         <span className="text-sm text-gray-700">
           J&apos;ai lu et j&apos;accepte les <span className="text-[#861D6D] font-medium">conditions générales d&apos;utilisation</span> de SpeedService.
         </span>
       </label>
 
       <button
+        type="button"
         disabled={!accepted || loading}
         onClick={onSubmit}
+        aria-busy={loading}
         className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-4 rounded-xl font-semibold text-lg mt-2 flex items-center justify-center gap-2"
       >
         {loading ? (

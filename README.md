@@ -7,7 +7,7 @@ Plateforme de livraison de colis au Bénin — application web full-stack (Next.
 ## Avancement du projet
 
 **Sprint 9 — Stabilisation & déploiement**
-Dernière mise à jour : 2026-06-28
+Dernière mise à jour : 2026-07-11
 
 ### Sprint 9 — Stabilisation & déploiement ✅
 
@@ -103,6 +103,9 @@ docker compose exec backend php artisan db:seed --force
 | `http://localhost:3000` | App client (login : 'preprod@speedservice.bj' / 'Password123!' ) |
 | `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!` — voir ci-dessous) |
 | `http://localhost:3002` | App livreur (login dev test : koffiagbeko@speedservice.bj / Driver123! |
+| `https://speed-service-frontend-git-develop-zeloteam.vercel.app/`|App client en dev)| 
+|`https://driver-speedservice-git-develop-zeloteam.vercel.app/`|App driver en dev|
+
 
 **Commandes utiles :**
 
@@ -170,7 +173,7 @@ Effectuer une rotation dans les cas suivants :
 | Serveur web | Nginx + PHP-FPM + Supervisord (single container) |
 | Hébergement frontends | Vercel |
 | Hébergement backend | Railway (Docker) |
-| CI/CD | GitHub Actions + Vercel/Railway auto-deploy sur `main` |
+| CI/CD | GitHub Actions + Vercel/Railway auto-deploy sur `prod` |
 
 ---
 
@@ -188,6 +191,10 @@ packages/api-client/    → @speedservice/api-client (client HTTP)
 docker-compose.yml      → Stack complète (prod & local)
 DEPLOY.md               → Guide déploiement Vercel + Railway
 .github/workflows/      → CI/CD GitHub Actions
+  ├── ci.yml            → lint, builds, tests, audits et scan de secrets
+  └── db-backup.yml     → sauvegarde PostgreSQL chiffrée quotidienne
+.github/dependabot.yml  → mises à jour hebdomadaires des dépendances
+docs/backups.md         → procédure de sauvegarde et de restauration
 AIorchestration.md      → Coordination Claude Code ↔ GPT Codex
 ```
 
@@ -215,14 +222,33 @@ test(scope):  tests
 
 ## CI/CD
 
-GitHub Actions automatise à chaque push :
-- Lint et build des 3 frontends
-- Tests PHPUnit + validation Composer
-- Validation Docker Compose
+Le workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) s'exécute à chaque push et pull request, quelle que soit la branche :
+
+- installation pnpm reproductible avec le lockfile ;
+- lint et build des applications client, admin et livreur ;
+- audit des dépendances pnpm de sévérité haute ou critique ;
+- validation Composer, tests Laravel sur PostgreSQL 16 et audit Composer ;
+- validation de la configuration Docker Compose ;
+- recherche de secrets dans l'historique Git avec Gitleaks.
+
+Les exécutions obsolètes d'une même branche sont automatiquement annulées. [Dependabot](.github/dependabot.yml) regroupe chaque semaine les mises à jour pnpm, Composer et GitHub Actions.
 
 **Auto-deploy en production :**
 - Push sur `prod` → Vercel redéploie les 3 apps Next.js automatiquement
 - Push sur `prod` → Railway reconstruit et redéploie le backend (migrations incluses)
+
+### Sauvegarde de la base
+
+Le workflow [`.github/workflows/db-backup.yml`](.github/workflows/db-backup.yml) sauvegarde PostgreSQL Railway tous les jours à 03:00 UTC, chiffre le dump en AES-256 et conserve l'artifact pendant 30 jours. Il peut aussi être lancé manuellement.
+
+Deux secrets GitHub Actions sont requis :
+
+| Secret | Valeur attendue |
+|---|---|
+| `RAILWAY_DATABASE_URL` | URL PostgreSQL publique/externe fournie par Railway |
+| `BACKUP_PASSPHRASE` | Phrase secrète longue, unique et conservée hors du dépôt |
+
+Configuration, contrôle et restauration : [docs/backups.md](docs/backups.md).
 
 ---
 

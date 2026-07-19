@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitComplement } from '@/lib/api'
+import { DOCUMENT_ACCEPT, DOCUMENT_ACCEPT_LABEL, validateUploadFile } from '../validation'
 
 type DocEntry = { type: string; file: File | null }
 
@@ -24,6 +25,7 @@ function ComplementContent() {
   const applicationId = params.get('id') ?? ''
 
   const [docs, setDocs] = useState<DocEntry[]>([{ type: '', file: null }])
+  const [fileErrors, setFileErrors] = useState<Record<number, string | null>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,7 +34,13 @@ function ComplementContent() {
   const updateDoc = (i: number, partial: Partial<DocEntry>) =>
     setDocs((d) => d.map((doc, idx) => idx === i ? { ...doc, ...partial } : doc))
 
-  const valid = applicationId && docs.every((d) => d.type && d.file)
+  const updateFile = (i: number, file: File) => {
+    const validationError = validateUploadFile(file, 'document')
+    setFileErrors((errors) => ({ ...errors, [i]: validationError }))
+    updateDoc(i, { file: validationError ? null : file })
+  }
+
+  const valid = applicationId && docs.every((d, i) => d.type && d.file && !fileErrors[i])
 
   const handleSubmit = async () => {
     setLoading(true)
@@ -72,8 +80,8 @@ function ComplementContent() {
         {docs.map((doc, i) => (
           <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type de document</label>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#861D6D]" value={doc.type} onChange={(e) => updateDoc(i, { type: e.target.value })}>
+              <label htmlFor={`complement-doc-type-${i}`} className="block text-sm font-medium text-gray-700 mb-1">Type de document</label>
+              <select id={`complement-doc-type-${i}`} required className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#861D6D]" value={doc.type} onChange={(e) => updateDoc(i, { type: e.target.value })}>
                 <option value="">Sélectionnez…</option>
                 {DOC_TYPES.map(({ value, label }) => (
                   <option key={value} value={value}>{label}</option>
@@ -81,24 +89,26 @@ function ComplementContent() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fichier</label>
-              <label className="block border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-[#861D6D]">
+              <label htmlFor={`complement-doc-file-${i}`} className="block text-sm font-medium text-gray-700 mb-1">Fichier</label>
+              <label htmlFor={`complement-doc-file-${i}`} className="block border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-[#861D6D]">
                 {doc.file ? (
                   <span className="text-sm text-[#861D6D] font-medium">{doc.file.name}</span>
                 ) : (
                   <span className="text-sm text-gray-400">Appuyer pour ajouter</span>
                 )}
-                <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => e.target.files?.[0] && updateDoc(i, { file: e.target.files[0] })} />
+                <input id={`complement-doc-file-${i}`} type="file" required accept={DOCUMENT_ACCEPT} className="sr-only" aria-describedby={`complement-doc-file-help-${i}${fileErrors[i] ? ` complement-doc-file-error-${i}` : ''}`} onChange={(e) => e.target.files?.[0] && updateFile(i, e.target.files[0])} />
               </label>
+              <p id={`complement-doc-file-help-${i}`} className="mt-1 text-xs text-gray-500">{DOCUMENT_ACCEPT_LABEL}</p>
+              {fileErrors[i] && <p id={`complement-doc-file-error-${i}`} className="mt-1 text-xs text-red-700">{fileErrors[i]}</p>}
             </div>
           </div>
         ))}
 
-        <button onClick={addDoc} className="text-[#861D6D] text-sm font-medium border border-[#861D6D] rounded-xl py-3 text-center">
+        <button type="button" onClick={addDoc} className="text-[#861D6D] text-sm font-medium border border-[#861D6D] rounded-xl py-3 text-center">
           + Ajouter un document
         </button>
 
-        <button disabled={!valid || loading} onClick={handleSubmit} className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2">
+        <button type="button" disabled={!valid || loading} onClick={handleSubmit} aria-busy={loading} className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2">
           {loading ? (
             <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Envoi…</>
           ) : 'Envoyer les documents'}

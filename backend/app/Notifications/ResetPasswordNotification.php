@@ -7,7 +7,10 @@ use Illuminate\Notifications\Notification;
 
 class ResetPasswordNotification extends Notification
 {
-    public function __construct(private readonly string $token) {}
+    public function __construct(
+        private readonly string $token,
+        private readonly ?string $resetUrl = null,
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -16,8 +19,8 @@ class ResetPasswordNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/');
-        $url = $frontendUrl . '/reset-password?' . http_build_query([
+        $resetUrl = $this->resetUrl ?: rtrim(config('app.frontend_url'), '/') . '/reset-password';
+        $url = $resetUrl . '?' . http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ]);

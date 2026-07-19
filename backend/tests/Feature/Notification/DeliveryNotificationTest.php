@@ -70,6 +70,97 @@ class DeliveryNotificationTest extends TestCase
         Notification::assertSentTo($this->client, DeliveryUpdateNotification::class);
     }
 
+    public function test_order_creation_notifies_client(): void
+    {
+        Notification::fake();
+
+        $response = $this->postJson('/api/deliveries', [
+            'sender_name' => 'Koffi Mensah',
+            'sender_phone' => '+22997000000',
+            'pickup_address' => 'Cadjèhoun, Cotonou',
+            'recipient_name' => 'Aïcha Bah',
+            'recipient_phone' => '+22997111111',
+            'delivery_address' => 'Akpakpa, Cotonou',
+            'package_type' => 'small',
+            'content_category' => 'clothing',
+            'delivery_type' => 'standard',
+            'payment_method' => 'mtn_momo',
+        ], $this->token($this->client))->assertCreated();
+
+        foreach (['in_app', 'email', 'sms'] as $channel) {
+            $this->assertDatabaseHas('notification_logs', [
+                'user_id' => $this->client->id,
+                'delivery_id' => $response->json('id'),
+                'event' => 'order_created',
+                'channel' => $channel,
+            ]);
+        }
+
+        Notification::assertSentTo($this->client, DeliveryUpdateNotification::class);
+    }
+
+    public function test_cash_payment_notifies_client_of_awaiting_validation(): void
+    {
+        Notification::fake();
+
+        $response = $this->postJson('/api/deliveries', [
+            'sender_name' => 'Koffi Mensah',
+            'sender_phone' => '+22997000000',
+            'pickup_address' => 'Cadjèhoun, Cotonou',
+            'recipient_name' => 'Aïcha Bah',
+            'recipient_phone' => '+22997111111',
+            'delivery_address' => 'Akpakpa, Cotonou',
+            'package_type' => 'small',
+            'content_category' => 'clothing',
+            'delivery_type' => 'standard',
+            'payment_method' => 'cash_on_delivery',
+        ], $this->token($this->client))->assertCreated();
+
+        $this->postJson(
+            '/api/deliveries/' . $response->json('id') . '/pay',
+            [],
+            $this->token($this->client),
+        )->assertOk();
+
+        foreach (['in_app', 'email', 'sms'] as $channel) {
+            $this->assertDatabaseHas('notification_logs', [
+                'user_id' => $this->client->id,
+                'delivery_id' => $response->json('id'),
+                'event' => 'awaiting_validation',
+                'channel' => $channel,
+            ]);
+        }
+
+        Notification::assertSentTo($this->client, DeliveryUpdateNotification::class);
+    }
+
+    public function test_order_cancellation_notifies_client(): void
+    {
+        Notification::fake();
+
+        $delivery = Delivery::factory()->create([
+            'client_id' => $this->client->id,
+            'status' => DeliveryStatus::AwaitingPayment,
+        ]);
+
+        $this->postJson(
+            "/api/deliveries/{$delivery->id}/cancel",
+            [],
+            $this->token($this->client),
+        )->assertOk();
+
+        foreach (['in_app', 'email', 'sms'] as $channel) {
+            $this->assertDatabaseHas('notification_logs', [
+                'user_id' => $this->client->id,
+                'delivery_id' => $delivery->id,
+                'event' => 'order_cancelled',
+                'channel' => $channel,
+            ]);
+        }
+
+        Notification::assertSentTo($this->client, DeliveryUpdateNotification::class);
+    }
+
     public function test_driver_transitions_generate_expected_client_notifications(): void
     {
         Notification::fake();

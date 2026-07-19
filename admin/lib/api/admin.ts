@@ -2,9 +2,12 @@ import type {
   AdminStats,
   AdminReports,
   AdminUser,
+  AdminUserDetail,
   AdminDelivery,
   AdminDriver,
   AdminPayment,
+  AdminAlertsResponse,
+  AdminActivityLog,
 } from '@/types/admin'
 import { getApiBaseUrl } from '@speedservice/api-client'
 
@@ -37,6 +40,11 @@ async function apiFetch<T>(
     throw new Error((error as { message?: string }).message ?? response.statusText)
   }
 
+  // 204 No Content (ex. suppression) → pas de corps à parser.
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
@@ -55,6 +63,17 @@ export function getAdminReports(): Promise<AdminReports> {
   return apiFetch<AdminReports>('/admin/reports')
 }
 
+export function getAdminAlerts(): Promise<AdminAlertsResponse> {
+  return apiFetch<AdminAlertsResponse>('/admin/alerts')
+}
+
+export function getAdminActivityLog(params?: {
+  page?: number
+  action?: string
+}): Promise<{ data: AdminActivityLog[]; current_page: number; last_page: number; total: number }> {
+  return apiFetch(`/admin/activity-log${buildQuery(params)}`)
+}
+
 export function getAdminUsers(params?: {
   page?: number
   role?: string
@@ -65,10 +84,32 @@ export function getAdminUsers(params?: {
   )
 }
 
+export function getAdminUser(userId: string): Promise<AdminUserDetail> {
+  return apiFetch<AdminUserDetail>(`/admin/users/${userId}`)
+}
+
 export function updateUserRole(userId: string, role: string): Promise<AdminUser> {
   return apiFetch<AdminUser>(`/admin/users/${userId}/role`, {
     method: 'PATCH',
     body: JSON.stringify({ role }),
+  })
+}
+
+// Actions super administrateur ------------------------------------------------
+
+export function resetUserPassword(
+  userId: string,
+  password: string
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/admin/users/${userId}/password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ password }),
+  })
+}
+
+export function deleteUser(userId: string): Promise<void> {
+  return apiFetch<void>(`/admin/users/${userId}`, {
+    method: 'DELETE',
   })
 }
 
@@ -106,11 +147,10 @@ export function getAdminDrivers(params?: {
 
 export function toggleDriverActive(
   driverId: string,
-  isActive: boolean
+  _isActive: boolean
 ): Promise<AdminDriver> {
-  return apiFetch<AdminDriver>(`/admin/drivers/${driverId}/active`, {
+  return apiFetch<AdminDriver>(`/admin/drivers/${driverId}/toggle-active`, {
     method: 'PATCH',
-    body: JSON.stringify({ is_active: isActive }),
   })
 }
 

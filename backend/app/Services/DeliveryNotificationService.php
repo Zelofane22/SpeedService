@@ -89,6 +89,18 @@ class DeliveryNotificationService
                 'Colis livré',
                 'Votre colis a bien été livré. Merci d’avoir choisi Speed Service.',
             ],
+            DeliveryNotificationEvent::OrderCreated => [
+                'Commande créée',
+                'Votre commande a bien été enregistrée. Finalisez le paiement pour la faire valider.',
+            ],
+            DeliveryNotificationEvent::AwaitingValidation => [
+                'Paiement à confirmer',
+                'Votre paiement est en attente de validation manuelle par un administrateur.',
+            ],
+            DeliveryNotificationEvent::OrderCancelled => [
+                'Commande annulée',
+                'Votre commande a été annulée.',
+            ],
         };
     }
 }

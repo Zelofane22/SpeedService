@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { getApiBaseUrl } from '@speedservice/api-client'
+import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 
 type DriverDocument = {
   id: string
@@ -49,6 +51,16 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 
 const VEHICLE_ICONS: Record<string, string> = {
   bicycle: '🚲', motorcycle: '🛵', car: '🚗', van: '🚐',
+}
+
+function SkeletonRow() {
+  return (
+    <div className="grid min-w-[560px] grid-cols-[1.5fr_1fr_1fr_1fr_1fr_80px] gap-4 px-4 py-3">
+      {[...Array(6)].map((_, index) => (
+        <div key={index} className="h-5 animate-pulse rounded-lg bg-muted" />
+      ))}
+    </div>
+  )
 }
 
 export default function DriverApplicationsPage() {
@@ -124,7 +136,7 @@ export default function DriverApplicationsPage() {
           <button
             key={s}
             onClick={() => applyFilter(s)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+            className={`min-h-9 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${
               filterStatus === s
                 ? 'bg-primary text-white border-primary'
                 : 'border-border text-muted-foreground hover:border-primary hover:text-foreground'
@@ -137,11 +149,20 @@ export default function DriverApplicationsPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Chargement…</div>
+        <Card className="overflow-hidden" aria-label="Chargement des candidatures" role="status">
+          <div className="overflow-x-auto divide-y divide-border">
+            {[...Array(5)].map((_, index) => (
+              <SkeletonRow key={index} />
+            ))}
+          </div>
+        </Card>
       ) : applications.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">Aucune candidature</div>
+        <EmptyState
+          title="Aucune candidature"
+          description="Les nouveaux dossiers livreur apparaîtront ici dès leur soumission."
+        />
       ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
+        <Card className="overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead className="bg-muted/50 border-b border-border">
@@ -189,7 +210,7 @@ export default function DriverApplicationsPage() {
             </tbody>
           </table>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Detail modal */}

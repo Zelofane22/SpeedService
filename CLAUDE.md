@@ -38,6 +38,20 @@ cd "SpeedService UI_UX Mockup" && npm i && npm run dev   # Vite dev server
 
 ---
 
+## Environnement dev (Railway)
+
+Le backend dev est déployé sur **Railway** et redéploie automatiquement à chaque push sur `develop`. C'est là qu'on vérifie le comportement réel de l'API déployée (au-delà des tests locaux Docker).
+
+- **Base URL API** : `https://speedservice-develop.up.railway.app/api`
+- **Santé** : `GET /api/status` → `{"status":"ok"}`
+- **Login** : `POST /api/auth/login` (préfixe `auth` — pas `/api/login`) avec `{email, password}` → `{user, token}`, puis header `Authorization: Bearer <token>`.
+- **Admin** : `admin@speedservice.bj` — mot de passe réel dans les variables Railway (secret, à demander à l'utilisateur ; le seeder utilise `AdminPassword123!` mais il diffère sur le dev).
+- **Migrations** : lancées au boot par `backend/docker-entrypoint.sh` (`migrate --force`). L'entrypoint fait aussi `config:cache` → toute nouvelle variable d'env doit être posée dans Railway **avant** le boot (Railway restart le conteneur à chaque modif de variable).
+
+> Les vérifications écrivent en base dev et peuvent créer des assets externes (ex. Cloudinary) → utiliser des marqueurs de test (`claude-test-*`) et penser au nettoyage.
+
+---
+
 ## Architecture
 
 ### Overview
@@ -114,4 +128,19 @@ Dernier état : Sprint 9 démarré le 2026-06-24 — monorepo pnpm workspaces mi
 Le fichier AIorchestration.md permet de se synchroniser entre IA afin d'éviter les conflits.
 
 ### multi agents
-utiliser les agent worcktree spécialisé existant pour améliorer la productivité
+utiliser le mode multi agents quand c'est neccessaire pour les grosses tâches full-stck pour améliorer la productivité
+
+## Workflow worktrees
+
+Après toute tâche sur un worktree :
+- Faire le commit des changements avec un message clair
+- Pousser vers `develop` avec `git push origin HEAD:develop`
+- Ne pas laisser de changements non-commités dans le worktree
+
+Cela garantit que le travail remonte sur la branche principale (`develop` → Railway auto-déploie).
+
+## choix de model et de niveau d'effort
+Avant d'executer une tâche, identifie d'abord le model adapté pour la tâche.
+Sortie attendue : Model : Effort
+Ensuite tu attends ma confirmation que j'ai changé de model avant d'excuter la tâche.
+Cela devrais permettre le gaspillage de tockens.

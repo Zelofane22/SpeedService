@@ -36,6 +36,48 @@ class PasswordResetTest extends TestCase
         Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
+    public function test_forgot_password_uses_allowed_driver_reset_url(): void
+    {
+        config(['app.driver_url' => 'https://driver.speedservice.bj']);
+        Notification::fake();
+        $user = $this->makeUser();
+
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => 'koffi@example.com',
+            'reset_url' => 'https://driver.speedservice.bj/set-password',
+        ]);
+
+        $response->assertStatus(200)->assertJsonStructure(['message']);
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function (ResetPasswordNotification $notification) use ($user) {
+            $mail = $notification->toMail($user);
+            $actionUrl = $mail->actionUrl;
+
+            return str_starts_with($actionUrl, 'https://driver.speedservice.bj/set-password?')
+                && str_contains($actionUrl, 'token=')
+                && str_contains($actionUrl, 'email=koffi%40example.com');
+        });
+    }
+
+    public function test_forgot_password_ignores_untrusted_reset_url(): void
+    {
+        config([
+            'app.frontend_url' => 'https://speedservice.bj',
+            'app.driver_url' => 'https://driver.speedservice.bj',
+        ]);
+        Notification::fake();
+        $user = $this->makeUser();
+
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => 'koffi@example.com',
+            'reset_url' => 'https://example.net/set-password',
+        ]);
+
+        $response->assertStatus(200)->assertJsonStructure(['message']);
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function (ResetPasswordNotification $notification) use ($user) {
+            return str_starts_with($notification->toMail($user)->actionUrl, 'https://speedservice.bj/reset-password?');
+        });
+    }
+
     public function test_forgot_password_returns_200_for_unknown_email(): void
     {
         Notification::fake();

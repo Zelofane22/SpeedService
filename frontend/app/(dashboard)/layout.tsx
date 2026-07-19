@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-border bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(29,29,31,0.08)] backdrop-blur lg:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-border bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(29,29,31,0.08)] backdrop-blur lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
             {navLinks.map(({ href, icon: Icon, mobileLabel }) => {
               const isActive = isNavActive(href)
@@ -125,7 +125,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-current={isActive ? 'page' : undefined}
                   className={[
                     'flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition-all',
-                    isActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-700 hover:bg-brand-muted/70 hover:text-brand-foreground',
+                    isActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-black hover:bg-brand-muted/70 hover:text-black',
                   ].join(' ')}
                 >
                   <Icon size={19} />

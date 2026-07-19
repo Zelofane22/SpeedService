@@ -70,11 +70,15 @@ function SetPasswordForm() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+              <label htmlFor="new-driver-password" className="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
               <input
+                id="new-driver-password"
+                name="new-password"
                 type="password"
                 required
                 minLength={8}
+                maxLength={72}
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#861D6D]"
@@ -83,11 +87,15 @@ function SetPasswordForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+              <label htmlFor="new-driver-password-confirmation" className="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
               <input
+                id="new-driver-password-confirmation"
+                name="new-password-confirmation"
                 type="password"
                 required
                 minLength={8}
+                maxLength={72}
+                autoComplete="new-password"
                 value={confirmation}
                 onChange={(e) => setConfirmation(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#861D6D]"
@@ -98,6 +106,7 @@ function SetPasswordForm() {
             <button
               type="submit"
               disabled={loading || !token || !email}
+              aria-busy={loading}
               className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-4 rounded-xl font-semibold text-lg"
             >
               {loading ? 'Enregistrement…' : 'Confirmer'}

@@ -8,7 +8,6 @@ import {
   Truck,
   TrendingUp,
   RefreshCw,
-  Download,
   Eye,
   AlertTriangle,
   CheckCircle2,
@@ -37,6 +36,7 @@ import {
 import StatCard from '@/components/stat-card'
 import StatusBadge from '@/components/status-badge'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import { getAdminStats, getAdminDeliveries, getAdminReports } from '@/lib/api/admin'
 import type { AdminStats, AdminReports, AdminDelivery } from '@/types/admin'
 
@@ -54,12 +54,40 @@ function formatXOFLong(amount: number): string {
   return `${amount.toLocaleString('fr-FR')} FCFA`
 }
 
+function trendProps(pct: number | null | undefined, vsLabel: string): { change?: string; up?: boolean } {
+  if (pct === null || pct === undefined) return {}
+  const formatted = `${pct > 0 ? '+' : ''}${pct.toLocaleString('fr-FR', { maximumFractionDigits: 1 })}% ${vsLabel}`
+  return { change: formatted, up: pct >= 0 }
+}
+
 function monthLabel(isoMonth: string): string {
   const [year, m] = isoMonth.split('-')
   const names = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
   const label = names[parseInt(m, 10) - 1] ?? m
   const now = new Date()
   return now.getFullYear().toString() !== year ? `${label} ${year.slice(2)}` : label
+}
+
+function recentMonthBuckets(count = 6): Array<{ month: string; orders: number; revenue: number }> {
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date()
+    date.setDate(1)
+    date.setMonth(date.getMonth() - (count - index - 1))
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    return { month: monthLabel(month), orders: 0, revenue: 0 }
+  })
+}
+
+function hasChartActivity(data: Array<{ orders: number; revenue: number }>): boolean {
+  return data.some((item) => item.orders > 0 || item.revenue > 0)
+}
+
+const CHART_TOOLTIP_STYLE = {
+  borderRadius: '12px',
+  border: '1px solid rgb(var(--border))',
+  backgroundColor: 'rgb(var(--card))',
+  color: 'rgb(var(--foreground))',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
 }
 
 // ---------------------------------------------------------------------------
@@ -113,6 +141,17 @@ export default function DashboardPage() {
   const [deliveries, setDeliveries] = useState<AdminDelivery[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  const [adminName, setAdminName] = useState('')
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('user')
+      if (stored) setAdminName((JSON.parse(stored) as { name?: string }).name ?? '')
+    } catch {
+      // ignore parse errors
+    }
+  }, [])
 
   const todayLabel = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -124,6 +163,7 @@ export default function DashboardPage() {
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setRefreshing(true)
+    setLoadError(false)
     try {
       const [statsData, deliveriesData, reportsData] = await Promise.all([
         getAdminStats(),
@@ -133,15 +173,15 @@ export default function DashboardPage() {
       setStats(statsData)
       setDeliveries(deliveriesData.data ?? [])
       setReports(reportsData)
-    } catch (err) {
-      console.error('Erreur chargement dashboard', err)
+    } catch {
+      if (!silent) setLoadError(true)
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { void loadData() }, [loadData])
 
   // Merge monthly data for charts
   const chartData = reports
@@ -150,6 +190,8 @@ export default function DashboardPage() {
         return { month: monthLabel(d.month), orders: d.count, revenue: rev?.total_xof ?? 0 }
       })
     : []
+  const displayedChartData = chartData.length > 0 ? chartData : recentMonthBuckets()
+  const hasCharts = hasChartActivity(chartData)
 
   // ---------------------------------------------------------------------------
   // Loading skeleton
@@ -157,17 +199,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6" role="status" aria-label="Chargement du tableau de bord">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <Skeleton className="h-7 w-48" />
             <Skeleton className="h-4 w-32" />
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
         </div>
         <div className="grid lg:grid-cols-2 gap-6">
@@ -175,6 +217,29 @@ export default function DashboardPage() {
           <Skeleton className="h-56" />
         </div>
         <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-900/30">
+            <AlertTriangle size={22} aria-hidden="true" />
+          </div>
+          <h1 className="text-lg font-semibold text-foreground">Le tableau de bord est indisponible</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Vérifiez votre connexion puis réessayez. Les données opérationnelles n&apos;ont pas été modifiées.
+          </p>
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="mt-6 min-h-11 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            Réessayer
+          </button>
+        </div>
       </div>
     )
   }
@@ -188,20 +253,19 @@ export default function DashboardPage() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Bonjour, {adminName || 'Admin'} 👋
+          </h1>
           <p className="text-sm text-muted-foreground capitalize">{todayLabel}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="p-2 rounded-xl border border-border hover:bg-muted/30 transition-colors disabled:opacity-50"
-            title="Rafraîchir"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border transition-colors hover:bg-muted/30 disabled:opacity-50"
+            aria-label="Rafraîchir les données"
           >
-            <RefreshCw size={18} className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-          <button className="p-2 rounded-xl border border-border hover:bg-muted/30 transition-colors" title="Exporter">
-            <Download size={18} className="text-muted-foreground" />
+            <RefreshCw size={18} aria-hidden="true" className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -229,7 +293,7 @@ export default function DashboardPage() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
           Opérationnel — temps réel
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <StatCard
             label="Commandes actives"
             value={String(stats?.deliveries.active_count ?? 0)}
@@ -266,31 +330,35 @@ export default function DashboardPage() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
           Finances & trafic
         </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           <StatCard
             label="CA aujourd'hui"
             value={formatXOF(stats?.revenue.today_xof ?? 0)}
             icon={TrendingUp}
             colorClass="bg-green-50 dark:bg-green-900/30 text-green-600"
+            {...trendProps(stats?.trends?.revenue_today_pct, 'vs hier')}
           />
           <StatCard
             label="CA ce mois"
             value={formatXOF(stats?.revenue.this_month_xof ?? 0)}
             icon={Wallet}
             colorClass="bg-primary/10 text-primary"
+            {...trendProps(stats?.trends?.revenue_month_pct, 'vs mois dernier')}
           />
           <StatCard
             label="Panier moyen"
-            value={formatXOF(stats?.revenue.avg_basket_xof ?? 0)}
+            value={(stats?.deliveries.total ?? 0) > 0 ? formatXOF(stats?.revenue.avg_basket_xof ?? 0) : '—'}
             icon={ShoppingBag}
             colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600"
+            subtitle={(stats?.deliveries.total ?? 0) > 0 ? undefined : 'aucune commande calculable'}
           />
           <StatCard
             label="Clients / Livreurs"
             value={`${stats?.users.clients ?? 0} / ${stats?.users.drivers ?? 0}`}
             icon={Users}
             colorClass="bg-amber-50 dark:bg-amber-900/30 text-amber-600"
-            subtitle={`${stats?.users.total ?? 0} utilisateurs total`}
+            subtitle={`${stats?.users.total ?? 0} utilisateurs · +${stats?.trends?.new_clients_month ?? 0} client${(stats?.trends?.new_clients_month ?? 0) > 1 ? 's' : ''} ce mois`}
+            {...trendProps(stats?.trends?.new_clients_month_pct, 'vs mois dernier')}
           />
         </div>
       </div>
@@ -322,33 +390,36 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-foreground">Livraisons / mois</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [Number(value ?? 0), 'Livraisons']}
+                />
+                <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de données"
+                description="Les livraisons mensuelles apparaîtront ici dès les premières commandes."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '12px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--card)',
-                  color: 'var(--foreground)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                }}
-                formatter={(v: number) => [v, 'Livraisons']}
-              />
-              <Bar dataKey="orders" fill="#861D6D" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
 
         <Card className="p-6">
@@ -356,46 +427,49 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-foreground">Revenus (FCFA)</h2>
             <span className="text-xs text-muted-foreground">6 derniers mois</span>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
-                  <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
+          <div className="relative">
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={displayedChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#861D6D" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="#861D6D" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--muted-foreground))' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatXOF(v)}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [formatXOFLong(Number(value ?? 0)), 'Revenus']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#861D6D"
+                  strokeWidth={2}
+                  fill="url(#revenueGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            {!hasCharts && (
+              <EmptyState
+                title="Pas encore de revenus"
+                description="Le chiffre d'affaires mensuel sera visible après les premiers paiements validés."
+                className="pointer-events-none absolute inset-x-4 top-6 min-h-28 bg-card/90"
               />
-              <YAxis
-                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => formatXOF(v)}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '12px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--card)',
-                  color: 'var(--foreground)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                }}
-                formatter={(v: number) => [formatXOFLong(v), 'Revenus']}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#861D6D"
-                strokeWidth={2}
-                fill="url(#revenueGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+            )}
+          </div>
         </Card>
       </div>
 

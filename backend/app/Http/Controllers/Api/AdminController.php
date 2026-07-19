@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
+use App\Enums\DriverApplicationStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\AdminActionLog;
 use App\Models\Delivery;
+use App\Models\DriverApplication;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\DeliveryNotificationService;
@@ -21,6 +24,41 @@ use Illuminate\Validation\Rule;
 class AdminController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
+    // ── Audit ─────────────────────────────────────────────────────────────────
+
+    private function logAction(string $action, string $description, ?string $subjectType = null, ?string $subjectId = null): void
+    {
+        AdminActionLog::create([
+            'admin_id'     => Auth::id(),
+            'action'       => $action,
+            'subject_type' => $subjectType,
+            'subject_id'   => $subjectId,
+            'description'  => $description,
+        ]);
+    }
+
+    public function activityLog(Request $request): JsonResponse
+    {
+        $query = AdminActionLog::with('admin:id,name,email')->latest();
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->input('action'));
+        }
+
+        return response()->json($query->paginate(20));
+    }
+
+    private function percentChange(float $current, float $previous): ?float
+    {
+        // null quand la période précédente est vide : impossible de calculer
+        // une variation, le front masque alors l'indicateur.
+        if ($previous == 0.0) {
+            return null;
+        }
+
+        return round(($current - $previous) / $previous * 100, 1);
+    }
 
     // ── Stats ─────────────────────────────────────────────────────────────────
 
@@ -106,6 +144,42 @@ class AdminController extends Controller
 
         $pendingValidations = $byStatus[DeliveryStatus::AwaitingValidation->value] ?? 0;
 
+        // Variations vs période précédente (jour/mois) pour les KPI du dashboard
+        $revenueYesterday = DB::table('payments')
+            ->where('status', PaymentStatus::Succeeded->value)
+            ->whereDate('created_at', today()->subDay())
+            ->sum('amount');
+
+        $lastMonth = now()->subMonthNoOverflow();
+
+        $revenueLastMonth = DB::table('payments')
+            ->where('status', PaymentStatus::Succeeded->value)
+            ->whereYear('created_at', $lastMonth->year)
+            ->whereMonth('created_at', $lastMonth->month)
+            ->sum('amount');
+
+        $deliveriesThisMonth = (int) DB::table('deliveries')
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count();
+
+        $deliveriesLastMonth = (int) DB::table('deliveries')
+            ->whereYear('created_at', $lastMonth->year)
+            ->whereMonth('created_at', $lastMonth->month)
+            ->count();
+
+        $newClientsThisMonth = (int) DB::table('users')
+            ->where('role', UserRole::Client->value)
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count();
+
+        $newClientsLastMonth = (int) DB::table('users')
+            ->where('role', UserRole::Client->value)
+            ->whereYear('created_at', $lastMonth->year)
+            ->whereMonth('created_at', $lastMonth->month)
+            ->count();
+
         return response()->json([
             'users' => [
                 'total'   => (int) $userCounts->sum(),
@@ -131,14 +205,109 @@ class AdminController extends Controller
             ],
             'pending_validations' => $pendingValidations,
             'completion_rate'     => (float) $completionRate,
+            'trends' => [
+                'revenue_today_pct'     => $this->percentChange((float) $revenueToday, (float) $revenueYesterday),
+                'revenue_month_pct'     => $this->percentChange((float) $revenueThisMonth, (float) $revenueLastMonth),
+                'deliveries_month'      => $deliveriesThisMonth,
+                'deliveries_month_pct'  => $this->percentChange($deliveriesThisMonth, $deliveriesLastMonth),
+                'new_clients_month'     => $newClientsThisMonth,
+                'new_clients_month_pct' => $this->percentChange($newClientsThisMonth, $newClientsLastMonth),
+            ],
         ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
+    }
+
+    // ── Alertes backoffice ────────────────────────────────────────────────────
+
+    public function alerts(): JsonResponse
+    {
+        $alerts = [];
+
+        $pendingValidations = Delivery::where('status', DeliveryStatus::AwaitingValidation)->count();
+        if ($pendingValidations > 0) {
+            $alerts[] = [
+                'id'       => 'pending-payment-validations',
+                'severity' => 'warning',
+                'kind'     => 'Paiements',
+                'title'    => 'Paiements à valider manuellement',
+                'message'  => "{$pendingValidations} livraison(s) en attente de validation d'un paiement (espèces ou agence).",
+                'count'    => $pendingValidations,
+                'action'   => '/payments',
+            ];
+        }
+
+        $failedPayments = Payment::where('status', PaymentStatus::Failed)
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
+        if ($failedPayments > 0) {
+            $alerts[] = [
+                'id'       => 'failed-payments',
+                'severity' => 'error',
+                'kind'     => 'Paiements',
+                'title'    => 'Paiements échoués (7 derniers jours)',
+                'message'  => "{$failedPayments} paiement(s) en échec sur les 7 derniers jours — vérifier les transactions concernées.",
+                'count'    => $failedPayments,
+                'action'   => '/payments?status=failed',
+            ];
+        }
+
+        $unassigned = Delivery::where('status', DeliveryStatus::Confirmed)
+            ->whereNull('driver_id')
+            ->where('updated_at', '<=', now()->subHours(2))
+            ->count();
+        if ($unassigned > 0) {
+            $alerts[] = [
+                'id'       => 'unassigned-deliveries',
+                'severity' => 'warning',
+                'kind'     => 'Livraisons',
+                'title'    => 'Livraisons confirmées sans livreur',
+                'message'  => "{$unassigned} livraison(s) confirmée(s) depuis plus de 2 heures sans livreur assigné.",
+                'count'    => $unassigned,
+                'action'   => '/orders?status=confirmed',
+            ];
+        }
+
+        $stuck = Delivery::whereIn('status', [DeliveryStatus::PickingUp, DeliveryStatus::InDelivery])
+            ->where('updated_at', '<=', now()->subDay())
+            ->count();
+        if ($stuck > 0) {
+            $alerts[] = [
+                'id'       => 'stuck-deliveries',
+                'severity' => 'error',
+                'kind'     => 'Livraisons',
+                'title'    => 'Livraisons bloquées en cours',
+                'message'  => "{$stuck} livraison(s) en collecte ou en livraison sans mise à jour depuis plus de 24 heures.",
+                'count'    => $stuck,
+                'action'   => '/orders',
+            ];
+        }
+
+        $pendingApplications = DriverApplication::whereIn('status', [
+            DriverApplicationStatus::Pending,
+            DriverApplicationStatus::UnderReview,
+        ])->count();
+        if ($pendingApplications > 0) {
+            $alerts[] = [
+                'id'       => 'pending-driver-applications',
+                'severity' => 'info',
+                'kind'     => 'Candidatures',
+                'title'    => 'Candidatures livreur à examiner',
+                'message'  => "{$pendingApplications} candidature(s) livreur en attente d'examen.",
+                'count'    => $pendingApplications,
+                'action'   => '/driver-applications',
+            ];
+        }
+
+        return response()->json([
+            'alerts' => $alerts,
+            'total'  => array_sum(array_column($alerts, 'count')),
+        ]);
     }
 
     // ── Users ─────────────────────────────────────────────────────────────────
 
     public function listUsers(Request $request): JsonResponse
     {
-        $query = User::select(['id', 'name', 'email', 'role', 'created_at'])
+        $query = User::select(['id', 'name', 'email', 'role', 'is_super_admin', 'created_at'])
             ->withCount(['deliveriesAsClient as deliveries_count']);
 
         if ($request->filled('role')) {
@@ -182,9 +351,78 @@ class AdminController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+        $previousRole = $user->role->value;
         $user->update(['role' => UserRole::from($request->input('role'))]);
 
+        $this->logAction(
+            'user.role_updated',
+            "Rôle de {$user->name} changé de {$previousRole} en {$user->role->value}.",
+            'user',
+            $user->id,
+        );
+
         return response()->json($user->only(['id', 'name', 'email', 'role', 'created_at']));
+    }
+
+    public function resetUserPassword(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if ($user->is_super_admin && $user->id !== Auth::id()) {
+            return response()->json([
+                'message' => "Impossible de réinitialiser le mot de passe d'un autre super administrateur.",
+            ], 403);
+        }
+
+        $user->update([
+            'password'             => $request->input('password'),
+            'must_change_password' => true,
+        ]);
+        // Révoque toutes les sessions existantes de l'utilisateur.
+        $user->tokens()->delete();
+
+        $this->logAction(
+            'user.password_reset',
+            "Mot de passe de {$user->name} réinitialisé manuellement.",
+            'user',
+            $user->id,
+        );
+
+        return response()->json(['message' => 'Mot de passe réinitialisé.']);
+    }
+
+    public function deleteUser(string $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'message' => 'Vous ne pouvez pas supprimer votre propre compte.',
+            ], 422);
+        }
+
+        if ($user->is_super_admin) {
+            return response()->json([
+                'message' => 'Impossible de supprimer un super administrateur.',
+            ], 403);
+        }
+
+        $name = $user->name;
+        $user->tokens()->delete();
+        $user->delete();
+
+        $this->logAction(
+            'user.deleted',
+            "Utilisateur {$name} supprimé.",
+            'user',
+            $id,
+        );
+
+        return response()->json(null, 204);
     }
 
     // ── Deliveries ────────────────────────────────────────────────────────────
@@ -265,16 +503,25 @@ class AdminController extends Controller
         ]);
 
         $event = match ($newStatus) {
-            DeliveryStatus::Confirmed   => DeliveryNotificationEvent::OrderConfirmed,
-            DeliveryStatus::Assigned    => DeliveryNotificationEvent::DriverAssigned,
-            DeliveryStatus::InDelivery  => DeliveryNotificationEvent::PackagePickedUp,
-            DeliveryStatus::Delivered   => DeliveryNotificationEvent::PackageDelivered,
-            default                     => null,
+            DeliveryStatus::Confirmed          => DeliveryNotificationEvent::OrderConfirmed,
+            DeliveryStatus::Assigned           => DeliveryNotificationEvent::DriverAssigned,
+            DeliveryStatus::InDelivery         => DeliveryNotificationEvent::PackagePickedUp,
+            DeliveryStatus::Delivered          => DeliveryNotificationEvent::PackageDelivered,
+            DeliveryStatus::AwaitingValidation => DeliveryNotificationEvent::AwaitingValidation,
+            DeliveryStatus::Cancelled          => DeliveryNotificationEvent::OrderCancelled,
+            default                            => null,
         };
 
         if ($event !== null) {
             $this->notifications->send($delivery->fresh(['client', 'driver']), $event);
         }
+
+        $this->logAction(
+            'delivery.status_updated',
+            "Statut de la livraison {$delivery->reference} forcé à {$newStatus->value}.",
+            'delivery',
+            $delivery->id,
+        );
 
         return response()->json($delivery->load('statusHistories'));
     }
@@ -305,6 +552,13 @@ class AdminController extends Controller
         }
 
         $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderConfirmed);
+
+        $this->logAction(
+            'payment.validated',
+            "Paiement de la livraison {$delivery->reference} validé manuellement.",
+            'delivery',
+            $delivery->id,
+        );
 
         return response()->json($delivery->load(['payment', 'statusHistories']));
     }
@@ -371,21 +625,21 @@ class AdminController extends Controller
     public function listDrivers(Request $request): JsonResponse
     {
         $query = User::where('role', UserRole::Driver)
-            ->select(['id', 'name', 'email', 'created_at'])
+            ->select(['id', 'name', 'email', 'is_active', 'created_at'])
             ->withCount([
                 'deliveriesAsDriver as deliveries_completed' => fn ($q) => $q->where('status', DeliveryStatus::Delivered),
             ]);
 
-        // The users table has no `is_active` column, so we filter/expose a virtual value.
-        // For forward compatibility we include it in the response as always true for now.
+        if ($request->filled('search')) {
+            $search = '%' . $request->input('search') . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', $search)
+                    ->orWhere('email', 'like', $search)
+                    ->orWhere('phone', 'like', $search);
+            });
+        }
 
         $drivers = $query->latest()->paginate(20);
-
-        // Append is_active (virtual — always true until a column is added)
-        $drivers->getCollection()->transform(function ($driver) {
-            $driver->is_active = true;
-            return $driver;
-        });
 
         return response()->json($drivers);
     }
@@ -402,6 +656,13 @@ class AdminController extends Controller
         }
 
         $driver->update(['is_active' => !$driver->is_active]);
+
+        $this->logAction(
+            'driver.status_toggled',
+            "Livreur {$driver->name} " . ($driver->is_active ? 'réactivé' : 'désactivé') . '.',
+            'user',
+            $driver->id,
+        );
 
         return response()->json(array_merge(
             $driver->only(['id', 'name', 'email', 'created_at']),
@@ -470,6 +731,42 @@ class AdminController extends Controller
                 'total_xof' => (float) $row->total_xof,
             ]);
 
+        // Top 5 livreurs (livraisons terminées + CA encaissé associé)
+        $topDrivers = DB::table('deliveries')
+            ->join('users', 'users.id', '=', 'deliveries.driver_id')
+            ->leftJoin('payments', function ($join) {
+                $join->on('payments.delivery_id', '=', 'deliveries.id')
+                    ->where('payments.status', PaymentStatus::Succeeded->value);
+            })
+            ->where('deliveries.status', DeliveryStatus::Delivered->value)
+            ->select(
+                'users.name',
+                'users.email',
+                DB::raw('count(deliveries.id) as count'),
+                DB::raw('coalesce(sum(payments.amount), 0) as total_xof')
+            )
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get()
+            ->map(fn ($row) => [
+                'name'      => $row->name,
+                'email'     => $row->email,
+                'count'     => (int) $row->count,
+                'total_xof' => (float) $row->total_xof,
+            ]);
+
+        // Répartition des livraisons par type de colis
+        $byPackageType = DB::table('deliveries')
+            ->select('package_type', DB::raw('count(*) as count'))
+            ->groupBy('package_type')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn ($row) => [
+                'package_type' => $row->package_type,
+                'count'        => (int) $row->count,
+            ]);
+
         // Delivery completion rate
         $totalDeliveries = DB::table('deliveries')
             ->whereNotIn('status', [DeliveryStatus::Draft->value, DeliveryStatus::AwaitingPayment->value])
@@ -484,10 +781,12 @@ class AdminController extends Controller
             : 0.0;
 
         return response()->json([
-            'revenue_by_month'        => $revenueByMonth,
-            'deliveries_by_month'     => $deliveriesByMonth,
-            'top_clients'             => $topClients,
-            'delivery_completion_rate' => (float) $completionRate,
+            'revenue_by_month'           => $revenueByMonth,
+            'deliveries_by_month'        => $deliveriesByMonth,
+            'top_clients'                => $topClients,
+            'top_drivers'                => $topDrivers,
+            'deliveries_by_package_type' => $byPackageType,
+            'delivery_completion_rate'   => (float) $completionRate,
         ], 200, [], JSON_PRESERVE_ZERO_FRACTION);
     }
 }

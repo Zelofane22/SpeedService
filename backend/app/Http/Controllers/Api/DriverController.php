@@ -9,6 +9,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Delivery;
+use App\Models\DriverApplication;
 use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,10 @@ class DriverController extends Controller
     {
         if ($err = $this->ensureDriver()) return $err;
 
+        if (! Auth::user()->is_online) {
+            return response()->json([]);
+        }
+
         $missions = Delivery::whereNull('driver_id')
             ->where(function ($q) {
                 $q->where('status', DeliveryStatus::Confirmed)
@@ -48,6 +53,48 @@ class DriverController extends Controller
             ->get();
 
         return response()->json($missions);
+    }
+
+    public function profile(): JsonResponse
+    {
+        if ($err = $this->ensureDriver()) return $err;
+
+        $user = Auth::user();
+        $application = DriverApplication::where('user_id', $user->id)
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'user' => $user->only(['id', 'name', 'email', 'phone', 'role', 'is_active', 'is_online']),
+            'application' => $application?->only([
+                'city',
+                'vehicle_type',
+                'vehicle_brand',
+                'vehicle_plate',
+                'payment_method',
+                'payment_number',
+                'bank_name',
+                'bank_iban',
+                'status',
+            ]),
+        ]);
+    }
+
+    public function updateAvailability(Request $request): JsonResponse
+    {
+        if ($err = $this->ensureDriver()) return $err;
+
+        $data = $request->validate([
+            'is_online' => ['required', 'boolean'],
+        ]);
+
+        $user = Auth::user();
+        $user->forceFill(['is_online' => $data['is_online']])->save();
+
+        return response()->json([
+            'id' => $user->id,
+            'is_online' => $user->is_online,
+        ]);
     }
 
     public function myMissions(): JsonResponse
@@ -112,6 +159,10 @@ class DriverController extends Controller
     public function acceptMission(string $id): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
+
+        if (! Auth::user()->is_online) {
+            return response()->json(['message' => 'Passez en ligne pour accepter une mission.'], 422);
+        }
 
         $delivery = Delivery::whereNull('driver_id')
             ->where(function ($q) {

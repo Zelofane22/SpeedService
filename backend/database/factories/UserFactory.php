@@ -30,6 +30,14 @@ class UserFactory extends Factory
         return $this->state(['role' => UserRole::Admin]);
     }
 
+    public function superAdmin(): static
+    {
+        return $this->state([
+            'role'           => UserRole::Admin,
+            'is_super_admin' => true,
+        ]);
+    }
+
     public function unverified(): static
     {
         return $this->state(['email_verified_at' => null]);

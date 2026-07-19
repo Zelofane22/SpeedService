@@ -14,12 +14,14 @@ export function SearchInput({ placeholder, value, onChange }: SearchInputProps) 
       <Search
         size={15}
         className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        aria-hidden="true"
       />
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? 'Rechercher...'}
-        className="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+        aria-label={placeholder ?? 'Rechercher'}
+        className="min-h-11 w-full rounded-xl border border-border bg-input-background py-2.5 pl-9 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
       />
     </div>
   )

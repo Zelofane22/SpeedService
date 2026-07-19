@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ContentCategory;
+use App\Enums\DeliveryNotificationEvent;
 use App\Enums\DeliveryStatus;
 use App\Enums\DeliveryType;
 use App\Enums\PackageType;
@@ -13,6 +14,7 @@ use App\Http\Requests\StoreDeliveryRequest;
 use App\Models\Delivery;
 use App\Models\Payment;
 use App\Mail\AdminNewOrderMail;
+use App\Services\DeliveryNotificationService;
 use App\Services\PriceCalculator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +23,8 @@ use Illuminate\Support\Str;
 
 class DeliveryController extends Controller
 {
+    public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
     public function index(): JsonResponse
     {
         $deliveries = Delivery::where('client_id', Auth::id())
@@ -70,6 +74,12 @@ class DeliveryController extends Controller
             'status'      => PaymentStatus::Pending,
         ]);
 
+        try {
+            $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderCreated);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         $adminEmail = config('mail.admin_notification_email');
         if ($adminEmail) {
             try {
@@ -107,6 +117,12 @@ class DeliveryController extends Controller
 
         $delivery->update(['status' => DeliveryStatus::Cancelled]);
         $delivery->statusHistories()->create(['status' => DeliveryStatus::Cancelled]);
+
+        try {
+            $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderCancelled);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return response()->json($delivery);
     }

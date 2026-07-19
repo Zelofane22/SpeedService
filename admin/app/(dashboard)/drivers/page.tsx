@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Truck, MoreHorizontal, UserCheck } from 'lucide-react'
+import { Truck, UserCheck } from 'lucide-react'
 import Card from '@/components/card'
 import SearchInput from '@/components/search-input'
+import UserActionsMenu from '@/components/user-actions-menu'
+import UserDetailDialog from '@/components/user-detail-dialog'
 import { getAdminDrivers, toggleDriverActive } from '@/lib/api/admin'
 import type { AdminDriver } from '@/types/admin'
 import { cn } from '@/lib/utils'
@@ -64,11 +66,12 @@ function DriverStatusBadge({ driver }: DriverStatusBadgeProps) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function CouriersPage() {
+export default function DriversPage() {
   const [drivers, setDrivers] = useState<AdminDriver[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [selectedDriver, setSelectedDriver] = useState<AdminDriver | null>(null)
 
   function load(searchValue: string) {
     setLoading(true)
@@ -97,6 +100,9 @@ export default function CouriersPage() {
       const updated = await toggleDriverActive(driver.id, !driver.is_active)
       setDrivers((prev) =>
         prev.map((d) => (d.id === driver.id ? { ...d, ...updated } : d)),
+      )
+      setSelectedDriver((prev) =>
+        prev && prev.id === driver.id ? { ...prev, ...updated } : prev,
       )
     } catch (err) {
       console.error('Erreur toggle livreur', err)
@@ -203,7 +209,13 @@ export default function CouriersPage() {
                         <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
                           <Truck size={14} className="text-amber-600" />
                         </div>
-                        <span className="text-sm font-semibold">{d.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDriver({ ...d, role: 'driver' })}
+                          className="text-left text-sm font-semibold text-foreground underline-offset-4 transition hover:text-primary hover:underline"
+                        >
+                          {d.name}
+                        </button>
                       </div>
                     </td>
                     {/* Téléphone */}
@@ -223,15 +235,13 @@ export default function CouriersPage() {
                     {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
-                        <button
-                          className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
-                          title="Plus d'actions"
-                        >
-                          <MoreHorizontal
-                            size={15}
-                            className="text-muted-foreground"
-                          />
-                        </button>
+                        <UserActionsMenu
+                          userId={d.id}
+                          userName={d.name}
+                          onDeleted={(id) =>
+                            setDrivers((prev) => prev.filter((x) => x.id !== id))
+                          }
+                        />
                         <button
                           onClick={() => handleToggleActive(d)}
                           disabled={togglingId === d.id}
@@ -257,6 +267,27 @@ export default function CouriersPage() {
           </table>
           </div>
         </Card>
+      )}
+
+      {selectedDriver && (
+        <UserDetailDialog
+          user={selectedDriver}
+          title="Détails livreur"
+          onClose={() => setSelectedDriver(null)}
+          onToggleDriverActive={handleToggleActive}
+          onUpdated={(updated) => {
+            setSelectedDriver((prev) => prev && prev.id === updated.id ? { ...prev, ...updated } : prev)
+            setDrivers((prev) =>
+              updated.role && updated.role !== 'driver'
+                ? prev.filter((driver) => driver.id !== updated.id)
+                : prev.map((driver) => driver.id === updated.id ? { ...driver, ...updated } : driver),
+            )
+          }}
+          onDeleted={(id) => {
+            setSelectedDriver(null)
+            setDrivers((prev) => prev.filter((driver) => driver.id !== id))
+          }}
+        />
       )}
     </div>
   )

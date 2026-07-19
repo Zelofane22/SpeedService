@@ -1,11 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { User, Eye, Edit } from 'lucide-react'
+import { User, Eye, Download } from 'lucide-react'
 import Card from '@/components/card'
+import { EmptyState } from '@/components/empty-state'
 import SearchInput from '@/components/search-input'
+import UserActionsMenu from '@/components/user-actions-menu'
+import UserDetailDialog from '@/components/user-detail-dialog'
 import { getAdminUsers } from '@/lib/api/admin'
+import { exportRowsToCsv } from '@/lib/export'
 import type { AdminUser } from '@/types/admin'
 
 // ---------------------------------------------------------------------------
@@ -44,10 +47,10 @@ const TABLE_HEADERS = [
 // ---------------------------------------------------------------------------
 
 export default function ClientsPage() {
-  const router = useRouter()
   const [clients, setClients] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [selectedClient, setSelectedClient] = useState<AdminUser | null>(null)
 
   function load(searchValue: string) {
     setLoading(true)
@@ -71,6 +74,19 @@ export default function ClientsPage() {
     load(value)
   }
 
+  function handleExport() {
+    exportRowsToCsv('speedservice-clients.csv', [
+      { header: 'Nom', value: (row) => row.name },
+      { header: 'Email', value: (row) => row.email },
+      { header: 'Téléphone', value: (row) => row.phone },
+      { header: 'Ville', value: (row) => row.city },
+      { header: 'Commandes', value: (row) => row.deliveries_count },
+      { header: 'Total dépensé FCFA', value: (row) => row.total_spent_xof },
+      { header: 'Depuis', value: (row) => formatDate(row.created_at) },
+      { header: 'Statut', value: () => 'Actif' },
+    ], clients)
+  }
+
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Header */}
@@ -78,12 +94,22 @@ export default function ClientsPage() {
         <h1 className="text-2xl font-bold text-foreground shrink-0">
           Gestion des clients
         </h1>
-        <div className="w-full sm:w-72">
-          <SearchInput
-            placeholder="Rechercher un client…"
-            value={search}
-            onChange={handleSearchChange}
-          />
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="w-full sm:w-72">
+            <SearchInput
+              placeholder="Rechercher un client…"
+              value={search}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleExport}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/20 hover:text-foreground"
+          >
+            <Download size={16} aria-hidden="true" />
+            Exporter
+          </button>
         </div>
       </div>
 
@@ -115,9 +141,12 @@ export default function ClientsPage() {
                 <tr>
                   <td
                     colSpan={TABLE_HEADERS.length}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    className="px-5 py-8"
                   >
-                    Aucun client trouvé
+                    <EmptyState
+                      title="Aucun client trouvé"
+                      description="Essayez une recherche plus large ou vérifiez que les comptes clients existent."
+                    />
                   </td>
                 </tr>
               ) : (
@@ -132,7 +161,13 @@ export default function ClientsPage() {
                         <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
                           <User size={14} className="text-primary" />
                         </div>
-                        <span className="text-sm font-semibold">{c.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedClient(c)}
+                          className="text-left text-sm font-semibold text-foreground underline-offset-4 transition hover:text-primary hover:underline"
+                        >
+                          {c.name}
+                        </button>
                       </div>
                     </td>
                     {/* Téléphone */}
@@ -163,18 +198,20 @@ export default function ClientsPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => router.push(`/clients/${c.id}`)}
+                          type="button"
+                          onClick={() => setSelectedClient(c)}
                           className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
                           title="Voir le profil"
                         >
                           <Eye size={15} className="text-muted-foreground" />
                         </button>
-                        <button
-                          className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
-                          title="Modifier"
-                        >
-                          <Edit size={15} className="text-muted-foreground" />
-                        </button>
+                        <UserActionsMenu
+                          userId={c.id}
+                          userName={c.name}
+                          onDeleted={(id) =>
+                            setClients((prev) => prev.filter((x) => x.id !== id))
+                          }
+                        />
                       </div>
                     </td>
                   </tr>
@@ -184,6 +221,26 @@ export default function ClientsPage() {
           </table>
           </div>
         </Card>
+      )}
+
+      {selectedClient && (
+        <UserDetailDialog
+          user={selectedClient}
+          title="Détails client"
+          onClose={() => setSelectedClient(null)}
+          onUpdated={(updated) => {
+            setSelectedClient((prev) => prev && prev.id === updated.id ? { ...prev, ...updated } : prev)
+            setClients((prev) =>
+              updated.role && updated.role !== 'client'
+                ? prev.filter((client) => client.id !== updated.id)
+                : prev.map((client) => client.id === updated.id ? { ...client, ...updated } : client),
+            )
+          }}
+          onDeleted={(id) => {
+            setSelectedClient(null)
+            setClients((prev) => prev.filter((client) => client.id !== id))
+          }}
+        />
       )}
     </div>
   )

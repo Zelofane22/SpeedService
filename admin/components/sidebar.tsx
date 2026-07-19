@@ -10,12 +10,17 @@ import {
   Truck,
   CreditCard,
   ClipboardList,
+  BarChart3,
+  Bell,
+  History,
+  ShieldCheck,
   Settings,
   LogOut,
   User,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getAdminAlerts } from '@/lib/api/admin'
 
 interface NavLink {
   href: string
@@ -31,6 +36,10 @@ const navLinks: NavLink[] = [
   { href: '/drivers', icon: Truck, label: 'Livreurs', exact: false },
   { href: '/payments', icon: CreditCard, label: 'Paiements', exact: false },
   { href: '/driver-applications', icon: ClipboardList, label: 'Candidatures', exact: false },
+  { href: '/reports', icon: BarChart3, label: 'Rapports', exact: false },
+  { href: '/alerts', icon: Bell, label: 'Alertes', exact: false },
+  { href: '/activity', icon: History, label: 'Journal', exact: false },
+  { href: '/access-privileges', icon: ShieldCheck, label: 'Accès & privilèges', exact: false },
   { href: '/settings', icon: Settings, label: 'Paramètres', exact: false },
 ]
 
@@ -48,6 +57,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = useState<UserInfo>({ name: '', email: '' })
+  const [alertCount, setAlertCount] = useState(0)
 
   useEffect(() => {
     try {
@@ -60,6 +70,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       // ignore parse errors
     }
   }, [])
+
+  // Recharge le compteur d'alertes à chaque navigation (les alertes évoluent
+  // au rythme des actions admin : validation de paiement, assignation…)
+  useEffect(() => {
+    getAdminAlerts()
+      .then((res) => setAlertCount(res.total ?? 0))
+      .catch(() => setAlertCount(0))
+  }, [pathname])
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
@@ -83,15 +101,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   return (
     <>
-      <div
+      <button
+        type="button"
+        aria-label="Fermer le menu"
         className={cn(
-          'fixed inset-0 z-40 bg-black/40 transition-opacity lg:hidden',
+          'fixed inset-0 z-40 border-0 bg-black/40 transition-opacity lg:hidden',
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         )}
         onClick={onClose}
       />
 
       <aside
+        id="admin-navigation"
+        aria-label="Navigation principale"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 max-w-full flex-col bg-card border-r border-border h-screen overflow-y-auto shadow-2xl transition-transform lg:static lg:translate-x-0 lg:flex lg:w-60',
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -101,7 +123,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <span className="text-xl font-extrabold text-primary">SpeedService</span>
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
             onClick={onClose}
             aria-label="Fermer le menu"
           >
@@ -126,6 +148,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all',
                   active
@@ -135,7 +158,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 onClick={onClose}
               >
                 <Icon size={16} />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {link.href === '/alerts' && alertCount > 0 && (
+                  <span
+                    className={cn(
+                      'min-w-5 h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center',
+                      active ? 'bg-white/20 text-white' : 'bg-red-500 text-white'
+                    )}
+                  >
+                    {alertCount > 99 ? '99+' : alertCount}
+                  </span>
+                )}
               </Link>
             )
           })}

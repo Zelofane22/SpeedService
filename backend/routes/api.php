@@ -60,6 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Driver routes
     Route::prefix('driver')->group(function () {
+        Route::get('/profile', [DriverController::class, 'profile']);
+        Route::patch('/availability', [DriverController::class, 'updateAvailability']);
         Route::get('/missions/available', [DriverController::class, 'availableMissions']);
         Route::get('/missions', [DriverController::class, 'myMissions']);
         Route::post('/missions/{id}/accept', [DriverController::class, 'acceptMission']);
@@ -71,9 +73,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
+        Route::get('/alerts', [AdminController::class, 'alerts']);
+        Route::get('/activity-log', [AdminController::class, 'activityLog']);
         Route::get('/users', [AdminController::class, 'listUsers']);
         Route::get('/users/{id}', [AdminController::class, 'showUser']);
-        Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+
+        // Actions sensibles réservées au super administrateur
+        Route::middleware('superadmin')->group(function () {
+            Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+            Route::patch('/users/{id}/password', [AdminController::class, 'resetUserPassword']);
+            Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+        });
+
         Route::get('/deliveries', [AdminController::class, 'listDeliveries']);
         Route::get('/deliveries/{id}', [AdminController::class, 'showDelivery']);
         Route::patch('/deliveries/{id}/status', [AdminController::class, 'updateDeliveryStatus']);

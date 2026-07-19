@@ -1,5 +1,5 @@
-FROM node:22-slim AS base
-RUN npm install -g pnpm
+FROM node:24-slim AS base
+RUN npm install -g pnpm@10.34.3
 
 FROM base AS deps
 WORKDIR /app
@@ -22,7 +22,7 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN pnpm --filter speedservice-admin build
 
-FROM node:22-slim AS runner
+FROM node:24-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/admin/.next/standalone ./
@@ -30,4 +30,5 @@ COPY --from=builder /app/admin/.next/static ./admin/.next/static
 EXPOSE 3001
 ENV PORT=3001
 ENV HOSTNAME=0.0.0.0
+WORKDIR /app/admin
 CMD ["node", "server.js"]

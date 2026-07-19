@@ -402,7 +402,7 @@ export default function NewDeliveryPage() {
               ].map(({ l, v }) => (
                 <div key={l} className="bg-brand-muted/30 rounded-2xl p-4">
                   <p className="text-xs text-gray-700 mb-1">{l}</p>
-                  <p className="text-sm font-semibold text-brand-foreground break-words">{v}</p>
+                  <p className="text-sm font-semibold text-brand-foreground wrap-break-word">{v}</p>
                 </div>
               ))}
             </div>
@@ -422,8 +422,8 @@ export default function NewDeliveryPage() {
             <h2 className="text-lg font-bold text-brand-foreground sm:text-xl">Choisir le service</h2>
             <div className="space-y-3">
               {([
-                { id: 'standard', label: 'Livraison Standard', delay: '24-48 heures', Icon: Clock },
-                { id: 'express',  label: 'Livraison Express',  delay: '2-4 heures',  Icon: Zap },
+                { id: 'standard', label: 'Livraison Standard', delay: '24-48 h', Icon: Clock },
+                { id: 'express',  label: 'Livraison Express',  delay: '2-4 h',  Icon: Zap },
               ] as const).map(({ id, label, delay, Icon }) => (
                 <label
                   key={id}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Package, Truck, CheckCircle, PlusCircle, ChevronRight, Eye } from 'lucide-react'
 import { useAuthUser } from '@/lib/auth-context'
@@ -32,16 +32,56 @@ function shortAddress(addr: string) {
   return parts[0]?.trim() ?? addr
 }
 
+function fetchDeliveries() {
+  return apiGet<Delivery[]>('/deliveries')
+}
+
 export default function DashboardPage() {
   const { user } = useAuthUser()
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+
+  const loadDeliveries = useCallback(async () => {
+    setLoading(true)
+    setLoadError(false)
+
+    try {
+      setDeliveries(await fetchDeliveries())
+    } catch {
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    apiGet<Delivery[]>('/deliveries')
-      .then(setDeliveries)
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    let ignore = false
+
+    async function loadInitialDeliveries() {
+      try {
+        const initialDeliveries = await fetchDeliveries()
+
+        if (!ignore) {
+          setDeliveries(initialDeliveries)
+          setLoadError(false)
+        }
+      } catch {
+        if (!ignore) {
+          setLoadError(true)
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadInitialDeliveries()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   const total     = deliveries.length
@@ -75,7 +115,7 @@ export default function DashboardPage() {
             {loading ? (
               <div className="h-7 w-16 bg-brand-muted animate-pulse rounded-lg mb-1" />
             ) : (
-              <p className="text-xl font-bold text-brand-foreground mb-1 break-words sm:text-2xl">{k.value}</p>
+              <p className="text-xl font-bold text-brand-foreground mb-1 wrap-break-word sm:text-2xl">{k.value}</p>
             )}
             <p className="text-xs text-gray-700">{k.label}</p>
             <p className="text-xs text-gray-700 font-medium mt-1">{k.change}</p>
@@ -91,10 +131,28 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-brand-border shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-brand-border shadow-sm overflow-hidden" aria-busy={loading}>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center justify-center py-16" role="status">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+            <span className="sr-only">Chargement des livraisons…</span>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+              <Package size={28} className="text-red-600" aria-hidden="true" />
+            </div>
+            <h3 className="text-base font-semibold text-brand-foreground mb-1">Vos livraisons sont indisponibles</h3>
+            <p className="max-w-sm text-sm text-gray-700 mb-6">
+              Vérifiez votre connexion, puis réessayez. Vos commandes ne sont pas perdues.
+            </p>
+            <button
+              type="button"
+              onClick={() => void loadDeliveries()}
+              className="min-h-11 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              Réessayer
+            </button>
           </div>
         ) : recent.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
