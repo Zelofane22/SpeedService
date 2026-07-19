@@ -19,15 +19,15 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@types/node": "24.13.3",
+    "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "class-variance-authority": "^0.7.1",
-    "eslint": "^9.39.4",
+    "eslint": "^10.7.0",
     "eslint-config-next": "16.2.10",
-    "postcss": "^8.5.17",
-    "tailwindcss": "^4.3.2",
-    "typescript": "^6.0.3"
+    "postcss": "^8.5.20",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
   }
 }
