@@ -113,9 +113,13 @@ class DriverController extends Controller
         return response()->json($missions);
     }
 
-    public function confirmPayment(string $id): JsonResponse
+    public function confirmPayment(Request $request, string $id): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
+
+        $request->validate([
+            'confirmation' => ['required', 'string', 'in:PAIEMENTRECU'],
+        ]);
 
         $delivery = Delivery::where('driver_id', Auth::id())
             ->where('status', DeliveryStatus::PickingUp)

@@ -38,6 +38,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+✅ Terminé : confirmation paiement physique livreur après clic "Colis récupéré" — le bouton conserve l’action de récupération, ouvre une fenêtre de saisie `PAIEMENTRECU`, envoie le mot-clé à l’API, et le backend refuse la confirmation sans ce mot-clé. Test backend ciblé ajouté. Validation : `git diff --check` au vert, syntaxe PHP du contrôleur via Docker au vert ; `artisan test --filter=DriverPaymentConfirmationTest` non exécuté car l'image backend installée n'inclut pas la commande `test`, lint driver non exécuté car `corepack`/Node/pnpm sont absents de l'environnement.
+
 ✅ Terminé : changement de rôle utilisateur supprimé pour clients/livreurs/admins, y compris super-admin — action retirée du dialogue utilisateur, du client API admin, de l’écran Accès & privilèges et de la route backend ; tests admin ajustés pour vérifier l’immutabilité du rôle. Validation : `docker compose build admin`, syntaxe PHP via image `speedservice-backend`, `php artisan test --filter=AdminControllerTest` et `php artisan test --filter=SuperAdminUserActionsTest` au vert.
 
 ✅ Terminé : correction superposition carte Leaflet / navbar mobile — conteneur Leaflet isolé dans son stacking context et navbar mobile remontée en `z-40`. Validation : `git diff --check -- AIorchestration.md frontend/app/globals.css frontend/app/(dashboard)/layout.tsx` au vert ; lint frontend non exécuté car `corepack` est absent de l'environnement.
