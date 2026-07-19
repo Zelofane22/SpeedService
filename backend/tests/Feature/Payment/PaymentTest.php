@@ -28,6 +28,7 @@ class PaymentTest extends TestCase
         'content_category' => 'clothing',
         'delivery_type'    => 'standard',
         'payment_method'   => 'mtn_momo',
+        'distance'         => 7.2,
     ];
 
     protected function setUp(): void

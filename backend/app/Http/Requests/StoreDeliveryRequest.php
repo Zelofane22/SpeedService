@@ -38,7 +38,12 @@ class StoreDeliveryRequest extends FormRequest
 
             'delivery_type'  => ['required', new Enum(DeliveryType::class)],
             'payment_method' => ['required', new Enum(PaymentMethod::class)],
-            'distance'       => ['nullable', 'numeric', 'min:0'],
+            'distance'       => [
+                'required_without:pickup_latitude,pickup_longitude,delivery_latitude,delivery_longitude',
+                'nullable',
+                'numeric',
+                'min:0.01',
+            ],
         ];
     }
 }

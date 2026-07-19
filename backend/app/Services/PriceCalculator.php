@@ -2,22 +2,34 @@
 
 namespace App\Services;
 
-use App\Enums\DeliveryType;
-use App\Enums\PackageType;
-
 class PriceCalculator
 {
-    private const BASE_PRICES = [
-        PackageType::Document->value => 1500,
-        PackageType::Small->value    => 2500,
-        PackageType::Medium->value   => 4000,
-        PackageType::Large->value    => 6500,
-    ];
+    public const PRICE_PER_KM = 200;
 
-    public static function calculate(PackageType $packageType, DeliveryType $deliveryType): int
+    public static function calculate(float $distanceKm): int
     {
-        $base = self::BASE_PRICES[$packageType->value] ?? 2500;
+        if ($distanceKm <= 0) {
+            return 0;
+        }
 
-        return $deliveryType === DeliveryType::Express ? $base * 2 : $base;
+        return (int) ceil($distanceKm) * self::PRICE_PER_KM;
+    }
+
+    public static function estimateDistanceKm(
+        float $pickupLatitude,
+        float $pickupLongitude,
+        float $deliveryLatitude,
+        float $deliveryLongitude,
+    ): float {
+        $earthRadiusKm = 6371;
+        $latDelta = deg2rad($deliveryLatitude - $pickupLatitude);
+        $lonDelta = deg2rad($deliveryLongitude - $pickupLongitude);
+
+        $a = sin($latDelta / 2) ** 2
+            + cos(deg2rad($pickupLatitude))
+            * cos(deg2rad($deliveryLatitude))
+            * sin($lonDelta / 2) ** 2;
+
+        return $earthRadiusKm * 2 * atan2(sqrt($a), sqrt(1 - $a)) * 1.3;
     }
 }

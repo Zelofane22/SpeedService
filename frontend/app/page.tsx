@@ -9,15 +9,15 @@ const pricingPlans = [
   {
     id: 'standard',
     name: 'Standard',
-    price: '1 500 FCFA',
-    detail: 'Livraison sous 24-48 h a Cotonou',
+    price: '200 FCFA/km',
+    detail: 'Livraison sous 24-48 h, calculee entre collecte et destination',
     icon: Package,
   },
   {
     id: 'express',
     name: 'Express',
-    price: '2 500 FCFA',
-    detail: 'Express 2-4 h selon disponibilite',
+    price: '200 FCFA/km',
+    detail: 'Express 2-4 h selon disponibilite livreur',
     icon: Zap,
   },
   {
@@ -240,7 +240,7 @@ export default function HomePage() {
           <div className="mb-12 max-w-2xl">
             <h2 className="text-4xl font-bold mb-4 text-brand-foreground">Tarifs simples pour envoyer vite</h2>
             <p className="text-gray-500 leading-relaxed">
-              Les prix demarrent a Cotonou et sont confirmes avant paiement selon la distance, le type de colis et le niveau de priorite.
+              Les prix sont confirmes avant paiement selon la distance exacte entre le point de collecte et le point de livraison.
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -260,7 +260,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mt-6 text-sm text-gray-500">
-            Hors formats volumineux ou trajets interurbains specifiques. Le montant final est affiche avant validation de la commande.
+            Les livreurs operent depuis la zone d&apos;Akpakpa, mais le montant facture au client ne compte que le trajet entre l&apos;emetteur et le destinataire.
           </p>
         </div>
       </section>

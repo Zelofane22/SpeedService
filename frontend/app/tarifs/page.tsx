@@ -3,28 +3,28 @@ import { PublicPage } from '../public-page'
 
 export const metadata: Metadata = {
   title: 'Tarifs',
-  description: 'Tarifs SpeedService pour les livraisons standard, express et entreprise au Benin.',
+  description: 'Tarifs SpeedService a 200 FCFA par kilometre entre collecte et livraison au Benin.',
 }
 
 export default function PricingPage() {
   return (
     <PublicPage
       title="Tarifs SpeedService"
-      subtitle="Choisissez le niveau de service adapte a votre colis. Le prix final est confirme avant paiement selon la distance, le volume et la ville de livraison."
+      subtitle="Le prix de livraison est calcule a 200 FCFA par kilometre entre le point de collecte et le destinataire, puis confirme avant paiement."
       sections={[
         {
           id: 'standard',
-          title: 'Standard - des 1 500 FCFA',
-          body: 'Livraison planifiee sous 24h a Cotonou pour les colis courants. Ideal pour les envois non urgents et les commandes recurrentes.',
+          title: 'Standard - 200 FCFA/km',
+          body: 'Livraison planifiee sous 24-48 h. Le montant depend uniquement de la distance entre l\'emetteur et le destinataire.',
         },
         {
           id: 'express',
-          title: 'Express - des 2 500 FCFA',
-          body: 'Priorite de collecte et livraison ciblee en 2h lorsque la zone et la disponibilite livreur le permettent.',
+          title: 'Express - 200 FCFA/km',
+          body: 'Priorite de collecte et livraison ciblee en 2-4 h lorsque la zone et la disponibilite livreur le permettent.',
         },
         {
           title: 'Interurbain',
-          body: 'Les trajets vers Porto-Novo, Abomey-Calavi, Parakou et les autres villes sont calcules selon la distance et le type de colis.',
+          body: 'Les trajets vers Porto-Novo, Abomey-Calavi, Parakou et les autres villes restent calcules selon la distance exacte de livraison.',
         },
         {
           id: 'entreprise',

@@ -47,18 +47,13 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// ─── Price table ──────────────────────────────────────────────────────────────
+// ─── Distance pricing ────────────────────────────────────────────────────────
 
-const BASE_PRICES: Record<string, number> = {
-  document: 1500,
-  small:    2500,
-  medium:   4000,
-  large:    6500,
-}
+const PRICE_PER_KM = 200
 
-function calcPrice(packageType: string, deliveryType: 'standard' | 'express'): number {
-  const base = BASE_PRICES[packageType] ?? 2500
-  return deliveryType === 'express' ? base * 2 : base
+function calcPrice(distanceKm: number | null): number {
+  if (distanceKm === null || distanceKm <= 0) return 0
+  return Math.ceil(distanceKm) * PRICE_PER_KM
 }
 
 function fmtPrice(n: number) {
@@ -140,10 +135,10 @@ function FieldSelect({
 const STEPS = ['Expéditeur', 'Destinataire', 'Colis', 'Récapitulatif', 'Paiement']
 
 const PACKAGE_TYPES = [
-  { value: 'document', label: 'Document (< 0,5 kg) — 1 500 FCFA' },
-  { value: 'small',    label: 'Petit colis (0,5–2 kg) — 2 500 FCFA' },
-  { value: 'medium',   label: 'Colis moyen (2–5 kg) — 4 000 FCFA' },
-  { value: 'large',    label: 'Grand colis (5–10 kg) — 6 500 FCFA' },
+  { value: 'document', label: 'Document (< 0,5 kg)' },
+  { value: 'small',    label: 'Petit colis (0,5–2 kg)' },
+  { value: 'medium',   label: 'Colis moyen (2–5 kg)' },
+  { value: 'large',    label: 'Grand colis (5–10 kg)' },
 ]
 
 const CATEGORIES = [
@@ -272,7 +267,7 @@ export default function NewDeliveryPage() {
     }
   }
 
-  const price = calcPrice(form.package_type, form.delivery_type)
+  const price = calcPrice(distance)
 
   // ── Wizard ─────────────────────────────────────────────────────────────────
   return (
@@ -407,10 +402,16 @@ export default function NewDeliveryPage() {
               ))}
             </div>
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
-              <p className="text-xs text-gray-700 mb-3">Le service (Standard / Express) sera sélectionné à l&apos;étape suivante.</p>
+              <p className="text-xs text-gray-700 mb-3">Le prix est calculé uniquement sur la distance entre le point de collecte et le point de livraison.</p>
+              {distance !== null && (
+                <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-gray-700">Distance estimée</span>
+                  <span className="font-medium">{distance.toFixed(1)} km</span>
+                </div>
+              )}
               <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-gray-700">Tarif Standard estimé</span>
-                <span className="font-medium">{fmtPrice(BASE_PRICES[form.package_type] ?? 2500)}</span>
+                <span className="text-gray-700">Tarif estimé · {PRICE_PER_KM} FCFA/km</span>
+                <span className="font-medium">{fmtPrice(price)}</span>
               </div>
             </div>
           </div>
@@ -441,7 +442,7 @@ export default function NewDeliveryPage() {
                     <p className="text-sm font-semibold text-brand-foreground">{label}</p>
                     <p className="text-xs text-gray-700">{delay}</p>
                   </div>
-                  <p className="shrink-0 text-sm font-bold text-primary">{fmtPrice(calcPrice(form.package_type, id))}</p>
+                  <p className="shrink-0 text-sm font-bold text-primary">{fmtPrice(price)}</p>
                 </label>
               ))}
             </div>

@@ -30,6 +30,7 @@ class DeliveryTest extends TestCase
         'content_category' => 'clothing',
         'delivery_type'    => 'standard',
         'payment_method'   => 'mtn_momo',
+        'distance'         => 7.2,
     ];
 
     protected function setUp(): void
@@ -90,30 +91,43 @@ class DeliveryTest extends TestCase
         $data = $response->json();
         $this->assertEquals('awaiting_payment', $data['status']);
         $this->assertStringStartsWith('SS-', $data['reference']);
-        $this->assertEquals(2500, (int) $data['price']);
+        $this->assertEquals(1600, (int) $data['price']);
+        $this->assertEquals(7.2, (float) $data['distance']);
     }
 
-    public function test_price_is_correct_for_each_package_type(): void
+    public function test_price_is_calculated_at_200_fcfa_per_started_kilometer(): void
     {
         $cases = [
-            'document' => ['standard' => 1500, 'express' => 3000],
-            'small'    => ['standard' => 2500, 'express' => 5000],
-            'medium'   => ['standard' => 4000, 'express' => 8000],
-            'large'    => ['standard' => 6500, 'express' => 13000],
+            [1.0, 200],
+            [1.1, 400],
+            [7.2, 1600],
         ];
 
-        foreach ($cases as $type => $prices) {
-            foreach ($prices as $deliveryType => $expected) {
-                $response = $this->postJson('/api/deliveries', [
-                    ...$this->validPayload,
-                    'package_type'  => $type,
-                    'delivery_type' => $deliveryType,
-                ], $this->auth());
+        foreach ($cases as [$distance, $expected]) {
+            $response = $this->postJson('/api/deliveries', [
+                ...$this->validPayload,
+                'distance' => $distance,
+            ], $this->auth());
 
-                $response->assertCreated();
-                $this->assertEquals($expected, (int) $response->json('price'), "Failed for {$type}/{$deliveryType}");
-            }
+            $response->assertCreated();
+            $this->assertEquals($expected, (int) $response->json('price'), "Failed for {$distance} km");
         }
+    }
+
+    public function test_coordinates_override_submitted_distance_for_price(): void
+    {
+        $response = $this->postJson('/api/deliveries', [
+            ...$this->validPayload,
+            'distance' => 12,
+            'pickup_latitude' => 0,
+            'pickup_longitude' => 0,
+            'delivery_latitude' => 0,
+            'delivery_longitude' => 0.01,
+        ], $this->auth());
+
+        $response->assertCreated();
+        $this->assertEquals(400, (int) $response->json('price'));
+        $this->assertEquals(1.45, (float) $response->json('distance'));
     }
 
     public function test_payment_record_is_created_with_pending_status(): void
@@ -146,7 +160,7 @@ class DeliveryTest extends TestCase
             ->assertJsonValidationErrors([
                 'sender_name', 'sender_phone', 'pickup_address',
                 'recipient_name', 'recipient_phone', 'delivery_address',
-                'package_type', 'content_category', 'delivery_type', 'payment_method',
+                'package_type', 'content_category', 'delivery_type', 'payment_method', 'distance',
             ]);
     }
 

@@ -48,4 +48,27 @@ class DriverAvailabilityTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonFragment(['message' => 'Passez en ligne pour accepter une mission.']);
     }
+
+    public function test_driver_cannot_accept_more_than_one_active_mission(): void
+    {
+        $driver = User::factory()->driver()->create(['is_online' => true]);
+        Delivery::factory()->create([
+            'driver_id' => $driver->id,
+            'status' => DeliveryStatus::Assigned,
+        ]);
+        $available = Delivery::factory()->create(['status' => DeliveryStatus::Confirmed]);
+
+        $this->actingAs($driver, 'sanctum')
+            ->postJson("/api/driver/missions/{$available->id}/accept")
+            ->assertUnprocessable()
+            ->assertJsonFragment([
+                'message' => 'Terminez votre mission en cours avant d’en accepter une autre.',
+            ]);
+
+        $this->assertDatabaseHas('deliveries', [
+            'id' => $available->id,
+            'driver_id' => null,
+            'status' => DeliveryStatus::Confirmed->value,
+        ]);
+    }
 }

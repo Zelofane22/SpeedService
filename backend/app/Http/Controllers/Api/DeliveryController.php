@@ -39,7 +39,8 @@ class DeliveryController extends Controller
     {
         $packageType  = PackageType::from($request->package_type);
         $deliveryType = DeliveryType::from($request->delivery_type);
-        $price        = PriceCalculator::calculate($packageType, $deliveryType);
+        $distance     = $this->resolveDistance($request);
+        $price        = PriceCalculator::calculate($distance);
         $reference    = 'SS-' . now()->year . '-' . strtoupper(Str::random(6));
 
         $delivery = Delivery::create([
@@ -62,7 +63,7 @@ class DeliveryController extends Controller
             'delivery_address'    => $request->delivery_address,
             'delivery_latitude'   => $request->delivery_latitude,
             'delivery_longitude'  => $request->delivery_longitude,
-            'distance'            => $request->distance,
+            'distance'            => $distance,
         ]);
 
         $delivery->statusHistories()->create(['status' => DeliveryStatus::AwaitingPayment]);
@@ -90,6 +91,25 @@ class DeliveryController extends Controller
         }
 
         return response()->json($delivery->load('payment', 'statusHistories'), 201);
+    }
+
+    private function resolveDistance(StoreDeliveryRequest $request): float
+    {
+        if (
+            $request->filled('pickup_latitude')
+            && $request->filled('pickup_longitude')
+            && $request->filled('delivery_latitude')
+            && $request->filled('delivery_longitude')
+        ) {
+            return round(PriceCalculator::estimateDistanceKm(
+                (float) $request->pickup_latitude,
+                (float) $request->pickup_longitude,
+                (float) $request->delivery_latitude,
+                (float) $request->delivery_longitude,
+            ), 2);
+        }
+
+        return round((float) $request->distance, 2);
     }
 
     public function show(string $id): JsonResponse

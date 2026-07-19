@@ -14,10 +14,17 @@ use App\Services\DeliveryNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DriverController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
+
+    private const ACTIVE_MISSION_STATUSES = [
+        DeliveryStatus::Assigned,
+        DeliveryStatus::PickingUp,
+        DeliveryStatus::InDelivery,
+    ];
 
     private function ensureDriver(): ?JsonResponse
     {
@@ -168,27 +175,51 @@ class DriverController extends Controller
             return response()->json(['message' => 'Passez en ligne pour accepter une mission.'], 422);
         }
 
-        $delivery = Delivery::whereNull('driver_id')
-            ->where(function ($q) {
-                $q->where('status', DeliveryStatus::Confirmed)
-                  ->orWhere(function ($q2) {
-                      $q2->where('status', DeliveryStatus::AwaitingValidation)
-                         ->whereHas('payment', fn ($p) => $p->whereIn('method', [
-                             PaymentMethod::CashOnDelivery->value,
-                             PaymentMethod::Agency->value,
-                         ]));
-                  });
-            })
-            ->findOrFail($id);
+        $delivery = DB::transaction(function () use ($id) {
+            Auth::user()->newQuery()
+                ->whereKey(Auth::id())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $delivery->update([
-            'status'    => DeliveryStatus::Assigned,
-            'driver_id' => Auth::id(),
-        ]);
+            $hasActiveMission = Delivery::where('driver_id', Auth::id())
+                ->whereIn('status', array_map(fn (DeliveryStatus $status) => $status->value, self::ACTIVE_MISSION_STATUSES))
+                ->exists();
 
-        $delivery->statusHistories()->create([
-            'status' => DeliveryStatus::Assigned,
-        ]);
+            if ($hasActiveMission) {
+                return null;
+            }
+
+            $delivery = Delivery::whereNull('driver_id')
+                ->where(function ($q) {
+                    $q->where('status', DeliveryStatus::Confirmed)
+                      ->orWhere(function ($q2) {
+                          $q2->where('status', DeliveryStatus::AwaitingValidation)
+                             ->whereHas('payment', fn ($p) => $p->whereIn('method', [
+                                 PaymentMethod::CashOnDelivery->value,
+                                 PaymentMethod::Agency->value,
+                             ]));
+                      });
+                })
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            $delivery->update([
+                'status'    => DeliveryStatus::Assigned,
+                'driver_id' => Auth::id(),
+            ]);
+
+            $delivery->statusHistories()->create([
+                'status' => DeliveryStatus::Assigned,
+            ]);
+
+            return $delivery;
+        });
+
+        if ($delivery === null) {
+            return response()->json([
+                'message' => 'Terminez votre mission en cours avant d’en accepter une autre.',
+            ], 422);
+        }
 
         try {
             $this->notifications->send(

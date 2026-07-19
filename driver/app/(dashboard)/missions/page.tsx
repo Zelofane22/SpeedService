@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { apiGet, apiPatch, apiPost, type DriverUser } from '@/lib/api-client'
 import { formatDriverLocalDate, parseApiDate } from '@/lib/utils'
 
@@ -53,6 +54,7 @@ function deliveredAt(mission: Mission) {
 }
 
 export default function MissionsPage() {
+  const router = useRouter()
   const [user, setUser]         = useState<DriverUser | null>(null)
   const [missions, setMissions] = useState<Mission[]>([])
   const [doneCount, setDoneCount] = useState(0)
@@ -85,6 +87,7 @@ export default function MissionsPage() {
     try {
       await apiPost(`/driver/missions/${id}/accept`, {})
       setMissions((ms) => ms.filter((m) => m.id !== id))
+      router.push('/active')
     } catch (e: unknown) {
       setError((e as Error).message ?? "Erreur lors de l'acceptation.")
     } finally {

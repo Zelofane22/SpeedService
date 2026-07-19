@@ -50,6 +50,7 @@ class DeliveryNotificationTest extends TestCase
             'content_category' => 'clothing',
             'delivery_type' => 'standard',
             'payment_method' => 'mtn_momo',
+            'distance' => 7.2,
         ], $this->token($this->client))->assertCreated();
 
         $this->postJson(
@@ -85,6 +86,7 @@ class DeliveryNotificationTest extends TestCase
             'content_category' => 'clothing',
             'delivery_type' => 'standard',
             'payment_method' => 'mtn_momo',
+            'distance' => 7.2,
         ], $this->token($this->client))->assertCreated();
 
         foreach (['in_app', 'email', 'sms'] as $channel) {
@@ -114,6 +116,7 @@ class DeliveryNotificationTest extends TestCase
             'content_category' => 'clothing',
             'delivery_type' => 'standard',
             'payment_method' => 'cash_on_delivery',
+            'distance' => 7.2,
         ], $this->token($this->client))->assertCreated();
 
         $this->postJson(

@@ -23,6 +23,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+✅ Terminé : tarification livraison à 200 FCFA/km entre émetteur et destinataire, localisation exacte recalculée côté backend, redirection livreur vers mission en cours après acceptation, et verrou serveur contre plus d'une mission active par livreur. Validation : syntaxe PHP Docker, tests `DeliveryTest`, `PaymentTest`, `DeliveryNotificationTest`, `DriverAvailabilityTest`, TypeScript frontend/driver, lint frontend au vert, lint driver au vert avec avertissement existant `eslint.config.mjs`, `git diff --check` au vert.
+
 <<<<<<< HEAD
 ✅ Terminé : confirmation paiement physique livreur après clic "Colis récupéré" — le bouton conserve l’action de récupération, ouvre une fenêtre de saisie `PAIEMENTRECU`, envoie le mot-clé à l’API, et le backend refuse la confirmation sans ce mot-clé. Test backend ciblé ajouté. Validation : `git diff --check` au vert, syntaxe PHP du contrôleur via Docker au vert ; `artisan test --filter=DriverPaymentConfirmationTest` non exécuté car l'image backend installée n'inclut pas la commande `test`, lint driver non exécuté car `corepack`/Node/pnpm sont absents de l'environnement.
 
