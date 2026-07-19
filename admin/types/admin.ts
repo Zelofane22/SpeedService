@@ -59,6 +59,16 @@ export interface AdminActivityLog {
   admin: { id: string; name: string; email?: string } | null
 }
 
+export interface AdminAccount {
+  id: string
+  name: string
+  email: string
+  phone?: string | null
+  is_super_admin: boolean
+  must_change_password?: boolean
+  created_at: string
+}
+
 export interface AdminUser {
   id: string
   name: string

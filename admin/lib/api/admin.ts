@@ -2,6 +2,7 @@ import type {
   AdminStats,
   AdminReports,
   AdminUser,
+  AdminAccount,
   AdminDelivery,
   AdminDriver,
   AdminPayment,
@@ -105,6 +106,47 @@ export function resetUserPassword(
 export function deleteUser(userId: string): Promise<void> {
   return apiFetch<void>(`/admin/users/${userId}`, {
     method: 'DELETE',
+  })
+}
+
+// Gestion des administrateurs (privilège & accès — super admin uniquement) ----
+
+type Paginated<T> = {
+  data: T[]
+  current_page: number
+  last_page: number
+  total: number
+}
+
+export function getAdmins(params?: {
+  page?: number
+  search?: string
+}): Promise<Paginated<AdminAccount>> {
+  return apiFetch<Paginated<AdminAccount>>(`/admin/admins${buildQuery(params)}`)
+}
+
+export function createAdmin(payload: {
+  name: string
+  email: string
+  phone?: string
+  password: string
+  is_super_admin?: boolean
+}): Promise<AdminAccount> {
+  return apiFetch<AdminAccount>('/admin/admins', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function toggleAdminSuper(adminId: string): Promise<AdminAccount> {
+  return apiFetch<AdminAccount>(`/admin/admins/${adminId}/super`, {
+    method: 'PATCH',
+  })
+}
+
+export function revokeAdmin(adminId: string): Promise<{ id: string; role: string }> {
+  return apiFetch<{ id: string; role: string }>(`/admin/admins/${adminId}/revoke`, {
+    method: 'PATCH',
   })
 }
 

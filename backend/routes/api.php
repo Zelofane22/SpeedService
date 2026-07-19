@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminManagementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DriverApplicationController;
 use App\Http\Controllers\Api\DeliveryController;
@@ -81,6 +82,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
             Route::patch('/users/{id}/password', [AdminController::class, 'resetUserPassword']);
             Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+
+            // Espace privilège & gestion des accès (gestion des administrateurs)
+            Route::get('/admins', [AdminManagementController::class, 'index']);
+            Route::post('/admins', [AdminManagementController::class, 'store']);
+            Route::patch('/admins/{id}/super', [AdminManagementController::class, 'toggleSuper']);
+            Route::patch('/admins/{id}/revoke', [AdminManagementController::class, 'revoke']);
         });
 
         Route::get('/deliveries', [AdminController::class, 'listDeliveries']);

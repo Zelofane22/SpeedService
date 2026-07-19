@@ -14,18 +14,21 @@ import {
   Bell,
   History,
   Settings,
+  ShieldCheck,
   LogOut,
   User,
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getAdminAlerts } from '@/lib/api/admin'
+import { isSuperAdmin } from '@/lib/current-user'
 
 interface NavLink {
   href: string
   icon: React.ElementType
   label: string
   exact: boolean
+  superAdminOnly?: boolean
 }
 
 const navLinks: NavLink[] = [
@@ -38,6 +41,7 @@ const navLinks: NavLink[] = [
   { href: '/reports', icon: BarChart3, label: 'Rapports', exact: false },
   { href: '/alerts', icon: Bell, label: 'Alertes', exact: false },
   { href: '/activity', icon: History, label: 'Journal', exact: false },
+  { href: '/access', icon: ShieldCheck, label: 'Accès & privilèges', exact: false, superAdminOnly: true },
   { href: '/settings', icon: Settings, label: 'Paramètres', exact: false },
 ]
 
@@ -56,6 +60,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const router = useRouter()
   const [user, setUser] = useState<UserInfo>({ name: '', email: '' })
   const [alertCount, setAlertCount] = useState(0)
+  const [superAdmin, setSuperAdmin] = useState(false)
 
   useEffect(() => {
     try {
@@ -67,7 +72,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     } catch {
       // ignore parse errors
     }
+    setSuperAdmin(isSuperAdmin())
   }, [])
+
+  // Les entrées réservées au super admin ne sont visibles qu'après lecture du
+  // flag (localStorage) côté client. La garde backend reste la source de vérité.
+  const visibleLinks = navLinks.filter((link) => !link.superAdminOnly || superAdmin)
 
   // Recharge le compteur d'alertes à chaque navigation (les alertes évoluent
   // au rythme des actions admin : validation de paiement, assignation…)
@@ -139,7 +149,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         <nav className="p-3 flex-1 space-y-1">
-          {navLinks.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = link.icon
             const active = isActive(link)
             return (
