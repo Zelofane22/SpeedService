@@ -38,7 +38,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
-🔒 En cours : suppression du changement de rôle utilisateur client/livreur — fichiers concernés : `admin/components/user-detail-dialog.tsx`, `admin/lib/api/admin.ts`, `admin/app/(dashboard)/activity/page.tsx`, `admin/app/(dashboard)/access-privileges/page.tsx`, `admin/app/(dashboard)/clients/page.tsx`, `admin/app/(dashboard)/drivers/page.tsx`, `backend/routes/api.php`, `backend/app/Http/Controllers/Api/AdminController.php`, tests admin ciblés.
+✅ Terminé : changement de rôle utilisateur supprimé pour clients/livreurs/admins, y compris super-admin — action retirée du dialogue utilisateur, du client API admin, de l’écran Accès & privilèges et de la route backend ; tests admin ajustés pour vérifier l’immutabilité du rôle. Validation : `docker compose build admin`, syntaxe PHP via image `speedservice-backend`, `php artisan test --filter=AdminControllerTest` et `php artisan test --filter=SuperAdminUserActionsTest` au vert.
 
 ✅ Terminé : correction superposition carte Leaflet / navbar mobile — conteneur Leaflet isolé dans son stacking context et navbar mobile remontée en `z-40`. Validation : `git diff --check -- AIorchestration.md frontend/app/globals.css frontend/app/(dashboard)/layout.tsx` au vert ; lint frontend non exécuté car `corepack` est absent de l'environnement.
 
