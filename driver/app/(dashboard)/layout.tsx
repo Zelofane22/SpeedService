@@ -18,6 +18,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<DriverUser | null>(null)
 
   useEffect(() => {
+    const current = NAV.find((item) => pathname === item.href || pathname.startsWith(item.href + '/'))
+    document.title = current ? `${current.label} · SpeedService Driver` : 'Espace livreur · SpeedService Driver'
+  }, [pathname])
+
+  useEffect(() => {
     const t = localStorage.getItem('driver_token')
     if (!t) { router.replace('/login'); return }
 

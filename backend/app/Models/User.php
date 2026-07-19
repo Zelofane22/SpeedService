@@ -7,13 +7,14 @@ use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasUuids, Notifiable;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'is_super_admin',
         'must_change_password',
     ];
 
@@ -37,6 +39,7 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'role'              => UserRole::class,
             'is_active'             => 'boolean',
+            'is_super_admin'        => 'boolean',
             'must_change_password'  => 'boolean',
         ];
     }

@@ -21,12 +21,14 @@ class AdminControllerTest extends TestCase
     private User $admin;
     private User $client;
     private User $driver;
+    private User $superAdmin;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->admin  = User::factory()->admin()->create();
+        $this->admin      = User::factory()->admin()->create();
+        $this->superAdmin = User::factory()->superAdmin()->create();
         $this->client = User::factory()->create(['role' => UserRole::Client]);
         $this->driver = User::factory()->driver()->create();
     }
@@ -198,7 +200,7 @@ class AdminControllerTest extends TestCase
 
     public function test_admin_can_update_user_role(): void
     {
-        $response = $this->actingAs($this->admin, 'sanctum')
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
             ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver']);
 
         $response->assertOk()
@@ -212,7 +214,7 @@ class AdminControllerTest extends TestCase
 
     public function test_update_user_role_validates_role_value(): void
     {
-        $this->actingAs($this->admin, 'sanctum')
+        $this->actingAs($this->superAdmin, 'sanctum')
             ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'superuser'])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['role']);
@@ -646,12 +648,12 @@ class AdminControllerTest extends TestCase
 
     public function test_admin_actions_are_logged(): void
     {
-        $this->actingAs($this->admin, 'sanctum')
+        $this->actingAs($this->superAdmin, 'sanctum')
             ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
             ->assertOk();
 
         $this->assertDatabaseHas('admin_action_logs', [
-            'admin_id'     => $this->admin->id,
+            'admin_id'     => $this->superAdmin->id,
             'action'       => 'user.role_updated',
             'subject_type' => 'user',
             'subject_id'   => $this->client->id,
@@ -685,7 +687,7 @@ class AdminControllerTest extends TestCase
 
     public function test_admin_can_list_activity_log(): void
     {
-        $this->actingAs($this->admin, 'sanctum')
+        $this->actingAs($this->superAdmin, 'sanctum')
             ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
             ->assertOk();
 
@@ -704,7 +706,7 @@ class AdminControllerTest extends TestCase
 
     public function test_activity_log_can_be_filtered_by_action(): void
     {
-        $this->actingAs($this->admin, 'sanctum')
+        $this->actingAs($this->superAdmin, 'sanctum')
             ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
             ->assertOk();
 

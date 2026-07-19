@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { applyDriver, uploadDocuments } from '@/lib/api'
 import StepPersonal from './steps/StepPersonal'
 import StepIdentity from './steps/StepIdentity'
@@ -10,6 +10,14 @@ import StepPayment from './steps/StepPayment'
 import StepProfilePhoto from './steps/StepProfilePhoto'
 import StepTerms from './steps/StepTerms'
 import StepSuccess from './steps/StepSuccess'
+import {
+  getApplicationErrorStep,
+  getPaymentErrors,
+  getPersonalErrors,
+  getVehicleDocsErrors,
+  getVehicleErrors,
+  mapApplicationError,
+} from './validation'
 
 export type FormData = {
   // Step 1
@@ -38,6 +46,12 @@ export type FileData = {
 }
 
 const TOTAL_STEPS = 7
+const DRAFT_STORAGE_KEY = 'speedservice-driver-application-draft'
+
+type SavedDraft = {
+  step?: number
+  form?: FormData
+}
 
 export default function ApplyPage() {
   const [step, setStep] = useState(1)
@@ -53,9 +67,55 @@ export default function ApplyPage() {
   const [applicationId, setApplicationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [draftRestored, setDraftRestored] = useState(false)
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS + 1))
-  const prev = () => setStep((s) => Math.max(s - 1, 1))
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(DRAFT_STORAGE_KEY)
+      if (saved) {
+        const draft = JSON.parse(saved) as SavedDraft
+        if (draft.form) setForm((current) => ({ ...current, ...draft.form }))
+        if (draft.step && draft.step >= 1 && draft.step <= TOTAL_STEPS) setStep(draft.step)
+      }
+    } catch {
+      try {
+        sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+      } catch {
+        // La reprise de brouillon est optionnelle.
+      }
+    } finally {
+      setDraftRestored(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!draftRestored || step > TOTAL_STEPS) return
+    try {
+      sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({ step, form }))
+    } catch {
+      // La reprise de brouillon est optionnelle.
+    }
+  }, [draftRestored, form, step])
+
+  useEffect(() => {
+    if (step === 4 && form.vehicle_type === 'bicycle') setStep(5)
+  }, [form.vehicle_type, step])
+
+  const next = () => {
+    setError(null)
+    setStep((s) => {
+      if (s === 3 && form.vehicle_type === 'bicycle') return 5
+      return Math.min(s + 1, TOTAL_STEPS + 1)
+    })
+  }
+
+  const prev = () => {
+    setError(null)
+    setStep((s) => {
+      if (s === 5 && form.vehicle_type === 'bicycle') return 3
+      return Math.max(s - 1, 1)
+    })
+  }
 
   const updateForm = (partial: Partial<FormData>) =>
     setForm((f) => ({ ...f, ...partial }))
@@ -63,22 +123,56 @@ export default function ApplyPage() {
     setFiles((f) => ({ ...f, ...partial }))
 
   const handleSubmit = async () => {
+    const personalErrors = getPersonalErrors(form)
+    if (personalErrors.length) {
+      setStep(1)
+      setError(personalErrors[0])
+      return
+    }
+
+    const vehicleErrors = getVehicleErrors(form, files)
+    if (vehicleErrors.length) {
+      setStep(3)
+      setError(vehicleErrors[0])
+      return
+    }
+
+    const vehicleDocsErrors = getVehicleDocsErrors(files, form.vehicle_type)
+    if (vehicleDocsErrors.length) {
+      setStep(4)
+      setError(vehicleDocsErrors[0])
+      return
+    }
+
+    const paymentErrors = getPaymentErrors(form)
+    if (paymentErrors.length) {
+      setStep(5)
+      setError(paymentErrors[0])
+      return
+    }
+
+    if (!files.profilePhoto) {
+      setStep(6)
+      setError('Ajoutez une photo de profil avant de soumettre votre candidature.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
       const { application_id } = await applyDriver({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-        phone: form.phone,
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
         city: form.city,
         vehicle_type: form.vehicle_type,
-        vehicle_brand: form.vehicle_brand,
-        vehicle_plate: form.vehicle_plate,
+        vehicle_brand: form.vehicle_brand.trim(),
+        vehicle_plate: form.vehicle_plate.trim(),
         payment_method: form.payment_method,
-        payment_number: form.payment_number,
-        bank_name: form.bank_name,
-        bank_iban: form.bank_iban,
+        payment_number: form.payment_number.trim(),
+        bank_name: form.bank_name.trim(),
+        bank_iban: form.bank_iban.trim(),
       })
 
       setApplicationId(application_id)
@@ -104,12 +198,16 @@ export default function ApplyPage() {
 
       if (idx > 0) await uploadDocuments(fd)
 
+      try {
+        sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+      } catch {
+        // La reprise de brouillon est optionnelle.
+      }
       next() // → StepSuccess
     } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'message' in err
-        ? String((err as { message: unknown }).message)
-        : 'Une erreur est survenue. Veuillez réessayer.'
-      setError(msg)
+      const errorStep = getApplicationErrorStep(err)
+      if (errorStep) setStep(errorStep)
+      setError(mapApplicationError(err))
     } finally {
       setLoading(false)
     }
@@ -128,7 +226,7 @@ export default function ApplyPage() {
       {/* Header */}
       <header className="bg-[#861D6D] text-white px-5 py-4 flex items-center gap-3">
         {step > 1 && (
-          <button onClick={prev} className="mr-1 text-white/80 hover:text-white" aria-label="Retour">
+          <button type="button" onClick={prev} className="mr-1 min-h-11 min-w-11 text-white/80 hover:text-white" aria-label="Retour">
             ←
           </button>
         )}
@@ -147,7 +245,7 @@ export default function ApplyPage() {
       {/* Step content */}
       <div className="flex-1 overflow-y-auto">
         {error && (
-          <div className="mx-4 mt-4 bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+          <div className="mx-4 mt-4 bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm" role="alert" aria-live="polite">
             {error}
           </div>
         )}
@@ -155,11 +253,7 @@ export default function ApplyPage() {
         {step === 1 && <StepPersonal data={form} onChange={updateForm} onNext={next} />}
         {step === 2 && <StepIdentity files={files} onChange={updateFiles} onNext={next} />}
         {step === 3 && <StepVehicleInfo data={form} onChange={updateForm} files={files} onFilesChange={updateFiles} onNext={next} />}
-        {step === 4 && (
-          requiresVehicleDocs
-            ? <StepVehicleDocs files={files} onChange={updateFiles} onNext={next} />
-            : (() => { next(); return null })()
-        )}
+        {step === 4 && requiresVehicleDocs && <StepVehicleDocs files={files} onChange={updateFiles} onNext={next} />}
         {step === 5 && <StepPayment data={form} onChange={updateForm} onNext={next} />}
         {step === 6 && <StepProfilePhoto files={files} onChange={updateFiles} onNext={next} />}
         {step === 7 && <StepTerms loading={loading} onSubmit={handleSubmit} />}

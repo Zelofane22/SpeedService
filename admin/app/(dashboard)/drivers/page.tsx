@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Truck, MoreHorizontal, UserCheck } from 'lucide-react'
+import { Truck, UserCheck } from 'lucide-react'
 import Card from '@/components/card'
 import SearchInput from '@/components/search-input'
+import UserActionsMenu from '@/components/user-actions-menu'
 import { getAdminDrivers, toggleDriverActive } from '@/lib/api/admin'
 import type { AdminDriver } from '@/types/admin'
 import { cn } from '@/lib/utils'
@@ -223,15 +224,13 @@ export default function DriversPage() {
                     {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
-                        <button
-                          className="p-1.5 rounded-lg hover:bg-muted/30 transition-colors"
-                          title="Plus d'actions"
-                        >
-                          <MoreHorizontal
-                            size={15}
-                            className="text-muted-foreground"
-                          />
-                        </button>
+                        <UserActionsMenu
+                          userId={d.id}
+                          userName={d.name}
+                          onDeleted={(id) =>
+                            setDrivers((prev) => prev.filter((x) => x.id !== id))
+                          }
+                        />
                         <button
                           onClick={() => handleToggleActive(d)}
                           disabled={togglingId === d.id}

@@ -90,6 +90,10 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-18
 
+🔒 En cours : ajout du flux mot de passe oublié au login driver. Fichiers touchés : `driver/app/login/page.tsx`, `driver/app/forgot-password/page.tsx`, fichiers adjacents si nécessaire.
+
+✅ Terminé : améliorations prioritaires UX/validation/accessibilité driver — validation email/téléphone/paiement/documents en amont, erreurs API lisibles et redirigées vers l’étape concernée, brouillon de candidature en `sessionStorage`, documents véhicule conditionnels au type de véhicule, uploads contraints avec aperçus, labels/autocomplete/viewport corrigés, login harmonisé avec affichage mot de passe + réinitialisation, 404 française et titres de pages. Validation : `git diff --check -- AIorchestration.md driver/app` au vert ; recherches ciblées `maximumScale`, uploads `image/*,.pdf` et labels non liés sans résultat ; TypeScript/lint non exécutés car `node`/`pnpm` sont absents de l'environnement.
+
 ✅ Terminé : correction TypeScript build admin — `admin/components/card.tsx` accepte désormais les attributs HTML standard (`role`, `aria-*`, etc.) et les transmet au `div`. Validation : `git diff --check -- AIorchestration.md admin/components/card.tsx` au vert ; `pnpm --filter speedservice-admin build` non exécuté car `node`/`pnpm`/`corepack` sont absents de l'environnement.
 
 ✅ Terminé : correction textes landing/délais/paiements dans `frontend/app/page.tsx`, `frontend/app/(dashboard)/new-delivery/page.tsx`, `frontend/app/(dashboard)/deliveries/[id]/page.tsx` — délais harmonisés en `2-4 h` / `24-48 h`, paiement public limité au paiement à la livraison en espèces, libellé `MTN MoMo` unifié. Validation : `rg` ciblé + `git diff --check` ; lint non exécuté car `node`/`pnpm` sont absents de l'environnement.

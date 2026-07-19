@@ -60,14 +60,18 @@ function StatusContent() {
       <div className="p-5 flex flex-col gap-4">
         {!applicationId && (
           <div className="flex flex-col gap-3">
-            <label className="text-sm font-medium text-gray-700">Référence de candidature</label>
+            <label htmlFor="application-reference" className="text-sm font-medium text-gray-700">Référence de candidature</label>
             <input
+              id="application-reference"
+              name="application-reference"
+              required
+              autoComplete="off"
               className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#861D6D]"
               value={inputId}
               onChange={(e) => setInputId(e.target.value)}
               placeholder="Collez votre référence ici"
             />
-            <button onClick={() => fetch(inputId)} disabled={!inputId || loading} className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold">
+            <button type="button" onClick={() => fetch(inputId)} disabled={!inputId || loading} aria-busy={loading} className="w-full bg-[#861D6D] disabled:bg-gray-300 text-white py-3 rounded-xl font-semibold">
               {loading ? 'Chargement…' : 'Consulter'}
             </button>
           </div>

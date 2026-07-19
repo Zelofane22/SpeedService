@@ -307,7 +307,7 @@ class AdminController extends Controller
 
     public function listUsers(Request $request): JsonResponse
     {
-        $query = User::select(['id', 'name', 'email', 'role', 'created_at'])
+        $query = User::select(['id', 'name', 'email', 'role', 'is_super_admin', 'created_at'])
             ->withCount(['deliveriesAsClient as deliveries_count']);
 
         if ($request->filled('role')) {
@@ -362,6 +362,67 @@ class AdminController extends Controller
         );
 
         return response()->json($user->only(['id', 'name', 'email', 'role', 'created_at']));
+    }
+
+    public function resetUserPassword(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user = User::findOrFail($id);
+
+        if ($user->is_super_admin && $user->id !== Auth::id()) {
+            return response()->json([
+                'message' => "Impossible de réinitialiser le mot de passe d'un autre super administrateur.",
+            ], 403);
+        }
+
+        $user->update([
+            'password'             => $request->input('password'),
+            'must_change_password' => true,
+        ]);
+        // Révoque toutes les sessions existantes de l'utilisateur.
+        $user->tokens()->delete();
+
+        $this->logAction(
+            'user.password_reset',
+            "Mot de passe de {$user->name} réinitialisé manuellement.",
+            'user',
+            $user->id,
+        );
+
+        return response()->json(['message' => 'Mot de passe réinitialisé.']);
+    }
+
+    public function deleteUser(string $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'message' => 'Vous ne pouvez pas supprimer votre propre compte.',
+            ], 422);
+        }
+
+        if ($user->is_super_admin) {
+            return response()->json([
+                'message' => 'Impossible de supprimer un super administrateur.',
+            ], 403);
+        }
+
+        $name = $user->name;
+        $user->tokens()->delete();
+        $user->delete();
+
+        $this->logAction(
+            'user.deleted',
+            "Utilisateur {$name} supprimé.",
+            'user',
+            $id,
+        );
+
+        return response()->json(null, 204);
     }
 
     // ── Deliveries ────────────────────────────────────────────────────────────

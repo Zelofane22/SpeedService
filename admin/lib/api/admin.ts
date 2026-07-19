@@ -39,6 +39,11 @@ async function apiFetch<T>(
     throw new Error((error as { message?: string }).message ?? response.statusText)
   }
 
+  // 204 No Content (ex. suppression) → pas de corps à parser.
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
@@ -82,6 +87,24 @@ export function updateUserRole(userId: string, role: string): Promise<AdminUser>
   return apiFetch<AdminUser>(`/admin/users/${userId}/role`, {
     method: 'PATCH',
     body: JSON.stringify({ role }),
+  })
+}
+
+// Actions super administrateur ------------------------------------------------
+
+export function resetUserPassword(
+  userId: string,
+  password: string
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/admin/users/${userId}/password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ password }),
+  })
+}
+
+export function deleteUser(userId: string): Promise<void> {
+  return apiFetch<void>(`/admin/users/${userId}`, {
+    method: 'DELETE',
   })
 }
 

@@ -75,7 +75,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/activity-log', [AdminController::class, 'activityLog']);
         Route::get('/users', [AdminController::class, 'listUsers']);
         Route::get('/users/{id}', [AdminController::class, 'showUser']);
-        Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+
+        // Actions sensibles réservées au super administrateur
+        Route::middleware('superadmin')->group(function () {
+            Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+            Route::patch('/users/{id}/password', [AdminController::class, 'resetUserPassword']);
+            Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+        });
+
         Route::get('/deliveries', [AdminController::class, 'listDeliveries']);
         Route::get('/deliveries/{id}', [AdminController::class, 'showDelivery']);
         Route::patch('/deliveries/{id}/status', [AdminController::class, 'updateDeliveryStatus']);
