@@ -7,7 +7,6 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 ### Règles d'utilisation
 - **Chaque IA écrit uniquement dans sa propre section.** Aucune modification de la section de l'autre.
 - Avant de commencer une tâche, écrire une ligne `🔒 En cours : <fichiers touchés>` dans sa section.
-- Après avoir terminé, remplacer par `✅ Terminé : <résumé court>` et libérer les fichiers.
 - Si une tâche bloque ou nécessite l'intervention de l'autre IA, écrire `🚧 Bloqué : <raison>` + mentionner les fichiers concernés.
 - Ne jamais toucher un fichier marqué `🔒 En cours` par l'autre IA.
 - Mettre à jour ce fichier à chaque début et fin de tâche significative.
@@ -17,20 +16,6 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section Claude Code
 
-**Dernier état :** 2026-07-19
-
-✅ Terminé : actions super-admin sur les utilisateurs (reset mot de passe, suppression, changement de rôle) — back-office. Fichiers libérés.
-
-### Actions super-admin sur les utilisateurs — ✅ Terminé (2026-07-19, branche `develop`, non commité)
-
-- ✅ Modèle superadmin retenu : flag `is_super_admin` (bool) sur `users` (role reste `admin`) + `softDeletes` — migration `2026_07_19_000000`
-- ✅ Middleware `superadmin` (`EnsureSuperAdmin`) enregistré ; routes `PATCH /admin/users/{id}/password`, `DELETE /admin/users/{id}` et `PATCH /admin/users/{id}/role` déplacées derrière cette garde
-- ✅ `AdminController::resetUserPassword` (force `must_change_password` + révoque les tokens) et `deleteUser` (soft-delete) avec garde-fous : pas d'auto-suppression, pas d'action destructive sur un autre super-admin ; actions loguées (`user.password_reset`, `user.deleted`)
-- ✅ Le login renvoie déjà `is_super_admin` (attribut du modèle) → lu côté front via `localStorage`
-- ✅ Front admin : `UserActionsMenu` (menu `…` + modales reset password / suppression), câblé sur pages **Livreurs** et **Clients**, visible uniquement si super-admin
-- ✅ Tests : 9 nouveaux (`SuperAdminUserActionsTest`) + `AdminControllerTest` adapté (role update via super-admin) — suite Admin au vert (46 tests) via Docker
-- ✅ Typecheck build admin au vert (`docker compose build admin`, exit 0 — `next build` inclut le typecheck)
-- ⚠️ Reste côté utilisateur : promouvoir un compte en super-admin (`is_super_admin = true`) pour activer les actions ; rebuild image backend nécessaire (migration + code bakés) avant test sur le dev déployé
 
 ---
 
@@ -38,6 +23,7 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+<<<<<<< HEAD
 ✅ Terminé : confirmation paiement physique livreur après clic "Colis récupéré" — le bouton conserve l’action de récupération, ouvre une fenêtre de saisie `PAIEMENTRECU`, envoie le mot-clé à l’API, et le backend refuse la confirmation sans ce mot-clé. Test backend ciblé ajouté. Validation : `git diff --check` au vert, syntaxe PHP du contrôleur via Docker au vert ; `artisan test --filter=DriverPaymentConfirmationTest` non exécuté car l'image backend installée n'inclut pas la commande `test`, lint driver non exécuté car `corepack`/Node/pnpm sont absents de l'environnement.
 
 ✅ Terminé : changement de rôle utilisateur supprimé pour clients/livreurs/admins, y compris super-admin — action retirée du dialogue utilisateur, du client API admin, de l’écran Accès & privilèges et de la route backend ; tests admin ajustés pour vérifier l’immutabilité du rôle. Validation : `docker compose build admin`, syntaxe PHP via image `speedservice-backend`, `php artisan test --filter=AdminControllerTest` et `php artisan test --filter=SuperAdminUserActionsTest` au vert.
@@ -83,5 +69,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 ✅ Terminé : CI frontend migrée de npm vers pnpm workspace (`.github/workflows/ci.yml`) ; installation gelée, lint et build validés.
 
 ✅ Terminé à la demande explicite de l'utilisateur : thème clair/sombre global ajouté à `admin/` (préférence système, persistance locale, bouton sur toutes les routes et graphiques adaptés). TypeScript et build Next.js au vert.
+=======
+🔒 En cours : confirmation paiement physique livreur après clic "Colis récupéré" — `driver/app/(dashboard)/active/page.tsx`, `backend/app/Http/Controllers/Api/DriverController.php`, tests backend ciblés éventuels.
+>>>>>>> 085a9bc9799f7d1cd624f9f74ecf6e857c59590b
 
 ---
