@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </div>
 
-        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-border bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(29,29,31,0.08)] backdrop-blur lg:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-border bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(29,29,31,0.08)] backdrop-blur lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
             {navLinks.map(({ href, icon: Icon, mobileLabel }) => {
               const isActive = isNavActive(href)
