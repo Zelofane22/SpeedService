@@ -66,7 +66,7 @@ function PaymentConfirmModal({
   confirming,
 }: {
   mission: Mission
-  onConfirm: () => void
+  onConfirm: (confirmation: string) => void
   onCancel: () => void
   confirming: boolean
 }) {
@@ -128,7 +128,7 @@ function PaymentConfirmModal({
             Annuler
           </button>
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(typed)}
             disabled={!valid || confirming}
             className="flex-1 py-3 rounded-xl bg-[#861D6D] text-white text-sm font-semibold shadow-lg shadow-[#861D6D]/25 disabled:opacity-40 active:scale-95 transition-transform"
           >
@@ -276,13 +276,13 @@ export default function ActiveMissionPage() {
     }
   }
 
-  async function handlePaymentConfirm() {
+  async function handlePaymentConfirm(confirmation: string) {
     if (!paymentModal) return
     setConfirming(true)
     setError(null)
     const mission = paymentModal
     try {
-      const updated = await apiPost<Mission>(`/driver/missions/${mission.id}/confirm-payment`, {})
+      const updated = await apiPost<Mission>(`/driver/missions/${mission.id}/confirm-payment`, { confirmation })
       setPaymentModal(null)
       setPaymentSuccess({ mission, updated })
     } catch (e: unknown) {
@@ -369,11 +369,6 @@ export default function ActiveMissionPage() {
                   <p className="text-sm font-bold text-white font-mono">{m.reference}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {needsPayment && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 font-bold">
-                      💵 Paiement cash
-                    </span>
-                  )}
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-white/20 text-white">
                     {m.delivery_type === 'express' ? 'Express' : 'Standard'}
                   </span>
@@ -431,13 +426,9 @@ export default function ActiveMissionPage() {
                   <button
                     onClick={() => advance(m)}
                     disabled={updating === m.id}
-                    className={`w-full py-4 rounded-xl font-semibold text-sm mt-2 disabled:opacity-60 active:scale-95 transition-transform ${needsPayment ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25' : 'bg-[#861D6D] text-white shadow-lg shadow-[#861D6D]/25'}`}
+                    className="w-full py-4 rounded-xl font-semibold text-sm mt-2 disabled:opacity-60 active:scale-95 transition-transform bg-[#861D6D] text-white shadow-lg shadow-[#861D6D]/25"
                   >
-                    {updating === m.id
-                      ? 'Mise à jour…'
-                      : needsPayment
-                        ? '💵 Encaisser le paiement & Départ'
-                        : action.label}
+                    {updating === m.id ? 'Mise à jour…' : action.label}
                   </button>
                 )}
               </div>
