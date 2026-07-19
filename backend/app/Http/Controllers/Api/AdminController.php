@@ -19,7 +19,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -342,26 +341,6 @@ class AdminController extends Controller
             ->findOrFail($id);
 
         return response()->json($user);
-    }
-
-    public function updateUserRole(Request $request, string $id): JsonResponse
-    {
-        $request->validate([
-            'role' => ['required', Rule::in(array_column(UserRole::cases(), 'value'))],
-        ]);
-
-        $user = User::findOrFail($id);
-        $previousRole = $user->role->value;
-        $user->update(['role' => UserRole::from($request->input('role'))]);
-
-        $this->logAction(
-            'user.role_updated',
-            "Rôle de {$user->name} changé de {$previousRole} en {$user->role->value}.",
-            'user',
-            $user->id,
-        );
-
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'created_at']));
     }
 
     public function resetUserPassword(Request $request, string $id): JsonResponse

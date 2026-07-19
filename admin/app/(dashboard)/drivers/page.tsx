@@ -278,9 +278,7 @@ export default function DriversPage() {
           onUpdated={(updated) => {
             setSelectedDriver((prev) => prev && prev.id === updated.id ? { ...prev, ...updated } : prev)
             setDrivers((prev) =>
-              updated.role && updated.role !== 'driver'
-                ? prev.filter((driver) => driver.id !== updated.id)
-                : prev.map((driver) => driver.id === updated.id ? { ...driver, ...updated } : driver),
+              prev.map((driver) => driver.id === updated.id ? { ...driver, ...updated } : driver),
             )
           }}
           onDeleted={(id) => {

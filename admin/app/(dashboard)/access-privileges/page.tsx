@@ -31,11 +31,10 @@ const ROLE_ACCESS = [
   },
   {
     title: 'Super administrateur',
-    description: 'Administration sensible des comptes et changement de rôles.',
+    description: 'Administration sensible des comptes, sans modification du rôle des utilisateurs.',
     permissions: [
       'Réinitialisation mot de passe',
       'Suppression utilisateur',
-      'Changement de rôle',
       'Accès aux actions sensibles',
     ],
   },
@@ -46,7 +45,6 @@ const PRIVILEGE_ROWS = [
   ['Validation paiements', true, true],
   ['Gestion commandes', true, true],
   ['Gestion Livreurs et clients', true, true],
-  ['Changer le rôle d’un compte', false, true],
   ['Réinitialiser un mot de passe', false, true],
   ['Supprimer un utilisateur', false, true],
 ] as const

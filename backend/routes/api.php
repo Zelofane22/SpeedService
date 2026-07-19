@@ -80,7 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Actions sensibles réservées au super administrateur
         Route::middleware('superadmin')->group(function () {
-            Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
             Route::patch('/users/{id}/password', [AdminController::class, 'resetUserPassword']);
             Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
         });

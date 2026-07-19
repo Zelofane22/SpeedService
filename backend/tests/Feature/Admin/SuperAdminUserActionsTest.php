@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -42,13 +41,13 @@ class SuperAdminUserActionsTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_regular_admin_cannot_update_role(): void
+    public function test_role_update_route_does_not_exist(): void
     {
         $target = User::factory()->create();
 
         $this->actingAs($this->admin, 'sanctum')
-            ->patchJson("/api/admin/users/{$target->id}/role", ['role' => UserRole::Driver->value])
-            ->assertForbidden();
+            ->patchJson("/api/admin/users/{$target->id}/role", ['role' => 'driver'])
+            ->assertNotFound();
     }
 
     // ── Reset password ─────────────────────────────────────────────────────────

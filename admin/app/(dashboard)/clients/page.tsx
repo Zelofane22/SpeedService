@@ -231,9 +231,7 @@ export default function ClientsPage() {
           onUpdated={(updated) => {
             setSelectedClient((prev) => prev && prev.id === updated.id ? { ...prev, ...updated } : prev)
             setClients((prev) =>
-              updated.role && updated.role !== 'client'
-                ? prev.filter((client) => client.id !== updated.id)
-                : prev.map((client) => client.id === updated.id ? { ...client, ...updated } : client),
+              prev.map((client) => client.id === updated.id ? { ...client, ...updated } : client),
             )
           }}
           onDeleted={(id) => {

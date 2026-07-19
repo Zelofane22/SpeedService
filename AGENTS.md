@@ -101,7 +101,7 @@ Les endpoints `/driver/*` sont servis par le backend partagé. Le CORS doit rest
 
 ## Vérification et livraison
 
-- Lancer au minimum les tests, le lint, le contrôle TypeScript ou le build directement concernés par le changement.
+- Lancer au minimum les tests, le lint, le contrôle TypeScript ou le build directement concernés par le changement uniquement sur docker.
 - Pour une modification backend, privilégier le test PHPUnit ciblé avant la suite complète.
 - Pour une modification d'un package partagé, vérifier ses consommateurs pertinents.
 - Dans le compte rendu final, indiquer les fichiers modifiés, les validations exécutées et toute validation non exécutée.

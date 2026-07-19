@@ -88,13 +88,6 @@ export function getAdminUser(userId: string): Promise<AdminUserDetail> {
   return apiFetch<AdminUserDetail>(`/admin/users/${userId}`)
 }
 
-export function updateUserRole(userId: string, role: string): Promise<AdminUser> {
-  return apiFetch<AdminUser>(`/admin/users/${userId}/role`, {
-    method: 'PATCH',
-    body: JSON.stringify({ role }),
-  })
-}
-
 // Actions super administrateur ------------------------------------------------
 
 export function resetUserPassword(

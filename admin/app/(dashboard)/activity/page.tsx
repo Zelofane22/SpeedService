@@ -11,7 +11,6 @@ import type { AdminActivityLog } from '@/types/admin'
 // ---------------------------------------------------------------------------
 
 const ACTION_CONFIG: Record<string, { label: string; chip: string }> = {
-  'user.role_updated':            { label: 'Rôle modifié',       chip: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600' },
   'delivery.status_updated':      { label: 'Statut forcé',       chip: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600' },
   'payment.validated':            { label: 'Paiement validé',    chip: 'bg-green-50 dark:bg-green-900/30 text-green-600' },
   'driver.status_toggled':        { label: 'Livreur activé/désactivé', chip: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600' },

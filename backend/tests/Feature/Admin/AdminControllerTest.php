@@ -196,28 +196,18 @@ class AdminControllerTest extends TestCase
             ->assertNotFound();
     }
 
-    // ── Update user role ──────────────────────────────────────────────────────
+    // ── User role immutability ────────────────────────────────────────────────
 
-    public function test_admin_can_update_user_role(): void
+    public function test_super_admin_cannot_update_user_role(): void
     {
-        $response = $this->actingAs($this->superAdmin, 'sanctum')
-            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver']);
-
-        $response->assertOk()
-            ->assertJsonPath('role', 'driver');
+        $this->actingAs($this->superAdmin, 'sanctum')
+            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->assertNotFound();
 
         $this->assertDatabaseHas('users', [
             'id'   => $this->client->id,
-            'role' => 'driver',
+            'role' => UserRole::Client->value,
         ]);
-    }
-
-    public function test_update_user_role_validates_role_value(): void
-    {
-        $this->actingAs($this->superAdmin, 'sanctum')
-            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'superuser'])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['role']);
     }
 
     // ── Deliveries listing ────────────────────────────────────────────────────
@@ -669,12 +659,12 @@ class AdminControllerTest extends TestCase
     public function test_admin_actions_are_logged(): void
     {
         $this->actingAs($this->superAdmin, 'sanctum')
-            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->patchJson("/api/admin/users/{$this->client->id}/password", ['password' => 'newpass123'])
             ->assertOk();
 
         $this->assertDatabaseHas('admin_action_logs', [
             'admin_id'     => $this->superAdmin->id,
-            'action'       => 'user.role_updated',
+            'action'       => 'user.password_reset',
             'subject_type' => 'user',
             'subject_id'   => $this->client->id,
         ]);
@@ -708,7 +698,7 @@ class AdminControllerTest extends TestCase
     public function test_admin_can_list_activity_log(): void
     {
         $this->actingAs($this->superAdmin, 'sanctum')
-            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->patchJson("/api/admin/users/{$this->client->id}/password", ['password' => 'newpass123'])
             ->assertOk();
 
         $response = $this->actingAs($this->admin, 'sanctum')
@@ -721,13 +711,13 @@ class AdminControllerTest extends TestCase
                 'total',
                 'per_page',
             ])
-            ->assertJsonPath('data.0.action', 'user.role_updated');
+            ->assertJsonPath('data.0.action', 'user.password_reset');
     }
 
     public function test_activity_log_can_be_filtered_by_action(): void
     {
         $this->actingAs($this->superAdmin, 'sanctum')
-            ->patchJson("/api/admin/users/{$this->client->id}/role", ['role' => 'driver'])
+            ->patchJson("/api/admin/users/{$this->client->id}/password", ['password' => 'newpass123'])
             ->assertOk();
 
         $delivery = Delivery::factory()->create([
@@ -740,10 +730,10 @@ class AdminControllerTest extends TestCase
             ->assertOk();
 
         $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/admin/activity-log?action=user.role_updated');
+            ->getJson('/api/admin/activity-log?action=user.password_reset');
 
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
-        $this->assertSame('user.role_updated', $response->json('data.0.action'));
+        $this->assertSame('user.password_reset', $response->json('data.0.action'));
     }
 }

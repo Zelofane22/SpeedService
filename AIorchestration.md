@@ -38,6 +38,8 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 **Dernier état :** 2026-07-19
 
+🔒 En cours : suppression du changement de rôle utilisateur client/livreur — fichiers concernés : `admin/components/user-detail-dialog.tsx`, `admin/lib/api/admin.ts`, `admin/app/(dashboard)/activity/page.tsx`, `admin/app/(dashboard)/access-privileges/page.tsx`, `admin/app/(dashboard)/clients/page.tsx`, `admin/app/(dashboard)/drivers/page.tsx`, `backend/routes/api.php`, `backend/app/Http/Controllers/Api/AdminController.php`, tests admin ciblés.
+
 ✅ Terminé : correction superposition carte Leaflet / navbar mobile — conteneur Leaflet isolé dans son stacking context et navbar mobile remontée en `z-40`. Validation : `git diff --check -- AIorchestration.md frontend/app/globals.css frontend/app/(dashboard)/layout.tsx` au vert ; lint frontend non exécuté car `corepack` est absent de l'environnement.
 
 ✅ Terminé : corrections driver — disponibilité `is_online` backend + toggle Missions/Paramètres, historique basé sur la date du statut livré/annulé avec format local, header/nav harmonisés en sombre, Paramètres enrichis (profil, véhicule, paiement, notifications, langue, sécurité, compte). Validation : `git diff --check`, syntaxe PHP via image Docker, `artisan test --filter=DriverAvailabilityTest` au vert, `corepack pnpm --filter speedservice-driver lint` au vert avec avertissement existant `eslint.config.mjs`, `corepack pnpm --filter speedservice-driver build` au vert. `docker compose build backend` non exécuté jusqu'au bout : Docker Desktop bloque sur `php:8.4-fpm` avec `error getting credentials`.

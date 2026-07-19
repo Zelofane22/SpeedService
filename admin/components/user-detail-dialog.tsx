@@ -16,7 +16,6 @@ import {
   deleteUser,
   getAdminUser,
   resetUserPassword,
-  updateUserRole,
 } from '@/lib/api/admin'
 import { isSuperAdmin } from '@/lib/current-user'
 import { cn } from '@/lib/utils'
@@ -33,12 +32,6 @@ interface UserDetailDialogProps {
   onToggleDriverActive?: (user: AdminDriver) => Promise<void>
 }
 
-const ROLE_OPTIONS = [
-  { value: 'client', label: 'Client' },
-  { value: 'driver', label: 'Livreur' },
-  { value: 'admin', label: 'Admin' },
-]
-
 export default function UserDetailDialog({
   user,
   title = 'Détails utilisateur',
@@ -52,7 +45,6 @@ export default function UserDetailDialog({
   const [allowed, setAllowed] = useState(false)
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [role, setRole] = useState(user.role ?? '')
   const [action, setAction] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -68,7 +60,6 @@ export default function UserDetailDialog({
       .then((res) => {
         if (cancelled) return
         setDetail(res)
-        setRole(res.role)
       })
       .catch(() => {
         if (!cancelled) setDetail(null)
@@ -130,16 +121,6 @@ export default function UserDetailDialog({
       setPassword('')
       setConfirm('')
       setMessage('Mot de passe réinitialisé. L’utilisateur devra le changer à la prochaine connexion.')
-    })
-  }
-
-  async function handleRoleChange() {
-    if (!role || role === merged.role) return
-    await runAction('role', async () => {
-      const updated = await updateUserRole(user.id, role)
-      setDetail((prev) => prev ? { ...prev, role: updated.role } : prev)
-      onUpdated?.({ id: user.id, role: updated.role })
-      setMessage(`Rôle modifié en ${roleLabel(updated.role)}.`)
     })
   }
 
@@ -281,34 +262,6 @@ export default function UserDetailDialog({
                   <h3 className="text-sm font-semibold text-foreground">Actions super-admin</h3>
                   {allowed ? (
                     <div className="mt-3 space-y-3">
-                      <div className="space-y-2">
-                        <label htmlFor="user-role" className="text-xs font-semibold text-muted-foreground">
-                          Rôle
-                        </label>
-                        <div className="flex gap-2">
-                          <select
-                            id="user-role"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="min-h-10 flex-1 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none focus:border-primary"
-                          >
-                            {ROLE_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            onClick={handleRoleChange}
-                            disabled={action === 'role' || role === merged.role}
-                            className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:opacity-50"
-                          >
-                            OK
-                          </button>
-                        </div>
-                      </div>
-
                       <div className="space-y-2">
                         <label htmlFor="new-password" className="text-xs font-semibold text-muted-foreground">
                           Nouveau mot de passe
