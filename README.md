@@ -103,6 +103,9 @@ docker compose exec backend php artisan db:seed --force
 | `http://localhost:3000` | App client (login : 'preprod@speedservice.bj' / 'Password123!' ) |
 | `http://localhost:3001` | Admin (login: `admin@speedservice.bj` / `AdminPassword123!` — voir ci-dessous) |
 | `http://localhost:3002` | App livreur (login dev test : koffiagbeko@speedservice.bj / Driver123! |
+| `https://speed-service-frontend-git-develop-zeloteam.vercel.app/`|App client en dev)| 
+|`https://driver-speedservice-git-develop-zeloteam.vercel.app/`|App driver en dev|
+
 
 **Commandes utiles :**
 
