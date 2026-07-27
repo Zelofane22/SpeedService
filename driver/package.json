@@ -12,10 +12,10 @@
     "@speedservice/api-client": "workspace:*",
     "@speedservice/ui": "workspace:*",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.24.0",
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {

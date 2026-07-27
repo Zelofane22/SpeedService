@@ -8,16 +8,16 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.3.0",
+    "@radix-ui/react-slot": "^1.3.3",
     "@speedservice/api-client": "workspace:*",
     "@speedservice/ui": "workspace:*",
     "@types/leaflet": "^1.9.21",
     "clsx": "^2.1.1",
     "leaflet": "^1.9.4",
-    "lucide-react": "^1.24.0",
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "react-leaflet": "^5.0.0",
     "tailwind-merge": "^3.6.0"
   },
