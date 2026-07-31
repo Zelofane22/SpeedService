@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * Événements métier déclenchant une notification au client (email / SMS / in-app).
+ */
 enum DeliveryNotificationEvent: string
 {
     case OrderConfirmed = 'order_confirmed';

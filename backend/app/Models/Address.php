@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Adresse enregistrée d'un utilisateur (label + coordonnées GPS),
+ * réutilisable pour préremplir les livraisons.
+ */
 class Address extends Model
 {
     use HasUuids;

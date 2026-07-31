@@ -4,6 +4,10 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validation de l'inscription client : téléphone normalisé pour une unicité
+ * indépendante des séparateurs saisis, mot de passe confirmé.
+ */
 class RegisterRequest extends FormRequest
 {
     public function authorize(): bool

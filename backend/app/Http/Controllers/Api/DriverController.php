@@ -16,6 +16,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Espace livreur : disponibilité, missions disponibles/assignées et transitions de statut.
+ * Les commandes espèces/agence en AwaitingValidation sont visibles car le paiement
+ * est encaissé à la livraison.
+ */
 class DriverController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
@@ -26,6 +31,8 @@ class DriverController extends Controller
         DeliveryStatus::InDelivery,
     ];
 
+    // ── Garde d'accès ─────────────────────────────────────────────────────────
+
     private function ensureDriver(): ?JsonResponse
     {
         if (Auth::user()->role !== UserRole::Driver) {
@@ -34,20 +41,22 @@ class DriverController extends Controller
         return null;
     }
 
+    // ── Missions disponibles ────────────────────────────────────────────────────
+
     public function availableMissions(): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
 
+        // Livreur hors ligne : aucune mission proposée
         if (! Auth::user()->is_online) {
             return response()->json([]);
         }
 
+        // Missions confirmées ou espèces/agence en attente validation admin
         $missions = Delivery::whereNull('driver_id')
             ->where(function ($q) {
                 $q->where('status', DeliveryStatus::Confirmed)
                   ->orWhere(function ($q2) {
-                      // Cash-on-delivery and agency orders pending admin validation
-                      // are immediately visible to drivers since payment is collected on delivery
                       $q2->where('status', DeliveryStatus::AwaitingValidation)
                          ->whereHas('payment', fn ($p) => $p->whereIn('method', [
                              PaymentMethod::CashOnDelivery->value,
@@ -61,6 +70,8 @@ class DriverController extends Controller
 
         return response()->json($missions);
     }
+
+    // ── Profil et disponibilité ─────────────────────────────────────────────────
 
     public function profile(): JsonResponse
     {
@@ -104,6 +115,8 @@ class DriverController extends Controller
         ]);
     }
 
+    // ── Missions assignées ──────────────────────────────────────────────────────
+
     public function myMissions(): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
@@ -133,6 +146,7 @@ class DriverController extends Controller
             ->with('payment')
             ->findOrFail($id);
 
+        // Encaissement manuel : espèces ou paiement en agence uniquement
         $cashMethods = [PaymentMethod::CashOnDelivery->value, PaymentMethod::Agency->value];
 
         if (!$delivery->payment || !in_array($delivery->payment->method->value, $cashMethods)) {
@@ -167,6 +181,8 @@ class DriverController extends Controller
         return response()->json($delivery->load('client:id,name,phone', 'payment', 'statusHistories'));
     }
 
+    // ── Acceptation / refus ─────────────────────────────────────────────────────
+
     public function acceptMission(string $id): JsonResponse
     {
         if ($err = $this->ensureDriver()) return $err;
@@ -175,6 +191,7 @@ class DriverController extends Controller
             return response()->json(['message' => 'Passez en ligne pour accepter une mission.'], 422);
         }
 
+        // Même critères de visibilité que availableMissions
         $delivery = DB::transaction(function () use ($id) {
             Auth::user()->newQuery()
                 ->whereKey(Auth::id())
@@ -237,12 +254,15 @@ class DriverController extends Controller
     {
         if ($err = $this->ensureDriver()) return $err;
 
+        // Vérification d'existence uniquement — pas de persistance du refus
         Delivery::where('status', DeliveryStatus::Confirmed)
             ->whereNull('driver_id')
             ->findOrFail($id);
 
         return response()->json(['message' => 'Mission refusée.']);
     }
+
+    // ── Transitions de statut ───────────────────────────────────────────────────
 
     public function updateStatus(Request $request, string $id): JsonResponse
     {
@@ -254,6 +274,7 @@ class DriverController extends Controller
             ->with('payment')
             ->findOrFail($id);
 
+        // Machine à états linéaire : Assigned → PickingUp → InDelivery → Delivered
         $transitions = [
             DeliveryStatus::Assigned->value   => DeliveryStatus::PickingUp,
             DeliveryStatus::PickingUp->value   => DeliveryStatus::InDelivery,

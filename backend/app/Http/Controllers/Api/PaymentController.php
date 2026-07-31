@@ -17,12 +17,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
+/**
+ * Gestion du paiement client d'une livraison.
+ * Les méthodes électroniques (MoMo, carte) confirment immédiatement ;
+ * CashOnDelivery et Agency passent en AwaitingValidation (validation admin).
+ */
 class PaymentController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
 
     public function pay(Request $request, string $id): JsonResponse
     {
+        // Vérifier que la livraison appartient au client et est payable
         $delivery = Delivery::where('client_id', Auth::id())
             ->with('payment')
             ->findOrFail($id);
@@ -45,6 +51,7 @@ class PaymentController extends Controller
 
         $method = $payment->method;
 
+        // Validation conditionnelle selon la méthode de paiement
         match ($method) {
             PaymentMethod::MtnMomo, PaymentMethod::MoovMoney => $request->validate([
                 'phone' => ['required', 'string', 'regex:/^[0-9+\s]{8,15}$/'],
@@ -64,6 +71,7 @@ class PaymentController extends Controller
             PaymentMethod::Card,
         ]);
 
+        // Transaction : statut livraison + historique selon type de paiement
         DB::transaction(function () use ($delivery, $payment, $isElectronic, $method) {
             if ($isElectronic) {
                 $payment->update([
@@ -90,6 +98,7 @@ class PaymentController extends Controller
             }
         });
 
+        // Notifications client + email admin (non bloquant en cas d'échec)
         $adminEmail = config('mail.admin_notification_email');
 
         try {

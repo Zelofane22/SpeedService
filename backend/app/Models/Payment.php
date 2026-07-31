@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Paiement associé à une livraison : méthode (MoMo, carte, COD, agence),
+ * statut, référence de transaction et validation manuelle le cas échéant.
+ */
 class Payment extends Model
 {
     use HasUuids;

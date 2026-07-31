@@ -4,6 +4,10 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validation de la réinitialisation de mot de passe via le token reçu par email
+ * (email + token + nouveau mot de passe).
+ */
 class ResetPasswordRequest extends FormRequest
 {
     public function authorize(): bool

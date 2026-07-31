@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * Documents requis pour une candidature livreur, avec libellé d'affichage.
+ */
 enum DocumentType: string
 {
     case NationalId       = 'national_id_front';

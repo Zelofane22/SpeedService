@@ -9,6 +9,10 @@ use App\Models\Delivery;
 use App\Models\NotificationLog;
 use App\Notifications\DeliveryUpdateNotification;
 
+/**
+ * Orchestration multi-canal des notifications client (in-app, email, SMS).
+ * Idempotence via NotificationLog::firstOrCreate — un événement n'est envoyé qu'une fois par canal.
+ */
 class DeliveryNotificationService
 {
     public function send(Delivery $delivery, DeliveryNotificationEvent $event): void
@@ -30,6 +34,7 @@ class DeliveryNotificationService
 
         $createdChannels = [];
 
+        // Enregistrement dédupliqué par (user, livraison, événement, canal)
         foreach ([NotificationChannel::InApp, NotificationChannel::Email, NotificationChannel::Sms] as $channel) {
             $log = NotificationLog::firstOrCreate(
                 [
@@ -47,6 +52,7 @@ class DeliveryNotificationService
             $createdChannels[$channel->value] = $log->wasRecentlyCreated;
         }
 
+        // Email et SMS uniquement si le log vient d'être créé (pas de doublon)
         if ($createdChannels[NotificationChannel::Email->value]) {
             try {
                 $client->notify(new DeliveryUpdateNotification(
@@ -68,6 +74,7 @@ class DeliveryNotificationService
         }
     }
 
+    /** Libellés français par type d'événement livraison. */
     private function content(Delivery $delivery, DeliveryNotificationEvent $event): array
     {
         return match ($event) {

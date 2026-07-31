@@ -21,7 +21,9 @@ Ce fichier sert de tableau de bord partagé entre **Claude Code** et **GPT Codex
 
 ## Section GPT Codex
 
-**Dernier état :** 2026-07-19
+**Dernier état :** 2026-07-31
+
+✅ Terminé : commentaires par bloc (FR) sur l'ensemble du code applicatif Laravel — 53 fichiers (`backend/app/` + `backend/routes/api.php`) : docblock de classe sur controllers/services/models/enums/requests/mail/notifications, séparateurs `// ──` et blocs logiques sur les méthodes. Aucune modification fonctionnelle. Validation : `git diff --check` au vert ; `php -l` et `php artisan test` non exécutés car PHP/Docker indisponibles dans l'environnement.
 
 ✅ Terminé : tarification livraison à 200 FCFA/km entre émetteur et destinataire, localisation exacte recalculée côté backend, redirection livreur vers mission en cours après acceptation, et verrou serveur contre plus d'une mission active par livreur. Validation : syntaxe PHP Docker, tests `DeliveryTest`, `PaymentTest`, `DeliveryNotificationTest`, `DriverAvailabilityTest`, TypeScript frontend/driver, lint frontend au vert, lint driver au vert avec avertissement existant `eslint.config.mjs`, `git diff --check` au vert.
 

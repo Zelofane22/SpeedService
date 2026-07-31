@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * Catégorie du contenu du colis : simple métadonnée, ne détermine pas le prix.
+ */
 enum ContentCategory: string
 {
     case Document    = 'document';

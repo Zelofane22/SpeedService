@@ -8,6 +8,9 @@ use App\Models\NotificationLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Notifications in-app du client : liste, marquage lu (unitaire ou global).
+ */
 class NotificationController extends Controller
 {
     public function index(): JsonResponse

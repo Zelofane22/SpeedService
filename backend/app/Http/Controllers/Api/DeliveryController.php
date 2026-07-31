@@ -21,6 +21,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
+/**
+ * Cycle de vie côté client : création, consultation et annulation de livraisons.
+ * Point d'entrée du flux métier (AwaitingPayment → paiement via PaymentController).
+ */
 class DeliveryController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
@@ -37,6 +41,7 @@ class DeliveryController extends Controller
 
     public function store(StoreDeliveryRequest $request): JsonResponse
     {
+        // Calcul du tarif et génération de la référence commande
         $packageType  = PackageType::from($request->package_type);
         $deliveryType = DeliveryType::from($request->delivery_type);
         $distance     = $this->resolveDistance($request);
@@ -68,6 +73,7 @@ class DeliveryController extends Controller
 
         $delivery->statusHistories()->create(['status' => DeliveryStatus::AwaitingPayment]);
 
+        // Enregistrement du paiement en attente (méthode choisie à la création)
         Payment::create([
             'delivery_id' => $delivery->id,
             'amount'      => $price,
@@ -75,6 +81,7 @@ class DeliveryController extends Controller
             'status'      => PaymentStatus::Pending,
         ]);
 
+        // Notification client et alerte admin (non bloquantes)
         try {
             $this->notifications->send($delivery->fresh(['client', 'driver']), DeliveryNotificationEvent::OrderCreated);
         } catch (\Throwable $e) {
@@ -129,6 +136,7 @@ class DeliveryController extends Controller
     {
         $delivery = Delivery::where('client_id', Auth::id())->findOrFail($id);
 
+        // Annulation possible uniquement avant confirmation ou assignation livreur
         $cancellable = [DeliveryStatus::AwaitingPayment, DeliveryStatus::AwaitingValidation];
 
         if (! in_array($delivery->status, $cancellable)) {

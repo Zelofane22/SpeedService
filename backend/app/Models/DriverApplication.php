@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Candidature livreur issue du tunnel d'inscription : informations personnelles,
+ * véhicule, moyens de paiement et documents, soumise à une revue administrateur
+ * (approved, rejected ou complement_requested).
+ */
 class DriverApplication extends Model
 {
     use HasFactory, HasUuids;

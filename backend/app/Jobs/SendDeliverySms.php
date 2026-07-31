@@ -9,6 +9,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Job asynchrone d'envoi SMS — dispatché après commit DB par DeliveryNotificationService.
+ */
 class SendDeliverySms implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

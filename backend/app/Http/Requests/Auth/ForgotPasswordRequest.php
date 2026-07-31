@@ -4,6 +4,11 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validation de la demande de réinitialisation de mot de passe.
+ * reset_url optionnelle permet aux clients (notamment drivers) d'envoyer un
+ * lien de réinitialisation propre à leur application.
+ */
 class ForgotPasswordRequest extends FormRequest
 {
     public function authorize(): bool

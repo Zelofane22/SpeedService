@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Journal d'une notification envoyée à un utilisateur pour une livraison
+ * (événement + canal), utilisé pour la déduplication et la lecture in-app.
+ */
 class NotificationLog extends Model
 {
     use HasUuids;

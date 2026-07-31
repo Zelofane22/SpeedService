@@ -5,6 +5,10 @@ namespace App\Notifications;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Email de réinitialisation de mot de passe : utilise une reset_url fournie
+ * (ex. application driver) ou retombe sur le reset client par défaut.
+ */
 class ResetPasswordNotification extends Notification
 {
     public function __construct(

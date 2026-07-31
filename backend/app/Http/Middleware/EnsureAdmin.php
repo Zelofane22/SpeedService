@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/** Garde les routes /admin/* — accès réservé aux utilisateurs role Admin. */
 class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response

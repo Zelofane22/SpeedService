@@ -5,6 +5,10 @@ namespace App\Notifications;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Notification email au client lors d'une mise à jour de sa livraison,
+ * avec lien de suivi vers le frontend.
+ */
 class DeliveryUpdateNotification extends Notification
 {
     public function __construct(

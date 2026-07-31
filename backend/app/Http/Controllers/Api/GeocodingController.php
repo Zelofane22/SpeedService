@@ -7,12 +7,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Proxy géographique : géocodage Nominatim (Bénin) et calcul de distance à vol d'oiseau.
+ */
 class GeocodingController extends Controller
 {
     public function geocode(Request $request): JsonResponse
     {
         $request->validate(['q' => ['required', 'string', 'max:500']]);
 
+        // Appel Nominatim avec restriction au Bénin (countrycodes=bj)
         $response = Http::withHeaders([
             'User-Agent' => 'SpeedService/1.0 (fouadechitou@gmail.com)',
             'Accept-Language' => 'fr',
@@ -46,6 +50,7 @@ class GeocodingController extends Controller
             'delivery_lon'  => ['required', 'numeric', 'between:-180,180'],
         ]);
 
+        // Distance à vol d'oiseau ; estimation route = ×1,3
         $km = $this->haversine(
             $request->pickup_lat, $request->pickup_lon,
             $request->delivery_lat, $request->delivery_lon,
@@ -57,6 +62,7 @@ class GeocodingController extends Controller
         ]);
     }
 
+    /** Formule haversine — rayon terrestre 6371 km. */
     private function haversine(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
         $R    = 6371;

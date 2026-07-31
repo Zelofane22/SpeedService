@@ -13,6 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * Commande de livraison, cœur du domaine : cycle de vie sur 9 statuts
+ * (Draft → AwaitingPayment → AwaitingValidation → Confirmed → Assigned →
+ * PickingUp → InDelivery → Delivered | Cancelled), prix calculé selon le colis,
+ * adresses de ramassage/livraison et relations client, livreur, paiement et historique.
+ */
 class Delivery extends Model
 {
     use HasFactory, HasUuids;

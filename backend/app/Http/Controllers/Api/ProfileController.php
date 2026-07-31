@@ -9,6 +9,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Profil utilisateur authentifié : consultation, mise à jour et changement de mot de passe.
+ */
 class ProfileController extends Controller
 {
     public function show(): JsonResponse
@@ -21,6 +24,7 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // Changement de mot de passe optionnel lors de la mise à jour profil
         if ($request->filled('password')) {
             if (! Hash::check($request->current_password, $user->password)) {
                 return response()->json([
@@ -39,6 +43,7 @@ class ProfileController extends Controller
         return response()->json($user);
     }
 
+    /** Changement de mot de passe dédié (ex. après reset admin avec must_change_password). */
     public function changePassword(\Illuminate\Http\Request $request): JsonResponse
     {
         $request->validate([

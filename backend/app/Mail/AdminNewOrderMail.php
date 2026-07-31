@@ -9,6 +9,9 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Email adressé à l'administrateur lors de la création d'une nouvelle commande.
+ */
 class AdminNewOrderMail extends Mailable
 {
     use Queueable, SerializesModels;

@@ -12,16 +12,24 @@ use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Routes API SpeedService
+|--------------------------------------------------------------------------
+| Préfixe /api appliqué par bootstrap/app.php.
+| Auth : Sanctum (Bearer token). Rôles : client, driver, admin (+ superadmin).
+*/
+
+// ── Santé ───────────────────────────────────────────────────────────────────
 Route::get('/status', [\App\Http\Controllers\Api\StatusController::class, 'check']);
 
-
-// Geo (public — no sensitive data)
+// ── Géolocalisation (public) ────────────────────────────────────────────────
 Route::prefix('geo')->group(function () {
     Route::get('/geocode', [GeocodingController::class, 'geocode']);
     Route::post('/distance', [GeocodingController::class, 'distance']);
 });
 
-// Driver application tunnel (public — no account required to apply)
+// ── Candidature livreur (public, sans compte) ───────────────────────────────
 Route::prefix('driver/apply')->group(function () {
     Route::post('/', [DriverApplicationController::class, 'apply']);
     Route::post('/documents', [DriverApplicationController::class, 'uploadDocuments']);
@@ -29,7 +37,7 @@ Route::prefix('driver/apply')->group(function () {
     Route::post('/complement', [DriverApplicationController::class, 'complement']);
 });
 
-// Auth (public)
+// ── Authentification (public) ───────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -37,28 +45,31 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-// Protected routes
+// ── Routes protégées (auth:sanctum) ─────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
+    // Profil client
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::patch('/profile/change-password', [ProfileController::class, 'changePassword']);
 
+    // Livraisons client
     Route::get('/deliveries', [DeliveryController::class, 'index']);
     Route::post('/deliveries', [DeliveryController::class, 'store']);
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show']);
     Route::post('/deliveries/{id}/cancel', [DeliveryController::class, 'cancel']);
     Route::post('/deliveries/{id}/pay', [PaymentController::class, 'pay']);
 
+    // Notifications in-app client
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
-    // Driver routes
+    // ── Espace livreur ──────────────────────────────────────────────────────
     Route::prefix('driver')->group(function () {
         Route::get('/profile', [DriverController::class, 'profile']);
         Route::patch('/availability', [DriverController::class, 'updateAvailability']);
@@ -70,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/missions/{id}/confirm-payment', [DriverController::class, 'confirmPayment']);
     });
 
-    // Admin routes
+    // ── Back-office admin (middleware admin) ──────────────────────────────────
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
         Route::get('/alerts', [AdminController::class, 'alerts']);
@@ -78,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [AdminController::class, 'listUsers']);
         Route::get('/users/{id}', [AdminController::class, 'showUser']);
 
-        // Actions sensibles réservées au super administrateur
+        // Actions sensibles — super administrateur uniquement
         Route::middleware('superadmin')->group(function () {
             Route::patch('/users/{id}/password', [AdminController::class, 'resetUserPassword']);
             Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
@@ -93,14 +104,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/drivers/{id}/toggle-active', [AdminController::class, 'toggleDriverStatus']);
         Route::get('/reports', [AdminController::class, 'reports']);
 
-        // Driver application management
+        // Gestion candidatures livreur
         Route::prefix('drivers/applications')->group(function () {
             Route::get('/', [DriverApplicationController::class, 'adminList']);
             Route::get('/{id}', [DriverApplicationController::class, 'adminShow']);
             Route::patch('/{id}/review', [DriverApplicationController::class, 'adminReview']);
         });
 
-        // Driver document download
+        // Téléchargement sécurisé des documents candidat
         Route::get('/drivers/documents/{documentId}/download', [DriverApplicationController::class, 'downloadDocument']);
     });
 });

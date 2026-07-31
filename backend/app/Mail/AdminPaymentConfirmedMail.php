@@ -9,6 +9,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Email adressé à l'administrateur après un paiement : confirme un paiement
+ * électronique ou demande une validation manuelle (COD / agence).
+ */
 class AdminPaymentConfirmedMail extends Mailable
 {
     use Queueable, SerializesModels;

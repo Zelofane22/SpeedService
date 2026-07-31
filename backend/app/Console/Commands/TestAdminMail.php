@@ -8,6 +8,10 @@ use App\Models\Delivery;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Commande de développement : envoie un email admin de test (nouvelle commande,
+ * paiement confirmé ou paiement à valider) sur la dernière livraison en base.
+ */
 class TestAdminMail extends Command
 {
     protected $signature = 'mail:test-admin {--type=new-order : new-order | payment-confirmed | payment-validation}';

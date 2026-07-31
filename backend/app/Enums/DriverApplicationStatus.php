@@ -2,6 +2,10 @@
 
 namespace App\Enums;
 
+/**
+ * Cycle de vie d'une candidature livreur :
+ * pending → under_review → approved | rejected | complement_requested.
+ */
 enum DriverApplicationStatus: string
 {
     case Pending      = 'pending';

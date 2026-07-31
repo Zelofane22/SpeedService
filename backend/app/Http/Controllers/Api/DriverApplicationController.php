@@ -19,8 +19,15 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * Tunnel de candidature livreur (public) et revue admin.
+ * Flux : apply → upload documents → suivi statut → complément éventuel → approbation/rejet.
+ * À l'approbation, création du compte User (role Driver) + lien set-password.
+ */
 class DriverApplicationController extends Controller
 {
+    // ── Tunnel public ───────────────────────────────────────────────────────────
+
     public function apply(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -44,6 +51,7 @@ class DriverApplicationController extends Controller
 
         $application = DriverApplication::create($data);
 
+        // Accusé de réception par email
         Mail::to($application->email)->queue(
             new DriverApplicationStatusMail($application, 'submitted')
         );
@@ -115,6 +123,8 @@ class DriverApplicationController extends Controller
         return response()->json(['message' => 'Documents complémentaires soumis.']);
     }
 
+    // ── Stockage documents ──────────────────────────────────────────────────────
+
     /**
      * Téléverse chaque document vers Cloudinary (privé) et crée les DriverDocument associés.
      * Les photos de profil / véhicule sont en plus reliées sur la candidature pour un accès direct.
@@ -156,7 +166,7 @@ class DriverApplicationController extends Controller
         }
     }
 
-    // --- Admin endpoints ---
+    // ── Endpoints admin ─────────────────────────────────────────────────────────
 
     public function adminList(Request $request): JsonResponse
     {
@@ -230,6 +240,7 @@ class DriverApplicationController extends Controller
 
         $setupUrl = null;
 
+        // Approbation : création du compte livreur + lien de définition du mot de passe
         if ($data['action'] === 'approve') {
             $user = User::firstOrCreate(
                 ['email' => $application->email],

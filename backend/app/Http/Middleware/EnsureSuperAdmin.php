@@ -7,6 +7,10 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Garde les actions sensibles (reset mot de passe, suppression, changement de rôle).
+ * Requiert role Admin ET flag is_super_admin sur le modèle User.
+ */
 class EnsureSuperAdmin
 {
     public function handle(Request $request, Closure $next): Response

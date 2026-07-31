@@ -12,6 +12,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Utilisateur de la plateforme : client, livreur ou admin (back-office).
+ * is_super_admin débloque les actions sensibles côté admin, is_online gère la
+ * disponibilité des livreurs, et softDeletes permet de supprimer sans perte définitive.
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;

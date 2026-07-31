@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+/**
+ * Calcul du tarif livraison en XOF à partir de la distance (forfait au kilomètre).
+ * estimateDistanceKm estime la distance par la formule haversine avec une marge de 30 %.
+ */
 class PriceCalculator
 {
     public const PRICE_PER_KM = 200;

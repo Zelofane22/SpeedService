@@ -9,6 +9,10 @@ use App\Enums\PaymentMethod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
+/**
+ * Validation de la création d'une commande client : expéditeur, destinataire,
+ * colis (type, catégorie, poids), type de livraison et méthode de paiement.
+ */
 class StoreDeliveryRequest extends FormRequest
 {
     public function authorize(): bool

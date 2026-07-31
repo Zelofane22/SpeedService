@@ -9,6 +9,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Email adressé au candidat livreur selon l'évolution de sa candidature :
+ * soumission, approbation, rejet ou demande de complément.
+ */
 class DriverApplicationStatusMail extends Mailable
 {
     use Queueable, SerializesModels;

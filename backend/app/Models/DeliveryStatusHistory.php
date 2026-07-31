@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Trace horodatée d'une transition de statut d'une livraison.
+ * Lignes immutables : created_at est renseigné automatiquement à la création.
+ */
 class DeliveryStatusHistory extends Model
 {
     use HasUuids;

@@ -2,6 +2,11 @@
 
 namespace App\Enums;
 
+/**
+ * Cycle de vie d'une livraison, dans l'ordre des transitions :
+ * Draft → AwaitingPayment → AwaitingValidation → Confirmed → Assigned →
+ * PickingUp → InDelivery → Delivered | Cancelled.
+ */
 enum DeliveryStatus: string
 {
     case Draft               = 'draft';

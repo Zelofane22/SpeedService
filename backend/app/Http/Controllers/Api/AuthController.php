@@ -15,8 +15,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
+/**
+ * Authentification Sanctum : inscription client, login (email ou téléphone),
+ * déconnexion et réinitialisation de mot de passe (client ou driver via reset_url).
+ */
 class AuthController extends Controller
 {
+    // ── Inscription et session ──────────────────────────────────────────────────
+
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -74,6 +80,8 @@ class AuthController extends Controller
         return response()->json(null, 204);
     }
 
+    // ── Réinitialisation mot de passe ───────────────────────────────────────────
+
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
         $broker = Password::broker();
@@ -84,12 +92,13 @@ class AuthController extends Controller
             $user->notify(new ResetPasswordNotification($token, $this->allowedResetUrl($request->input('reset_url'))));
         }
 
-        // Always return the same message to prevent email enumeration.
+        // Message identique que l'email existe ou non (anti-énumération)
         return response()->json([
             'message' => 'Si un compte correspond à cette adresse, vous recevrez un lien de réinitialisation.',
         ]);
     }
 
+    /** Vérifie que reset_url provient de FRONTEND_URL ou DRIVER_URL autorisés. */
     private function allowedResetUrl(?string $requestedUrl): ?string
     {
         if (! $requestedUrl) {

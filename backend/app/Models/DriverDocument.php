@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Pièce jointe d'une candidature livreur (CNI, permis, carte grise, assurance,
+ * photos…) stockée sur Cloudinary, avec son type et son état de validation.
+ */
 class DriverDocument extends Model
 {
     use HasFactory, HasUuids;

@@ -5,6 +5,11 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Validation de la mise à jour du profil client : le changement de mot de passe
+ * exige le mot de passe courant, et le téléphone est exclu de l'unicité pour
+ * l'utilisateur concerné.
+ */
 class UpdateProfileRequest extends FormRequest
 {
     public function authorize(): bool

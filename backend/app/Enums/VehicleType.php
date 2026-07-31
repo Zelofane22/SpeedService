@@ -2,6 +2,10 @@
 
 namespace App\Enums;
 
+/**
+ * Type de véhicule du livreur ; seuls les engins motorisés (hors vélo)
+ * exigent des documents véhicule.
+ */
 enum VehicleType: string
 {
     case Bicycle  = 'bicycle';

@@ -21,6 +21,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
+/**
+ * Back-office administrateur : KPIs, alertes, gestion utilisateurs/livraisons/paiements/livreurs.
+ * Les actions destructives (reset mot de passe, suppression, changement de rôle) sont réservées
+ * aux super-admins via le middleware EnsureSuperAdmin sur les routes concernées.
+ */
 class AdminController extends Controller
 {
     public function __construct(private readonly DeliveryNotificationService $notifications) {}
@@ -79,7 +84,7 @@ class AdminController extends Controller
             $byStatus[$case->value] = (int) ($deliveryCounts[$case->value] ?? 0);
         }
 
-        // Active deliveries (in-flight: confirmed → in_delivery)
+        // Livraisons en cours (confirmée → en livraison, hors brouillon/annulée)
         $activeStatuses = [
             DeliveryStatus::Confirmed->value,
             DeliveryStatus::Assigned->value,
@@ -88,7 +93,7 @@ class AdminController extends Controller
         ];
         $activeCount = (int) array_sum(array_map(fn ($s) => $byStatus[$s] ?? 0, $activeStatuses));
 
-        // Today's operational stats
+        // Statistiques opérationnelles du jour
         $todayDeliveries = (int) DB::table('deliveries')
             ->whereDate('created_at', today())
             ->count();
@@ -103,7 +108,7 @@ class AdminController extends Controller
             ->whereDate('updated_at', today())
             ->count();
 
-        // Revenue aggregates
+        // Agrégats de chiffre d'affaires (paiements réussis uniquement)
         $revenueTotal = DB::table('payments')
             ->where('status', PaymentStatus::Succeeded->value)
             ->sum('amount');
@@ -123,7 +128,7 @@ class AdminController extends Controller
             ->where('status', PaymentStatus::Succeeded->value)
             ->avg('amount') ?? 0;
 
-        // Revenue breakdown by payment method
+        // Répartition du CA par méthode de paiement
         $revenueByMethod = DB::table('payments')
             ->where('status', PaymentStatus::Succeeded->value)
             ->select('method', DB::raw('sum(amount) as total'), DB::raw('count(*) as count'))
@@ -134,7 +139,7 @@ class AdminController extends Controller
                 'count'     => (int) $r->count,
             ]]);
 
-        // Completion rate (excluding draft/awaiting_payment)
+        // Taux de complétion (hors brouillons et attente de paiement)
         $totalEngaged = DB::table('deliveries')
             ->whereNotIn('status', [DeliveryStatus::Draft->value, DeliveryStatus::AwaitingPayment->value])
             ->count();
@@ -222,6 +227,7 @@ class AdminController extends Controller
     {
         $alerts = [];
 
+        // Paiements manuels (espèces/agence) en attente de validation admin
         $pendingValidations = Delivery::where('status', DeliveryStatus::AwaitingValidation)->count();
         if ($pendingValidations > 0) {
             $alerts[] = [
@@ -250,6 +256,7 @@ class AdminController extends Controller
             ];
         }
 
+        // Livraisons confirmées sans livreur depuis plus de 2 h
         $unassigned = Delivery::where('status', DeliveryStatus::Confirmed)
             ->whereNull('driver_id')
             ->where('updated_at', '<=', now()->subHours(2))
@@ -266,6 +273,7 @@ class AdminController extends Controller
             ];
         }
 
+        // Livraisons bloquées en collecte ou en cours depuis plus de 24 h
         $stuck = Delivery::whereIn('status', [DeliveryStatus::PickingUp, DeliveryStatus::InDelivery])
             ->where('updated_at', '<=', now()->subDay())
             ->count();
@@ -482,6 +490,7 @@ class AdminController extends Controller
             'note'   => $request->input('note', 'Statut mis à jour par un administrateur.'),
         ]);
 
+        // Notifier le client selon le nouveau statut forcé par l'admin
         $event = match ($newStatus) {
             DeliveryStatus::Confirmed          => DeliveryNotificationEvent::OrderConfirmed,
             DeliveryStatus::Assigned           => DeliveryNotificationEvent::DriverAssigned,
@@ -628,7 +637,7 @@ class AdminController extends Controller
     {
         $driver = User::where('role', UserRole::Driver)->findOrFail($id);
 
-        // If the column doesn't exist we return a graceful response
+        // Réponse gracieuse si la migration is_active n'a pas encore été appliquée
         if (!array_key_exists('is_active', $driver->getAttributes())) {
             return response()->json([
                 'message' => 'La colonne is_active n\'existe pas encore. Migration requise.',
@@ -664,7 +673,7 @@ class AdminController extends Controller
     {
         $monthExpr = $this->monthExpr();
 
-        // Revenue by month (last 6 months)
+        // CA mensuel sur les 6 derniers mois
         $revenueByMonth = DB::table('payments')
             ->where('status', PaymentStatus::Succeeded->value)
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
@@ -677,7 +686,7 @@ class AdminController extends Controller
             ->get()
             ->map(fn ($row) => ['month' => $row->month, 'total_xof' => (float) $row->total_xof]);
 
-        // Deliveries by month (last 6 months)
+        // Volume de livraisons mensuel sur les 6 derniers mois
         $deliveriesByMonth = DB::table('deliveries')
             ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
             ->select(
@@ -689,7 +698,7 @@ class AdminController extends Controller
             ->get()
             ->map(fn ($row) => ['month' => $row->month, 'count' => (int) $row->count]);
 
-        // Top 5 clients
+        // Top 5 clients par nombre de commandes et CA
         $topClients = DB::table('deliveries')
             ->join('users', 'users.id', '=', 'deliveries.client_id')
             ->join('payments', 'payments.delivery_id', '=', 'deliveries.id')
@@ -747,7 +756,7 @@ class AdminController extends Controller
                 'count'        => (int) $row->count,
             ]);
 
-        // Delivery completion rate
+        // Taux de livraisons abouties (hors brouillons et attente paiement)
         $totalDeliveries = DB::table('deliveries')
             ->whereNotIn('status', [DeliveryStatus::Draft->value, DeliveryStatus::AwaitingPayment->value])
             ->count();
